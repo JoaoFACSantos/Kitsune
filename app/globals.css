@@ -184,12 +184,30 @@
   }
 
   .title .hand {
+    position: relative;
     display: inline-block;
     margin-left: 0.08em;
     font-size: 1.3em;
     line-height: 0.7;
     color: var(--link);
     transform: rotate(-4deg);
+  }
+
+  .squiggle {
+    position: absolute;
+    left: 3%;
+    bottom: -0.24em;
+    width: 94%;
+    height: 0.2em;
+    overflow: visible;
+  }
+
+  .squiggle path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .lead {
@@ -1968,6 +1986,160 @@
       background-size:
         100% 100%,
         100% 100%;
+    }
+  }
+}
+
+/* =========================================================
+   Animações ligadas ao scroll. O componente ScrollFx escreve o progresso (0 a 1) nas
+   variáveis --in, --p, --out e --page; aqui decide-se o que cada elemento faz com elas.
+   Usam translate / rotate / scale (e não transform) para não chocarem com o GSAP,
+   os hovers e as animações de entrada. Os valores por omissão são o estado final.
+   ========================================================= */
+
+@layer components {
+  /* Títulos: sobem e ganham cor; a palavra manuscrita roda para o sítio e o sublinhado desenha-se. */
+  .title[data-scroll] {
+    translate: 0 calc((1 - var(--in, 1)) * 40px);
+    opacity: calc(0.2 + var(--in, 1) * 0.8);
+  }
+
+  .title[data-scroll] .hand {
+    rotate: calc((1 - var(--in, 1)) * -16deg);
+    scale: calc(0.72 + var(--in, 1) * 0.28);
+  }
+
+  .squiggle path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--in, 1));
+  }
+
+  /* Hero a sair: as letras do nome abrem em leque, a moldura encolhe e os stickers voam para fora. */
+  .hero .letter {
+    translate: calc(var(--out, 0) * var(--o, 0) * 2.6vw) calc(var(--out, 0) * (-6vh - var(--a, 0) * 5vh));
+    rotate: calc(var(--out, 0) * var(--o, 0) * 7deg);
+  }
+
+  .hero .stage {
+    scale: calc(1 - var(--out, 0) * 0.16);
+    rotate: calc(var(--out, 0) * -5deg);
+    translate: 0 calc(var(--out, 0) * 8vh);
+  }
+
+  .hero .sticker {
+    translate: calc(var(--out, 0) * var(--fly-x, 1) * 16vw) calc(var(--out, 0) * var(--fly-y, -10vh));
+    rotate: calc(var(--out, 0) * var(--fly-x, 1) * 50deg);
+    /* Desaparecem a meio do caminho, para não passarem por cima do texto. */
+    opacity: calc(1 - var(--out, 0) * 2.4);
+  }
+
+  .hero .hero-greeting {
+    translate: calc(var(--out, 0) * -10vw) 0;
+    opacity: calc(1 - var(--out, 0) * 1.8);
+  }
+
+  /* Clips: os cartões passam a velocidades diferentes (só na grelha; no telemóvel é um carrossel). */
+  @media (min-width: 640px) {
+    .clip-cell {
+      translate: 0 calc((0.5 - var(--p, 0.5)) * 56px);
+    }
+
+    .clip-cell:nth-child(even) {
+      translate: 0 calc((0.5 - var(--p, 0.5)) * -44px);
+    }
+  }
+
+  /* Setup: uma onda passa pelos ícones enquanto a grelha atravessa o ecrã. */
+  .scroll-fx .gear-grid[data-scroll] .gear svg {
+    rotate: calc(sin(var(--p, 0.5) * 10 + var(--i, 0) * 0.9) * 10deg);
+    translate: 0 calc(sin(var(--p, 0.5) * 10 + var(--i, 0) * 0.9) * -5px);
+  }
+
+  /* Parcerias: o cartão endireita-se e cresce; as estatísticas entram da direita, uma a uma. */
+  .collab[data-scroll] {
+    scale: calc(0.9 + var(--in, 1) * 0.1);
+    rotate: calc((1 - var(--in, 1)) * -3deg);
+  }
+
+  .collab[data-scroll] .stat-pill {
+    --e: clamp(0, (var(--in, 1) - var(--i, 0) * 0.14) / 0.6, 1);
+    translate: calc((1 - var(--e)) * 80px) 0;
+    opacity: var(--e);
+  }
+
+  /* Redes: os cartões entram alternadamente da esquerda e da direita. */
+  .socials[data-scroll] > li {
+    --e: clamp(0, (var(--in, 1) - var(--i, 0) * 0.08) / 0.6, 1);
+    --dir: -1;
+    translate: calc((1 - var(--e)) * var(--dir) * min(90px, 12vw)) 0;
+    rotate: calc((1 - var(--e)) * var(--dir) * 4deg);
+    opacity: var(--e);
+  }
+
+  .socials[data-scroll] > li:nth-child(even) {
+    --dir: 1;
+  }
+
+  /* Rodapé: o nome pinta-se de cor à medida que se chega ao fim da página. */
+  .footer-name[data-scroll] {
+    background-size:
+      calc(var(--in, 0) * 100%) 100%,
+      100% 100%;
+  }
+
+  @media (hover: hover) {
+    .footer-name[data-scroll]:hover {
+      background-size:
+        100% 100%,
+        100% 100%;
+    }
+  }
+
+  /* Fundo: a grelha de pontos sobe mais devagar do que a página. */
+  .dots[data-scroll] {
+    inset: 0 0 -160px;
+    translate: 0 calc(var(--page, 0) * -160px);
+  }
+
+  /* A raposa que corre ao lado da página e marca onde vais. */
+  .scroll-fox {
+    position: fixed;
+    right: 22px;
+    top: 50%;
+    z-index: 40;
+    display: none;
+    width: 3px;
+    height: 34vh;
+    border-radius: 3px;
+    background: var(--line);
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+
+  .scroll-fox::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(var(--page, 0) * 100%);
+    border-radius: 3px;
+    background: var(--pink);
+  }
+
+  .scroll-fox-runner {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--page, 0) * 100%);
+    width: 38px;
+    height: 38px;
+    margin: -19px 0 0 -19px;
+    /* Abana a cabeça enquanto corre. */
+    rotate: calc(sin(var(--page, 0) * 60) * 14deg);
+    filter: drop-shadow(0 4px 8px color-mix(in oklab, var(--pink-deep) 30%, transparent));
+  }
+
+  @media (min-width: 1280px) {
+    .scroll-fx .scroll-fox {
+      display: block;
     }
   }
 }

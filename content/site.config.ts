@@ -10,8 +10,7 @@ export const site: SiteConfig = {
   platform: 'twitch',
   role: 'Streamer & criadora de conteúdo',
   tagline: 'Jogos, conversa e muitas gargalhadas, sempre com o chat.',
-  // Email de exemplo: troca pelo verdadeiro.
-  email: 'parcerias@kitsune.example',
+  email: 'kitsunepartnerships@gmail.com',
   url:
     process.env.NEXT_PUBLIC_SITE_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -61,7 +60,7 @@ export const site: SiteConfig = {
 
   clips: {
     title: 'melhores *momentos*',
-    intro: 'Os clips mais vistos do canal. Aviso: há muitos gritos.',
+    intro: 'Os clips mais vistos do canal.',
     moreUrl: 'https://www.twitch.tv/kitsune/clips',
     // Clips de exemplo. Com as chaves da Twitch no .env, vêm os mais vistos do canal.
     items: [

@@ -64,11 +64,11 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
           <p className="hand -rotate-3 text-3xl text-link">{note}</p>
         </div>
 
-        <ul className="socials mt-10 md:mt-14">
-          {socials.map((s) => {
+        <ul className="socials mt-10 md:mt-14" data-scroll="in">
+          {socials.map((s, i) => {
             const count = s.id === 'discord' ? discordMembers : s.followers;
             return (
-              <li key={s.id}>
+              <li key={s.id} style={{ '--i': i } as React.CSSProperties}>
                 <a
                   href={s.url}
                   target="_blank"

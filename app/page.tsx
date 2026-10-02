@@ -6,6 +6,7 @@ import { Nav } from '@/components/Nav';
 import { Partners } from '@/components/Partners';
 import { LiveProvider } from '@/components/providers/Live';
 import { Ribbon } from '@/components/Ribbon';
+import { ScrollFx } from '@/components/ScrollFx';
 import { Setup } from '@/components/Setup';
 import { Socials } from '@/components/Socials';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
@@ -88,6 +89,7 @@ export default async function Home() {
         />
       </main>
       <Footer name={site.name} email={site.email} />
+      <ScrollFx />
     </LiveProvider>
   );
 }

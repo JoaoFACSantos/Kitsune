@@ -63,7 +63,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <span className="blob blob-1" />
           <span className="blob blob-2" />
           <span className="blob blob-3" />
-          <span className="dots" />
+          <span className="dots" data-scroll="page" />
           <span className="grain" />
         </div>
         <a href="#conteudo" className="skip-link">

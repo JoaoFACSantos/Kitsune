@@ -256,6 +256,7 @@ export function Hero({
       tabIndex={-1}
       aria-labelledby="hero-name"
       className="hero"
+      data-scroll="out"
       style={{ '--chars': letters.length } as React.CSSProperties}
     >
       <p className="hero-greeting hand intro-rise" style={{ '--delay': '0.25s' } as React.CSSProperties}>
@@ -267,7 +268,13 @@ export function Hero({
 
       <h1 id="hero-name" className="hero-name" aria-label={name}>
         {letters.map((char, i) => (
-          <span key={i} aria-hidden className="letter intro-drop" style={{ '--i': i } as React.CSSProperties}>
+          <span
+            key={i}
+            aria-hidden
+            className="letter intro-drop"
+            // --o: distância ao centro do nome (com sinal); --a: a mesma distância sem sinal.
+            style={{ '--i': i, '--o': i - (letters.length - 1) / 2, '--a': Math.abs(i - (letters.length - 1) / 2) } as React.CSSProperties}
+          >
             <span className="letter-inner">{char === ' ' ? ' ' : char}</span>
           </span>
         ))}
@@ -347,7 +354,18 @@ export function Hero({
               className={`sticker${s.desktopOnly ? ' hidden md:block' : ''}${s.side ? ' sticker-side' : ''}`}
               data-cursor
               style={
-                { '--x': s.x, '--xm': s.xm ?? s.x, '--y': s.y, '--lx': s.lx, '--ly': s.ly, '--s': s.size, '--r': `${s.r}deg` } as React.CSSProperties
+                {
+                  '--x': s.x,
+                  '--xm': s.xm ?? s.x,
+                  '--y': s.y,
+                  '--lx': s.lx,
+                  '--ly': s.ly,
+                  '--s': s.size,
+                  '--r': `${s.r}deg`,
+                  // Para onde o sticker voa quando o hero sai do ecrã: para fora e para cima.
+                  '--fly-x': `${s.x.startsWith('-') ? -1 : 1}`,
+                  '--fly-y': `${-(8 + i * 5)}vh`,
+                } as React.CSSProperties
               }
             >
               <span className="block h-full w-full intro-pop" style={{ '--delay': `${0.9 + i * 0.08}s` } as React.CSSProperties}>

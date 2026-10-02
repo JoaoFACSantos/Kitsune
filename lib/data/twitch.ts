@@ -27,7 +27,10 @@ async function requestToken() {
   const res = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
     body: new URLSearchParams({ client_id: id, client_secret: secret, grant_type: 'client_credentials' }),
-    cache: 'no-store',
+    // Em cache 1 h (o token dura semanas). Com 'no-store', a página deixava de poder ser
+    // estática e os dados da Twitch falhavam em produção.
+    cache: 'force-cache',
+    next: { revalidate: HOUR_S },
   });
   if (!res.ok) throw new Error(`Twitch token: ${res.status}`);
   const data = (await res.json()) as { access_token: string; expires_in: number };

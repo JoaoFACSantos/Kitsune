@@ -72,7 +72,7 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
           </a>
         </div>
 
-        <ul className="clips mt-10 md:mt-14" aria-label="Clips">
+        <ul className="clips mt-10 md:mt-14" aria-label="Clips" data-scroll="through">
           {clips.map((clip, i) => {
             const cover = COVERS[i % COVERS.length];
             const style = { '--r': `${TILT[i % TILT.length]}deg` } as React.CSSProperties;

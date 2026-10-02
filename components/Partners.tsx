@@ -72,7 +72,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
           ))}
         </div>
 
-        <div ref={cardRef} className="collab mt-12 md:mt-16">
+        <div ref={cardRef} className="collab mt-12 md:mt-16" data-scroll="in">
           <span aria-hidden className="collab-blob" />
           <div className="relative grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-7">
@@ -95,8 +95,8 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
               </div>
             </div>
             <ul className="grid content-end gap-3 lg:col-span-5">
-              {stats.map((stat) => (
-                <li key={stat.label} className="stat-pill">
+              {stats.map((stat, i) => (
+                <li key={stat.label} className="stat-pill" style={{ '--i': i } as React.CSSProperties}>
                   <strong>{stat.value}</strong>
                   <span className="text-sm font-semibold text-white/90">{stat.label}</span>
                 </li>
