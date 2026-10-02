@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-Sem chaves no `.env`, o site usa dados mock e aparece como offline. Para ver o estado "em direto", põe `MOCK_LIVE=true` no `.env.local`.
+Sem chaves no `.env`, o site usa dados mock e aparece como offline. Para testar o estado "em direto" (botão de play e televisão), põe `MOCK_LIVE=true` no `.env.local`; funciona com ou sem chaves da Twitch.
 
 ## Personalizar
 
@@ -49,7 +49,7 @@ Os logos em `public/brands/` são de marcas fictícias de exemplo. Troca-os por 
 ## Dados
 
 - **Estado do direto**: vem da Twitch Helix quando `TWITCH_CLIENT_ID` e `TWITCH_CLIENT_SECRET` estão definidos. Usa um app token no servidor, com cache de 60 s. O nav e a moldura atualizam-se sozinhos de 60 em 60 s.
-- **Direto na moldura**: em direto, a moldura do hero passa a ecrã 16:9 com uma capa e um botão de play. O player da Twitch só carrega depois do clique. No telemóvel, o toque abre a Twitch.
+- **Direto na televisão**: em direto, aparece um botão de play na moldura do hero. Ao clicar, a moldura alarga, a ilustração fica à esquerda e o direto passa numa televisão à direita (o player da Twitch só carrega depois do clique). Em ecrãs abaixo de 1024 px, o play abre a Twitch.
 - **Clips**: com as chaves da Twitch, a secção mostra os 4 clips mais vistos do canal (cache de 1 h) e cada um abre num modal. Sem chaves, usa os clips de `clips.items`, que abrem o link do clip.
 - **Seguidores**: o número aparece em cada cartão das redes. Na Twitch vem da Helix (com as chaves acima) e no YouTube da Data API (`YOUTUBE_API_KEY` e `YOUTUBE_CHANNEL_ID`), com cache de 1 h. Instagram, TikTok e X não dão o número sem login: escreve-o em `followers`, em `socials`.
 - **Discord**: com `discord.invite` preenchido, o número de membros vem da API pública de convites.

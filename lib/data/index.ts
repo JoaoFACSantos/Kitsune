@@ -20,6 +20,8 @@ function source(): StreamSource {
 /** Nunca falha: se a API falhar, o site mostra offline. */
 export async function getLiveStatus(): Promise<LiveStatus> {
   try {
+    // Modo de teste: MOCK_LIVE=true mostra o site "em direto", mesmo com as chaves da Twitch.
+    if (process.env.MOCK_LIVE === 'true') return await mockSource.getLiveStatus();
     return await source().getLiveStatus();
   } catch (error) {
     console.error('[dados] estado do direto', error);

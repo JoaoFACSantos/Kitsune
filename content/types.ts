@@ -94,6 +94,8 @@ export type SiteConfig = {
     greeting: string;
     /** PNG recortado (fundo transparente) ou SVG. A cabeça sai da moldura. */
     photo: string;
+    /** Imagem enquanto o direto passa na televisão (as personagens viradas para ela). Opcional. */
+    photoWatching?: string;
     photoAlt: string;
     /** Tamanho real da imagem (px), para reservar o espaço certo. */
     photoSize: { width: number; height: number };

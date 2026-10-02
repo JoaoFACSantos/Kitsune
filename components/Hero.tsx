@@ -3,11 +3,13 @@
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 import type { Platform } from '@/content/types';
-import { HeartShape, StickerArt, type StickerKind } from '@/components/icons';
+import { HeartShape, PlayIcon, StickerArt, type StickerKind } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
-import { LivePlayer } from '@/components/LivePlayer';
+import { LiveTv } from '@/components/LiveTv';
 import { Magnetic } from '@/components/Magnetic';
 import { useLive } from '@/components/providers/Live';
+import { liveEmbedUrl } from '@/lib/embed';
+import { cn } from '@/lib/format';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { FOLLOW, MEDIA } from '@/lib/motion';
 
@@ -17,6 +19,7 @@ type HeroProps = {
   role: string;
   tagline: string;
   photo: string;
+  photoWatching?: string;
   photoAlt: string;
   photoSize: { width: number; height: number };
   photoScale: number;
@@ -32,23 +35,21 @@ type StickerSpot = {
   x: string;
   y: string;
   xm?: string;
-  /** Posição com o direto na moldura (ecrã 16:9). */
+  /** Posição com a moldura alargada (a ver o direto na televisão). */
   lx: string;
   ly: string;
   size: string;
   r: number;
   desktopOnly?: boolean;
-  /** Fica ao lado do ecrã do direto: no telemóvel não há espaço, por isso esconde-se. */
-  side?: boolean;
 };
 
 // Posições em % do palco (a moldura). xm = posição no telemóvel.
 const STICKERS: StickerSpot[] = [
-  { kind: 'heart', x: '-36%', y: '6%', xm: '-16%', lx: '-9%', ly: '8%', size: '30%', r: -12, side: true },
-  { kind: 'star', x: '104%', y: '-8%', xm: '86%', lx: '7%', ly: '-13%', size: '24%', r: 10 },
-  { kind: 'fox', x: '102%', y: '40%', lx: '94%', ly: '16%', size: '32%', r: 8, desktopOnly: true },
-  { kind: 'gamepad', x: '-40%', y: '60%', xm: '-18%', lx: '-10%', ly: '46%', size: '32%', r: -8, side: true },
-  { kind: 'paw', x: '84%', y: '84%', lx: '94%', ly: '52%', size: '25%', r: 14, desktopOnly: true },
+  { kind: 'heart', x: '-36%', y: '6%', xm: '-16%', lx: '-8%', ly: '10%', size: '30%', r: -12 },
+  { kind: 'star', x: '104%', y: '-8%', xm: '86%', lx: '30%', ly: '-11%', size: '24%', r: 10 },
+  { kind: 'fox', x: '102%', y: '40%', lx: '96%', ly: '42%', size: '32%', r: 8, desktopOnly: true },
+  { kind: 'gamepad', x: '-40%', y: '60%', xm: '-18%', lx: '-9%', ly: '58%', size: '32%', r: -8 },
+  { kind: 'paw', x: '84%', y: '84%', lx: '96%', ly: '78%', size: '25%', r: 14, desktopOnly: true },
 ];
 
 // Corações em néon no fundo da moldura (posições em % da moldura).
@@ -60,13 +61,18 @@ const NEON_HEARTS = [
 const HEARTS = 22;
 const HEART_COLORS = ['var(--pink)', 'var(--pink-deep)', 'var(--lilac)', 'var(--butter)', 'var(--peach)'];
 
-/** 01 · Hero: nome gigante, a foto a sair da moldura, stickers e corações. Em direto, a moldura mostra o direto. */
+/**
+ * 01 · Hero: nome gigante, a foto a sair da moldura, stickers e corações.
+ * Em direto aparece um botão de play: a moldura alarga, ela fica à esquerda e o direto
+ * passa numa televisão à direita. Em ecrãs pequenos, o play abre a plataforma.
+ */
 export function Hero({
   name,
   greeting,
   role,
   tagline,
   photo,
+  photoWatching,
   photoAlt,
   photoSize,
   photoScale,
@@ -82,6 +88,14 @@ export function Hero({
   const [likes, setLikes] = useState(0);
   const status = useLive();
   const live = status.live;
+  // Domínio do site, guardado ao clicar no play: a Twitch exige-o para deixar embutir.
+  const [host, setHost] = useState<string | null>(null);
+  const canEmbed = liveEmbedUrl(platform, handle, 'x') !== null;
+  const embed = live && host ? liveEmbedUrl(platform, handle, host) : null;
+  const playing = embed !== null;
+  const playLabel = status.live ? `Ver o direto: ${status.title}` : '';
+  // Com a televisão ligada, a ilustração troca para a versão em que se viram para ela.
+  const photoSrc = playing && photoWatching ? photoWatching : photo;
   const letters = Array.from(name.toUpperCase());
 
   /** Um coração a voar: em rajada (clique) ou a subir como as reações de um direto. */
@@ -212,8 +226,8 @@ export function Hero({
         };
         gsap.set(card, { transformPerspective: 900 });
         const onMove = (event: PointerEvent) => {
-          // Com o direto na moldura, o ecrã fica direito (um vídeo a abanar cansa).
-          const k = stage.dataset.live === 'true' ? 0 : 1;
+          // Com o direto a passar, a moldura fica direita (um vídeo a abanar cansa).
+          const k = stage.dataset.playing === 'true' ? 0 : 1;
           const nx = event.clientX / window.innerWidth - 0.5;
           const ny = event.clientY / window.innerHeight - 0.5;
           layers.rx(-ny * 12 * k);
@@ -235,8 +249,8 @@ export function Hero({
       const timer = window.setInterval(() => {
         if (!visible || document.hidden) return;
         const r = stage.getBoundingClientRect();
-        // Em direto sobem por fora, ao lado do ecrã, para não taparem o vídeo.
-        const x = stage.dataset.live === 'true' ? r.width + 8 : r.width * 0.86;
+        // Com o direto a passar, sobem do lado dela, para não taparem a televisão.
+        const x = stage.dataset.playing === 'true' ? r.height * 0.6 : r.width * 0.86;
         spawnHeart(x, r.height * 0.9, 'stream');
       }, 1100);
       cleanups.push(() => {
@@ -284,7 +298,7 @@ export function Hero({
         ref={stageRef}
         className="stage"
         data-live={live}
-        style={{ '--photo-ratio': `${photoSize.width} / ${photoSize.height}` } as React.CSSProperties}
+        data-playing={playing}
       >
         <div className="absolute inset-0 intro-zoom">
           <div className="stage-float">
@@ -296,45 +310,59 @@ export function Hero({
                     <HeartShape key={i} className="neon-heart" style={{ '--x': h.x, '--y': h.y, '--s': h.size, '--r': `${h.r}deg`, '--d': `${i * -0.8}s` } as React.CSSProperties} />
                   ))}
                 </span>
-                <LivePlayer name={name} platform={platform} handle={handle} watchUrl={watchUrl} />
               </div>
-              {/* A foto numa só camada, recortada à moldura e livre por cima: a cabeça "sai" do ecrã.
-                  Em direto fica por trás do ecrã, a espreitar por cima. */}
+              {/* A foto numa só camada, recortada à moldura e livre por cima: a cabeça "sai" do ecrã. */}
               <div className="popout">
                 <Image
-                  src={photo}
+                  src={photoSrc}
                   alt={photoAlt}
                   width={photoSize.width}
                   height={photoSize.height}
                   loading="eager"
                   fetchPriority="high"
                   decoding="sync"
-                  unoptimized={photo.endsWith('.svg')}
+                  unoptimized={photo.split('#')[0].endsWith('.svg')}
                   sizes="(min-width: 768px) 520px, 95vw"
                   className="photo"
                   style={{ '--photo-scale': photoScale, '--photo-y': photoOffsetY } as React.CSSProperties}
                   draggable={false}
                 />
               </div>
-              {live ? null : (
+              <p className="window-note hand">{note}</p>
+              <div className="window-bar">
+                <LivePill />
+                <span className="likes" aria-live="polite">
+                  <HeartShape />
+                  <span className="tabular-nums">{likes}</span>
+                  <span className="sr-only">corações</span>
+                </span>
+              </div>
+              <button type="button" className="window-hit" aria-label={`Mandar um coração à ${name}`} onClick={love} />
+              {live && !playing ? (
                 <>
-                  <p className="window-note hand">{note}</p>
-                  <div className="window-bar">
-                    <LivePill />
-                    <span className="likes" aria-live="polite">
-                      <HeartShape />
-                      <span className="tabular-nums">{likes}</span>
-                      <span className="sr-only">corações</span>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="window-hit"
-                    aria-label={`Mandar um coração à ${name}`}
-                    onClick={love}
-                  />
+                  {/* Ecrãs pequenos (ou plataforma sem player): o play abre a plataforma. */}
+                  <a
+                    href={watchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('live-play', canEmbed && 'lg:hidden')}
+                    aria-label={playLabel}
+                  >
+                    <PlayIcon />
+                  </a>
+                  {canEmbed ? (
+                    <button
+                      type="button"
+                      className="live-play hidden lg:grid"
+                      aria-label={playLabel}
+                      onClick={() => setHost(window.location.hostname)}
+                    >
+                      <PlayIcon />
+                    </button>
+                  ) : null}
                 </>
-              )}
+              ) : null}
+              {embed ? <LiveTv name={name} src={embed} onClose={() => setHost(null)} /> : null}
             </div>
           </div>
         </div>
@@ -351,7 +379,7 @@ export function Hero({
           {STICKERS.map((s, i) => (
             <span
               key={s.kind}
-              className={`sticker${s.desktopOnly ? ' hidden md:block' : ''}${s.side ? ' sticker-side' : ''}`}
+              className={`sticker${s.desktopOnly ? ' sticker-right hidden md:block' : ''}`}
               data-cursor
               style={
                 {
@@ -379,35 +407,31 @@ export function Hero({
           ))}
         </div>
 
-        {live ? null : (
-          <>
-            <p aria-hidden className="hero-hint hero-hint-love hand intro-rise hidden lg:flex" style={{ '--delay': '1.7s' } as React.CSSProperties}>
-              <span>
-                clica na foto
-                <br />
-                para mandar ♡
-              </span>
-              <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <path d="M4 30c16 4 38 0 48-18M52 12l2 12M52 12l-11 3" />
-              </svg>
-            </p>
+        <p aria-hidden className="hero-hint hero-hint-love hand intro-rise hidden lg:flex" style={{ '--delay': '1.7s' } as React.CSSProperties}>
+          <span>
+            clica na foto
+            <br />
+            para mandar ♡
+          </span>
+          <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <path d="M4 30c16 4 38 0 48-18M52 12l2 12M52 12l-11 3" />
+          </svg>
+        </p>
 
-            <p aria-hidden className="hero-hint hand intro-rise hidden lg:flex" style={{ '--delay': '1.5s' } as React.CSSProperties}>
-              <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <path d="M56 30C40 34 18 30 8 12M8 12l-2 12M8 12l11 3" />
-              </svg>
-              <span>
-                arrasta os
-                <br />
-                stickers!
-              </span>
-            </p>
-          </>
-        )}
+        <p aria-hidden className="hero-hint hand intro-rise hidden lg:flex" style={{ '--delay': '1.5s' } as React.CSSProperties}>
+          <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <path d="M56 30C40 34 18 30 8 12M8 12l-2 12M8 12l11 3" />
+          </svg>
+          <span>
+            arrasta os
+            <br />
+            stickers!
+          </span>
+        </p>
       </div>
 
       <p aria-hidden className="hero-tap hand intro-rise lg:hidden" style={{ '--delay': '1.3s' } as React.CSSProperties}>
-        {live ? 'toca no ecrã para ver o direto' : 'toca na foto para mandar corações'}
+        {live ? 'toca no play para ver o direto' : 'toca na foto para mandar corações'}
       </p>
 
       <div className="hero-foot intro-rise" style={{ '--delay': '0.7s' } as React.CSSProperties}>

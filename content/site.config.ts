@@ -36,6 +36,8 @@ export const site: SiteConfig = {
     greeting: 'olá! eu sou a',
     // Ilustração: a Kitsune abraçada a uma raposa. Para usar uma foto: PNG com fundo transparente, recortada até à cintura.
     photo: '/media/kitsune.svg',
+    // O mesmo desenho com "#watch": as duas viram-se para a televisão.
+    photoWatching: '/media/kitsune.svg#watch',
     photoAlt: 'Kitsune, de cabelo ruivo comprido, abraçada a uma raposa que pisca o olho',
     photoSize: { width: 600, height: 760 },
     photoScale: 1.22,

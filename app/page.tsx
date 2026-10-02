@@ -55,6 +55,7 @@ export default async function Home() {
           role={site.role}
           tagline={site.tagline}
           photo={site.hero.photo}
+          photoWatching={site.hero.photoWatching}
           photoAlt={site.hero.photoAlt}
           photoSize={site.hero.photoSize}
           photoScale={site.hero.photoScale}
