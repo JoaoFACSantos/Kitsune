@@ -1,0 +1,21 @@
+{
+  // Servidor de desenvolvimento num terminal do VS Code.
+  // Arranca sozinho ao abrir o projeto; também dá com Ctrl+Shift+B.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Servidor (npm run dev)",
+      "type": "shell",
+      "command": "npm run dev",
+      // cmd evita o bloqueio do npm.ps1 pela execution policy do PowerShell.
+      "options": {
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": false, "clear": true },
+      "runOptions": { "runOn": "folderOpen" }
+    }
+  ]
+}

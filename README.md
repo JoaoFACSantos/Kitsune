@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Site de streamer
 
-## Getting Started
+Site de uma página para uma streamer, com tema girly e muita interação:
 
-First, run the development server:
+- a foto sai da moldura de stream;
+- stickers que se arrastam;
+- corações ao clicar;
+- cursor próprio.
+
+Tem cinco partes: hero, clips, setup, parcerias e redes.
+
+Next.js 16 (App Router), TypeScript, Tailwind CSS v4, GSAP e Lenis.
+
+## Arranque
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sem chaves no `.env`, o site usa dados mock e aparece como offline. Para ver o estado "em direto", põe `MOCK_LIVE=true` no `.env.local`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Personalizar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Todo o conteúdo está em [`content/site.config.ts`](content/site.config.ts):
 
-## Learn More
+- nome, handle e cores do tema;
+- foto;
+- clips de exemplo;
+- setup e PC;
+- parcerias e redes.
 
-To learn more about Next.js, take a look at the following resources:
+As cores do tema são CSS variables, por isso mudá-las muda o site todo.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### A foto do hero
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+A ilustração do hero (a Kitsune abraçada a uma raposa) está em `public/media/kitsune.svg`. Para usar uma foto em vez dela:
 
-## Deploy on Vercel
+1. Recorta a foto até à cintura, com fundo transparente, e exporta em PNG. Podes usar, por exemplo, o remove.bg.
+2. Guarda-a em `public/media/` e muda `hero.photo` e `hero.photoSize` (largura e altura reais em px).
+3. Ajusta `hero.photoScale`, que é o tamanho relativo à moldura. Valores maiores fazem a cabeça sair mais por cima. Se precisares, mexe também em `hero.photoOffsetY`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A mesma imagem é usada como avatar no nav.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Marcas
+
+Os logos em `public/brands/` são de marcas fictícias de exemplo. Troca-os por SVG ou PNG e atualiza `partners.brands`.
+
+## Dados
+
+- **Estado do direto**: vem da Twitch Helix quando `TWITCH_CLIENT_ID` e `TWITCH_CLIENT_SECRET` estão definidos. Usa um app token no servidor, com cache de 60 s. O nav e a moldura atualizam-se sozinhos de 60 em 60 s.
+- **Direto na moldura**: em direto, a moldura do hero passa a ecrã 16:9 com uma capa e um botão de play. O player da Twitch só carrega depois do clique. No telemóvel, o toque abre a Twitch.
+- **Clips**: com as chaves da Twitch, a secção mostra os 4 clips mais vistos do canal (cache de 1 h) e cada um abre num modal. Sem chaves, usa os clips de `clips.items`, que abrem o link do clip.
+- **Seguidores**: o número aparece em cada cartão das redes. Na Twitch vem da Helix (com as chaves acima) e no YouTube da Data API (`YOUTUBE_API_KEY` e `YOUTUBE_CHANNEL_ID`), com cache de 1 h. Instagram, TikTok e X não dão o número sem login: escreve-o em `followers`, em `socials`.
+- **Discord**: com `discord.invite` preenchido, o número de membros vem da API pública de convites.
+- **Outras plataformas**: a fonte de dados está isolada em [`lib/data`](lib/data). Para YouTube ou Kick, cria um adaptador com a mesma interface.
+
+## Rotas
+
+| Rota | O que é |
+| --- | --- |
+| `/` | A página (ISR, regenera no máximo a cada 60 s) |
+| `/api/live` | Estado do direto (cache de 60 s) |
+| `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |
+| `/sitemap.xml`, `/robots.txt`, `/icon` | SEO e ícones |
+
+## Acessibilidade e motion
+
+- **Cursor**: o cursor próprio só aparece com rato. Em ecrãs tácteis fica o comportamento normal.
+- **Teclado**: tudo funciona por teclado. A foto é um botão que manda corações. O modal dos clips fecha com Esc.
+- **Movimento reduzido**: com `prefers-reduced-motion` não há Lenis, tilt, animações de entrada nem reações a subir.
+
+## Deploy
+
+Na Vercel: importa o repositório e define as variáveis de ambiente do [`.env.example`](.env.example).

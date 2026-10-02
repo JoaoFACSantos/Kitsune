@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760" width="600" height="760">
+  <title>Kitsune abraçada a uma raposa</title>
+  <style>
+    .girl-head { transform-box: view-box; transform-origin: 336px 372px; animation: tilt 7s ease-in-out infinite; }
+    .eyes { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+    .fox-head { transform-box: view-box; transform-origin: 300px 384px; animation: nuzzle 4.5s ease-in-out infinite; }
+    .ear { transform-box: view-box; transform-origin: 356px 172px; animation: twitch 6s ease-in-out infinite; }
+    .tail { transform-box: view-box; transform-origin: 260px 780px; animation: wag 2.8s ease-in-out infinite; }
+    @keyframes tilt { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+    @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 93% { transform: scaleY(0.08); } 96% { transform: scaleY(1); } }
+    @keyframes nuzzle { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(2deg); } }
+    @keyframes twitch { 0%, 84%, 100% { transform: rotate(0); } 88% { transform: rotate(6deg); } 92% { transform: rotate(-3deg); } 96% { transform: rotate(3deg); } }
+    @keyframes wag { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <defs>
+    <clipPath id="foxface">
+      <path d="M300 132C366 132 408 176 412 238C428 258 444 282 452 306C436 306 424 312 414 320C424 334 428 348 428 360C410 356 396 360 386 368C366 388 334 398 300 398C266 398 234 388 214 368C204 360 190 356 172 360C172 348 176 334 186 320C176 312 164 306 148 306C156 282 172 258 188 238C192 176 234 132 300 132Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- cabelo comprido e ondulado, atrás -->
+  <path d="M336 40C240 40 172 112 168 214c-2 48-36 72-40 122-4 44 22 68 10 114-12 46-46 72-42 130 4 50 28 76 16 126-6 24-12 54-16 84h472c-6-40 16-74 6-122-10-48-42-68-34-120 8-48 38-78 26-128-10-44-42-64-46-110-4-40-8-60-10-96C506 112 432 40 336 40Z" fill="#D9622B"/>
+  <path d="M150 350c-6 40 18 62 8 104-10 40-40 62-38 112M172 250c-2 40-22 56-26 86M548 430c10 44-22 70-24 116 0 40 26 60 28 100M514 300c4 40 30 56 36 96" fill="none" stroke="#B84A1F" stroke-width="9" stroke-linecap="round" opacity="0.55"/>
+  <path d="M262 88c34-26 104-30 148 6" fill="none" stroke="#F59A55" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- pescoço, ombros e top (parados: a cabeça roda por cima do pescoço) -->
+  <path d="M306 330v64c-6 22-44 32-66 52-16 14-20 40-20 66v288h232V512c0-26-4-52-20-66-22-20-60-30-66-52v-64Z" fill="#FFD0B8"/>
+  <path d="M306 350c14 22 46 22 60 0v18c-14 20-46 20-60 0Z" fill="#F3B79E"/>
+  <path d="M220 570C220 540 250 520 274 528C300 554 372 554 398 528C422 520 452 540 452 570V800H220Z" fill="#34143A"/>
+  <path d="M268 530l-6-86M404 530l6-86" fill="none" stroke="#34143A" stroke-width="10" stroke-linecap="round"/>
+  <!-- gargantilha -->
+  <path d="M307 384c16 11 42 11 58 0" fill="none" stroke="#2A0F2F" stroke-width="9" stroke-linecap="round"/>
+  <path d="M336 394c-4-6-13-3-11 4 1.500 5 9 9 11 11 2-2 9.500-6 11-11 2-7-7-10-11-4Z" fill="#FF4FA0"/>
+
+  <g class="girl-head">
+    <!-- cara -->
+    <path d="M336 122c-62 0-106 42-106 112 0 66 42 122 106 122s106-56 106-122c0-70-44-112-106-112Z" fill="#FFD0B8"/>
+    <!-- olhos, pestanas, sobrancelhas -->
+    <g class="eyes">
+      <ellipse cx="294" cy="250" rx="18" ry="22" fill="#FFFFFF"/>
+      <ellipse cx="378" cy="250" rx="18" ry="22" fill="#FFFFFF"/>
+      <ellipse cx="295" cy="252" rx="14" ry="18" fill="#8A4420"/>
+      <ellipse cx="377" cy="252" rx="14" ry="18" fill="#8A4420"/>
+      <ellipse cx="295" cy="254" rx="8" ry="11" fill="#2A0F2F"/>
+      <ellipse cx="377" cy="254" rx="8" ry="11" fill="#2A0F2F"/>
+      <circle cx="301" cy="244" r="5.500" fill="#FFFFFF"/>
+      <circle cx="383" cy="244" r="5.500" fill="#FFFFFF"/>
+      <circle cx="289" cy="261" r="2.400" fill="#FFFFFF"/>
+      <circle cx="371" cy="261" r="2.400" fill="#FFFFFF"/>
+      <path d="M272 244c6-20 36-24 44-6M356 238c8-18 38-14 44 6" fill="none" stroke="#2A0F2F" stroke-width="6" stroke-linecap="round"/>
+      <path d="M273 243l-11-5M276 235l-8-9M400 243l11-5M397 235l8-9" stroke="#2A0F2F" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <path d="M268 214q20-14 44-4M360 210q24-10 44 4" fill="none" stroke="#9C4A22" stroke-width="5.500" stroke-linecap="round"/>
+
+    <!-- bochechas, nariz, lábios -->
+    <ellipse cx="262" cy="296" rx="21" ry="11" fill="#FF8DB8" opacity="0.6"/>
+    <ellipse cx="410" cy="296" rx="21" ry="11" fill="#FF8DB8" opacity="0.6"/>
+    <path d="M334 280q6 5 0 10" fill="none" stroke="#E79E88" stroke-width="3.500" stroke-linecap="round"/>
+    <path d="M310 312c9-6 19-4 26 0 7-4 17-6 26 0-9 18-43 18-52 0Z" fill="#E8517F"/>
+    <path d="M310 312c16 5 36 5 52 0" fill="none" stroke="#B8305C" stroke-width="2.500" stroke-linecap="round"/>
+
+    <!-- madeixas onduladas a cair pelos lados da cara -->
+    <path d="M352 88c-74-6-130 46-136 138-3 50 8 86-8 128-12 34-42 50-46 92-3 30 10 50 4 78-22-30-32-66-22-104 10-36 30-58 34-98 6-58-2-126 32-176 32-46 90-70 142-58Z" fill="#E2702F"/>
+    <path d="M350 88c68-2 110 48 112 134 0 48 14 78 28 114 14 36-4 74 10 114 12 36 40 50 36 96-16-26-40-36-52-70-12-36 2-72-14-106-18-40-30-80-30-140 0-60-30-110-90-126Z" fill="#E2702F"/>
+    <!-- franja em cortina -->
+    <path d="M354 90c-56 6-98 48-112 120 26-34 62-60 110-72Z" fill="#EC7C38"/>
+    <path d="M350 90c52 6 90 46 100 114-22-32-54-54-100-66Z" fill="#EC7C38"/>
+    <path d="M330 104c-30 12-54 34-70 66M372 104c26 10 46 30 60 58M222 240c-6 44 2 80-10 118M456 236c6 40 16 70 30 100" fill="none" stroke="#F59A55" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  </g>
+
+  <!-- raposa ao colo: corpo (sobe até por trás da cabeça, para ficarem ligados) -->
+  <path d="M82 800c-8-124 22-204 66-234 32-20 92-20 122 2 44 32 70 112 74 232Z" fill="#FF9A52"/>
+  <path d="M146 596h116l-10 44-18-14-10 42-18-26-18 26-10-42-18 14Z" fill="#FFF3E4"/>
+
+  <!-- braço a abraçar a raposa: ombro, cotovelo e antebraço por cima do corpo dela -->
+  <path d="M416 482C424 444 470 444 476 490C482 540 488 604 474 646C462 682 420 694 380 692C350 690 322 688 300 686C280 684 268 672 270 658C272 644 288 636 304 638C330 642 356 648 384 644C410 640 424 622 424 596C424 562 412 520 416 482Z" fill="#FFD0B8"/>
+  <path d="M417 490c-3 36 7 68 7 106" fill="none" stroke="#F3B79E" stroke-width="3" stroke-linecap="round"/>
+  <path d="M290 650c-7 2-10 7-10 12M296 664c-7 2-10 6-10 11" fill="none" stroke="#F3B79E" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- cauda, à frente -->
+  <g class="tail">
+    <!-- tom mais claro do que o corpo, com contorno, para a cauda se destacar -->
+    <path d="M210 800C230 700 326 640 424 650C490 656 536 720 532 800Z" fill="#FFAE6E"/>
+    <path d="M424 650C490 656 536 720 532 800H450L438 770L452 754L430 730L446 714L424 690L440 676Z" fill="#FFF3E4"/>
+    <path d="M300 742c30-26 68-40 106-42M268 782c26-20 58-34 92-40" fill="none" stroke="#F59550" stroke-width="3" stroke-linecap="round"/>
+    <path d="M210 800C230 700 326 640 424 650C490 656 536 720 532 800" fill="none" stroke="#E27A38" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- raposa: cabeça encostada, a piscar o olho -->
+  <g transform="translate(204 506) rotate(-8) scale(0.66) translate(-300 -265)">
+    <g class="fox-head">
+      <g>
+        <path d="M198 200c-22-56-32-112-20-158 46 16 90 48 118 90Z" fill="#FF9A52"/>
+        <path d="M178 42c20 6 40 16 58 28-14 14-32 24-54 32-6-22-8-42-4-60Z" fill="#4A1F45"/>
+        <path d="M208 172c-12-36-16-66-10-92 26 14 50 34 66 56Z" fill="#FFB8D6"/>
+      </g>
+      <g class="ear">
+        <path d="M402 200c22-56 32-112 20-158-46 16-90 48-118 90Z" fill="#FF9A52"/>
+        <path d="M422 42c-20 6-40 16-58 28 14 14 32 24 54 32 6-22 8-42 4-60Z" fill="#4A1F45"/>
+        <path d="M392 172c12-36 16-66 10-92-26 14-50 34-66 56Z" fill="#FFB8D6"/>
+      </g>
+      <path d="M300 132C366 132 408 176 412 238C428 258 444 282 452 306C436 306 424 312 414 320C424 334 428 348 428 360C410 356 396 360 386 368C366 388 334 398 300 398C266 398 234 388 214 368C204 360 190 356 172 360C172 348 176 334 186 320C176 312 164 306 148 306C156 282 172 258 188 238C192 176 234 132 300 132Z" fill="#FF9A52"/>
+      <path clip-path="url(#foxface)" d="M130 324C180 298 226 302 254 302C276 302 290 290 300 274C310 290 324 302 346 302C374 302 420 298 470 324V420H130Z" fill="#FFF3E4"/>
+      <!-- olho aberto e olho a piscar -->
+      <ellipse cx="256" cy="262" rx="16" ry="20" fill="#2A0F2F"/>
+      <circle cx="262" cy="253" r="6" fill="#FFFFFF"/>
+      <circle cx="250" cy="271" r="2.600" fill="#FFFFFF"/>
+      <path d="M241 251l-10-7M244 245l-6-10" stroke="#2A0F2F" stroke-width="4" stroke-linecap="round"/>
+      <path d="M326 268q18-18 38 0" fill="none" stroke="#2A0F2F" stroke-width="6" stroke-linecap="round"/>
+      <ellipse cx="222" cy="322" rx="21" ry="11" fill="#FF8DB8" opacity="0.65"/>
+      <ellipse cx="378" cy="322" rx="21" ry="11" fill="#FF8DB8" opacity="0.65"/>
+      <!-- nariz, boca aberta e língua -->
+      <path d="M288 304c8-5 16-5 24 0-1 9-6 14-12 16-6-2-11-7-12-16Z" fill="#4A1F45"/>
+      <path d="M272 330c10 6 20 4 28-6 8 10 18 12 28 6-2 28-14 44-28 44s-26-16-28-44Z" fill="#4A1F45"/>
+      <path d="M286 352c8-8 20-8 28 0-2 14-8 22-14 22s-12-8-14-22Z" fill="#FF7FA6"/>
+    </g>
+  </g>
+</svg>

@@ -1,26 +1,2059 @@
 @import "tailwindcss";
 
+/* =========================================================
+   Tokens. As cores vêm de content/site.config.ts (aplicadas no <html>).
+   ========================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --pink: #ff4fa0;
+  --pink-deep: #d6106b;
+  --lilac: #b9a4ff;
+  --butter: #ffd66e;
+  --mint: #8ee3c8;
+  --peach: #ffb199;
+  --violet: #7a2fd0;
+
+  /* Tinta escura fixa: texto sobre cores claras (fitas, cartões coloridos, stickers). */
+  --dark: var(--ink-light, #2a0f2f);
+
+  /* Tema claro (por omissão). As cores base vêm da configuração: --bg-light, --ink-light. */
+  --bg: var(--bg-light, #fff4f8);
+  --ink: var(--dark);
+  --ink-soft: color-mix(in oklab, var(--ink) 72%, var(--bg));
+  --line: color-mix(in oklab, var(--ink) 12%, transparent);
+  --surface: rgb(255 255 255 / 0.8);
+  --surface-strong: #fff;
+  --surface-border: rgb(255 255 255 / 0.95);
+  --nav-bg: rgb(255 255 255 / 0.72);
+  --hover-soft: color-mix(in oklab, var(--pink) 16%, white);
+  --glider: var(--dark);
+  --toast-bg: var(--dark);
+  --chip-bg: color-mix(in oklab, var(--pink) 10%, white);
+  --chip-fg: color-mix(in oklab, var(--pink-deep) 82%, var(--dark));
+  --link: var(--pink-deep);
+  --focus: var(--pink-deep);
+  --dots: color-mix(in oklab, var(--dark) 11%, transparent);
+  --blob-alpha: 50%;
+  --grain-opacity: 0.5;
+  --shadow: 0 24px 60px -24px color-mix(in oklab, var(--pink-deep) 45%, transparent);
+  --shadow-sm: 0 12px 30px -16px color-mix(in oklab, var(--pink-deep) 40%, transparent);
+
+  --margin: clamp(16px, 4vw, 56px);
+  --nav-h: 76px;
+  --scroll-offset: 96px;
+  --spring: cubic-bezier(0.2, 0.9, 0.3, 1.35);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Reações curtas (hovers, switch), para acompanharem o cursor nativo; o spring mantém-nas suaves. */
+  --dur-hover: 0.3s;
+  --dur-fade: 0.2s;
+
+  color-scheme: light;
+}
+
+/* Tema escuro (switch no nav): ameixa-noite com os rosas em néon. */
+:root[data-theme="dark"] {
+  --bg: var(--bg-dark, #140a18);
+  --ink: var(--ink-dark, #fbeaf3);
+  --ink-soft: color-mix(in oklab, var(--ink) 70%, var(--bg));
+  --line: rgb(255 255 255 / 0.12);
+  --surface: rgb(40 20 48 / 0.72);
+  --surface-strong: rgb(255 255 255 / 0.1);
+  --surface-border: rgb(255 255 255 / 0.12);
+  --nav-bg: rgb(26 12 32 / 0.72);
+  --hover-soft: rgb(255 79 160 / 0.18);
+  --glider: var(--pink-deep);
+  --toast-bg: var(--pink-deep);
+  --chip-bg: rgb(255 79 160 / 0.16);
+  --chip-fg: #ff8cc4;
+  --link: #ff7ab8;
+  --focus: #ff7ab8;
+  --dots: rgb(255 255 255 / 0.08);
+  --blob-alpha: 34%;
+  --grain-opacity: 0.35;
+  --shadow: 0 24px 60px -24px rgb(0 0 0 / 0.7);
+  --shadow-sm: 0 12px 30px -16px rgb(0 0 0 / 0.6);
+
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-pink: var(--pink);
+  --color-pink-deep: var(--pink-deep);
+  --color-lilac: var(--lilac);
+  --color-butter: var(--butter);
+  --color-mint: var(--mint);
+  --color-peach: var(--peach);
+  --color-line: var(--line);
+  --color-link: var(--link);
+  --color-dark: var(--dark);
+
+  --font-display: var(--font-unbounded), ui-rounded, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: var(--scroll-offset);
+  }
+
+  body {
+    min-height: 100%;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    /* Sem seleção de texto (campos editáveis continuam a deixar). */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  ::selection {
+    background: var(--pink-deep);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  [tabindex="-1"]:focus {
+    outline: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  img,
+  svg {
+    display: block;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Cursor em coração (nativo: segue o rato sem atraso). Só com rato ou trackpad. */
+@media (hover: hover) and (pointer: fine) {
+  html,
+  html * {
+    cursor: var(--cursor, auto);
+  }
+
+  html :is(a, button, label, [role="tab"], [role="switch"], [data-cursor]),
+  html :is(a, button, label, [role="tab"], [role="switch"], [data-cursor]) * {
+    cursor: var(--cursor-hover, pointer);
+  }
+}
+
+@layer components {
+  /* ---------- Tipografia ---------- */
+
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--link);
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 6vw, 84px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .hand {
+    font-family: var(--font-hand);
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .title .hand {
+    display: inline-block;
+    margin-left: 0.08em;
+    font-size: 1.3em;
+    line-height: 0.7;
+    color: var(--link);
+    transform: rotate(-4deg);
+  }
+
+  .lead {
+    max-width: 46ch;
+    font-size: clamp(17px, 1.35vw, 20px);
+    color: var(--ink-soft);
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: var(--dark);
+    color: #fff;
+    font-weight: 800;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  /* ---------- Botões ---------- */
+
+  .btn {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 54px;
+    padding: 0 28px;
+    overflow: hidden;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition:
+      transform var(--dur-hover) var(--spring),
+      box-shadow var(--dur-fade),
+      background-color var(--dur-fade);
+  }
+
+  .btn-primary {
+    background: var(--pink-deep);
+    color: #fff;
+    box-shadow: 0 14px 30px -12px color-mix(in oklab, var(--pink-deep) 75%, transparent);
+  }
+
+  .btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(120deg, var(--pink-deep), var(--violet));
+    opacity: 0;
+    transition: opacity var(--dur-fade);
+  }
+
+  .btn-ghost {
+    background: var(--surface-strong);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+
+  .btn-sm {
+    height: 44px;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+
+  .btn .arrow {
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  @media (hover: hover) {
+    .btn:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .btn-primary:hover::before {
+      opacity: 1;
+    }
+
+    .btn-ghost:hover {
+      background: var(--hover-soft);
+    }
+
+    .btn:hover .arrow {
+      transform: translate(3px, -3px) rotate(8deg);
+    }
+  }
+
+  .btn:active {
+    transform: scale(0.96);
+    transition-duration: 0.1s;
+  }
+
+  /* ---------- Estado do direto ---------- */
+
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--surface-strong);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .live-pill[data-live="true"] {
+    background: var(--pink-deep);
+    color: #fff;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #b9a9ba;
+  }
+
+  .live-pill[data-live="true"] .live-dot {
+    background: #fff;
+    animation: live-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes live-pulse {
+    50% {
+      transform: scale(0.6);
+      opacity: 0.5;
+    }
+  }
+
+  /* ---------- Efeito de clique: mini-corações ---------- */
+
+  .fx-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  .fx-heart {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    opacity: 0;
+  }
+
+  /* ---------- Navegação ---------- */
+
+  .nav {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    z-index: 50;
+    width: min(1120px, calc(100% - 2 * var(--margin)));
+    transform: translateX(-50%);
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .nav[data-hidden="true"]:not(:focus-within) {
+    transform: translate(-50%, calc(-100% - 20px));
+  }
+
+  .nav-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 62px;
+    padding: 0 9px;
+    border: 1.5px solid var(--surface-border);
+    border-radius: 999px;
+    background: var(--nav-bg);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(16px) saturate(1.4);
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding-right: 10px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .avatar {
+    position: relative;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: linear-gradient(140deg, var(--pink), var(--lilac));
+  }
+
+  /* Recorte da cara na imagem do hero. */
+  .avatar img {
+    position: absolute;
+    left: -70%;
+    top: -27%;
+    width: 214%;
+    max-width: none;
+  }
+
+  .nav-links {
+    position: relative;
+    display: none;
+    gap: 2px;
+  }
+
+  @media (min-width: 860px) {
+    .nav-links {
+      display: flex;
+    }
+  }
+
+  .nav-link {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .nav-glider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--hover-soft);
+    opacity: 0;
+  }
+
+  .nav-actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Telemóveis estreitos: menos folgas, para o nome e os botões caberem na pílula. */
+  @media (max-width: 399px) {
+    .nav-pill {
+      gap: 6px;
+      padding: 0 7px;
+    }
+
+    .nav-brand {
+      gap: 8px;
+      padding-right: 0;
+      font-size: 14px;
+    }
+
+    .nav-actions {
+      gap: 6px;
+    }
+  }
+
+  /* ---------- Switch claro / escuro ---------- */
+
+  .theme-switch {
+    position: relative;
+    flex: none;
+    width: 62px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--butter) 55%, white);
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.9);
+    transition: background-color var(--dur-fade);
+  }
+
+  /* Troca de tema instantânea: nada anima a mudança de cores, exceto o próprio switch. */
+  :root.theme-swap *:not(.theme-switch, .theme-switch *) {
+    transition: none !important;
+  }
+
+  :root[data-theme="dark"] .theme-switch {
+    background: #2c1846;
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.14);
+  }
+
+  .theme-knob {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgb(42 15 47 / 0.18);
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  /* Ecrãs tácteis: o switch fica com a altura dos botões, para ser fácil de acertar com o dedo. */
+  @media (pointer: coarse) {
+    .theme-switch {
+      height: 44px;
+    }
+
+    .theme-knob {
+      top: 8px;
+    }
+
+    .theme-stars {
+      position: absolute;
+      inset: 4px 0;
+    }
+  }
+
+  :root[data-theme="dark"] .theme-knob {
+    transform: translateX(26px);
+    background: #fbeaf3;
+  }
+
+  .theme-knob svg {
+    position: absolute;
+    width: 17px;
+    height: 17px;
+    transition:
+      opacity var(--dur-fade),
+      transform var(--dur-hover) var(--spring);
+  }
+
+  .theme-sun {
+    color: #f59e0b;
+  }
+
+  .theme-moon {
+    color: var(--violet);
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.4);
+  }
+
+  :root[data-theme="dark"] .theme-sun {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.4);
+  }
+
+  :root[data-theme="dark"] .theme-moon {
+    opacity: 1;
+    transform: none;
+  }
+
+  .theme-stars i {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    transform: scale(0);
+    transition:
+      opacity var(--dur-fade),
+      transform var(--dur-hover) var(--spring);
+  }
+
+  .theme-stars i:nth-child(1) {
+    left: 12px;
+    top: 9px;
+  }
+
+  .theme-stars i:nth-child(2) {
+    left: 20px;
+    top: 21px;
+    transition-delay: 0.03s;
+  }
+
+  .theme-stars i:nth-child(3) {
+    left: 9px;
+    top: 24px;
+    width: 2px;
+    height: 2px;
+    transition-delay: 0.06s;
+  }
+
+  :root[data-theme="dark"] .theme-stars i {
+    opacity: 0.9;
+    transform: none;
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    --name-size: min(240px, calc((100vw - 2 * var(--margin)) / (var(--chars, 7) * 0.95)));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100svh;
+    padding: calc(var(--nav-h) + 44px) var(--margin) 40px;
+    overflow: clip;
+  }
+
+  /* Fundo do site: manchas de cor a derivar, grelha de pontos e grão, fixo atrás de tudo. */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .blob {
+    position: absolute;
+    width: 62vmax;
+    height: 62vmax;
+    border-radius: 50%;
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+
+  .blob-1 {
+    left: -18vmax;
+    top: -24vmax;
+    background: radial-gradient(circle, color-mix(in oklab, var(--pink) var(--blob-alpha), transparent), transparent 62%);
+  }
+
+  .blob-2 {
+    right: -22vmax;
+    top: 6vmax;
+    background: radial-gradient(circle, color-mix(in oklab, var(--lilac) var(--blob-alpha), transparent), transparent 62%);
+    animation-duration: 24s;
+    animation-direction: alternate-reverse;
+  }
+
+  .blob-3 {
+    left: 12vw;
+    bottom: -38vmax;
+    background: radial-gradient(circle, color-mix(in oklab, var(--peach) var(--blob-alpha), transparent), transparent 62%);
+    animation-duration: 28s;
+  }
+
+  @keyframes drift {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(6vmax, 4vmax, 0) scale(1.12);
+    }
+  }
+
+  .dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--dots) 1.3px, transparent 1.8px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000 25%, transparent 80%);
+  }
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .2 0 0 0 0 .45 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .hero-greeting {
+    position: relative;
+    z-index: 4;
+    align-self: flex-start;
+    margin-left: max(0px, calc(50% - var(--name-size) * 2.9));
+    color: var(--link);
+    font-size: clamp(28px, 3.2vw, 44px);
+    line-height: 1;
+    transform: rotate(-6deg);
+  }
+
+  .hero-greeting svg {
+    display: inline-block;
+    width: 1.3em;
+    margin-left: 6px;
+    vertical-align: -0.6em;
+  }
+
+  .hero-name {
+    position: relative;
+    z-index: 1;
+    margin-top: 4px;
+    font-family: var(--font-display);
+    font-size: var(--name-size);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    color: var(--pink);
+  }
+
+  .letter {
+    display: inline-block;
+  }
+
+  .letter-inner {
+    display: inline-block;
+    text-shadow:
+      0 1px 0 color-mix(in oklab, var(--pink) 94%, var(--dark)),
+      0 2px 0 color-mix(in oklab, var(--pink) 90%, var(--dark)),
+      0 3px 0 color-mix(in oklab, var(--pink) 86%, var(--dark)),
+      0 4px 0 color-mix(in oklab, var(--pink) 82%, var(--dark)),
+      0 5px 0 color-mix(in oklab, var(--pink) 78%, var(--dark)),
+      0 6px 0 color-mix(in oklab, var(--pink) 74%, var(--dark)),
+      0 7px 0 color-mix(in oklab, var(--pink) 70%, var(--dark)),
+      0 20px 30px color-mix(in oklab, var(--pink-deep) 35%, transparent);
+  }
+
+  /* Palco: moldura de stream com a foto a sair por cima. */
+  /* A cabeça sai ~25% da largura acima da moldura; tapa só a metade de baixo do nome. */
+  .stage {
+    /* Também limitada pela altura do ecrã, para o hero caber em portáteis baixos. */
+    --stage-w: min(380px, 70vw, calc((100svh - 190px - var(--name-size)) * 0.8));
+    position: relative;
+    z-index: 2;
+    width: var(--stage-w);
+    aspect-ratio: 4 / 5;
+    margin-top: calc(var(--stage-w) * 0.25 - var(--name-size) * 0.5);
+  }
+
+  .stage-float {
+    position: absolute;
+    inset: 0;
+    animation: float 5.5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .card3d {
+    position: absolute;
+    inset: 0;
+  }
+
+  .window {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border: 6px solid #fff;
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at 20% 15%, rgb(255 255 255 / 0.7), transparent 40%),
+      linear-gradient(165deg, color-mix(in oklab, var(--pink) 55%, white), var(--lilac));
+    box-shadow: var(--shadow);
+  }
+
+  .window-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.35;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.7) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.7) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: 0 14px;
+  }
+
+  /* Corações em néon no fundo da moldura. */
+  .neon-heart {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--s);
+    transform: rotate(var(--r, 0deg));
+    filter: drop-shadow(0 0 4px var(--pink)) drop-shadow(0 0 10px var(--pink-deep));
+    animation: neon 3.2s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+
+  .neon-heart path {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+  }
+
+  @keyframes neon {
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  /* Frase manuscrita no canto da moldura, por cima da foto. */
+  .window-note {
+    position: absolute;
+    left: 7%;
+    bottom: 5%;
+    z-index: 4;
+    max-width: 5.4em;
+    color: #fff;
+    font-size: clamp(22px, calc(var(--stage-w) * 0.088), 34px);
+    line-height: 0.95;
+    /* Contorno rosa grosso, tipo autocolante: lê-se por cima de qualquer cor. */
+    -webkit-text-stroke: 6px var(--pink-deep);
+    paint-order: stroke fill;
+    text-shadow: 0 3px 10px rgb(42 15 47 / 0.35);
+    transform: rotate(-6deg);
+    pointer-events: none;
+  }
+
+  /* A foto é uma só camada: recortada à moldura (cantos de baixo arredondados, raio interior
+     de 28px) e livre acima dela, para a cabeça "sair". Sem duas cópias, não há junção visível. */
+  .popout {
+    position: absolute;
+    inset: 6px;
+    z-index: 3;
+    pointer-events: none;
+    clip-path: polygon(
+      -60% -120%,
+      160% -120%,
+      160% 0%,
+      100% 0%,
+      calc(100% - 0px) calc(100% - 28px),
+      calc(100% - 0.95px) calc(100% - 20.75px),
+      calc(100% - 3.75px) calc(100% - 14px),
+      calc(100% - 8.2px) calc(100% - 8.2px),
+      calc(100% - 14px) calc(100% - 3.75px),
+      calc(100% - 20.75px) calc(100% - 0.95px),
+      calc(100% - 28px) calc(100% - 0px),
+      calc(28px) calc(100% - 0px),
+      calc(20.75px) calc(100% - 0.95px),
+      calc(14px) calc(100% - 3.75px),
+      calc(8.2px) calc(100% - 8.2px),
+      calc(3.75px) calc(100% - 14px),
+      calc(0.95px) calc(100% - 20.75px),
+      calc(0px) calc(100% - 28px),
+      0% 0%,
+      -60% 0%
+    );
+  }
+
+  .photo {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--photo-y, 0) * 1%);
+    width: calc(var(--photo-scale, 1.3) * 100%);
+    max-width: none;
+    height: auto;
+    transform: translateX(-50%);
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  .window-bar {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .likes {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.85);
+    color: var(--pink-deep);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .likes svg {
+    width: 15px;
+  }
+
+  /* Dentro da moldura (fundo claro) o estado offline mantém sempre o estilo claro. */
+  .window-bar .live-pill[data-live="false"] {
+    background: #fff;
+    color: var(--dark);
+  }
+
+  .window-hit {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: 34px;
+  }
+
+  /* ---------- Em direto: a moldura passa a ecrã 16:9 com o direto ---------- */
+  /* A foto fica por trás do ecrã, a espreitar por cima (a cabeça tapa a metade de baixo do nome). */
+
+  .stage[data-live="true"] {
+    /* Altura limitada pelo ecrã, para o direto e os botões caberem sem scroll. */
+    --stage-h: clamp(300px, calc(100svh - 360px - var(--name-size)), 380px);
+    --stage-w: min(92vw, calc(var(--stage-h) * 16 / 9));
+    --peek: calc(var(--stage-w) * 0.3);
+    aspect-ratio: 16 / 9;
+    margin-top: max(14px, calc(var(--peek) * 0.72 - var(--name-size) * 0.5));
+  }
+
+  .stage[data-live="true"] .stage-float {
+    animation: none;
+  }
+
+  /* O ecrã é largo: o texto e os botões passam para baixo dele, em vez de ficarem aos lados. */
+  @media (min-width: 1024px) {
+    .stage[data-live="true"] ~ .hero-foot {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: 100%;
+      padding-top: 28px;
+      transform: none;
+    }
+  }
+
+  .stage[data-live="true"] .window {
+    z-index: 1;
+    border-radius: 28px;
+  }
+
+  .stage[data-live="true"] .popout {
+    inset: auto 6% 100% auto;
+    z-index: 0;
+    width: var(--peek);
+    aspect-ratio: var(--photo-ratio, 0.79);
+    clip-path: none;
+    /* Fica de fora a cabeça e os ombros; o resto esconde-se atrás do ecrã. */
+    transform: translateY(38%);
+  }
+
+  .stage[data-live="true"] .photo {
+    bottom: 0;
+    width: 100%;
+  }
+
+  .stage[data-live="true"] .sticker {
+    left: var(--lx, var(--x));
+    top: var(--ly, var(--y));
+    width: calc(var(--s, 28%) * 0.42);
+  }
+
+  @media (max-width: 767px) {
+    .stage[data-live="true"] .sticker-side {
+      display: none;
+    }
+  }
+
+  .live-cover,
+  .live-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .live-frame {
+    border: 0;
+    background: #000;
+  }
+
+  .live-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .live-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(20 10 24 / 0.85), transparent 62%);
+  }
+
+  .live-game {
+    display: inline-flex;
+    align-items: center;
+    max-width: 55%;
+    height: 36px;
+    padding: 0 14px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.88);
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .live-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--pink-deep);
+    animation: live-ring 1.8s ease-out infinite;
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .live-play svg {
+    width: 26px;
+    margin-left: 3px;
+  }
+
+  @keyframes live-ring {
+    from {
+      box-shadow: 0 0 0 0 rgb(255 255 255 / 0.65);
+    }
+    to {
+      box-shadow: 0 0 0 22px rgb(255 255 255 / 0);
+    }
+  }
+
+  .live-title {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 14px;
+    display: -webkit-box;
+    overflow: hidden;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(14px, 1.5vw, 19px);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .live-hit {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .live-play {
+      width: 76px;
+      height: 76px;
+      margin: -38px 0 0 -38px;
+    }
+
+    .live-play svg {
+      width: 32px;
+    }
+  }
+
+  @media (hover: hover) {
+    .live-cover:hover .live-play {
+      transform: scale(1.1);
+    }
+  }
+
+  .hearts {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  .heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+    opacity: 0;
+  }
+
+  /* Stickers arrastáveis. */
+  .stickers {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    pointer-events: none;
+  }
+
+  .sticker {
+    position: absolute;
+    left: var(--xm, var(--x));
+    top: var(--y);
+    width: var(--s, 28%);
+    aspect-ratio: 1;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  @media (min-width: 768px) {
+    .sticker {
+      left: var(--x);
+    }
+  }
+
+  .sticker-pop {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotate(var(--r, 0deg));
+    filter: drop-shadow(0 10px 14px color-mix(in oklab, var(--pink-deep) 30%, transparent));
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .sticker-wobble {
+    display: block;
+    width: 100%;
+    height: 100%;
+    animation: wobble 4s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+
+  @keyframes wobble {
+    0%,
+    100% {
+      transform: rotate(-4deg) translateY(0);
+    }
+    50% {
+      transform: rotate(4deg) translateY(-6px);
+    }
+  }
+
+  @media (hover: hover) {
+    .sticker:hover .sticker-pop {
+      transform: rotate(var(--r, 0deg)) scale(1.12);
+    }
+  }
+
+  .hero-hint {
+    position: absolute;
+    left: 118%;
+    top: 20%;
+    z-index: 8;
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    color: var(--ink-soft);
+    font-size: 24px;
+    line-height: 1;
+    transform: rotate(4deg);
+    pointer-events: none;
+  }
+
+  .hero-hint span {
+    white-space: nowrap;
+  }
+
+  .hero-hint svg {
+    flex: none;
+    width: 44px;
+    margin-top: 10px;
+    color: var(--pink-deep);
+  }
+
+  .hero-tap {
+    position: relative;
+    z-index: 4;
+    margin-top: 18px;
+    color: var(--link);
+    font-size: 22px;
+    transform: rotate(-3deg);
+  }
+
+  .hero-hint-love {
+    left: auto;
+    right: 116%;
+    top: 34%;
+    transform: rotate(-5deg);
+  }
+
+  .hero-hint-love svg {
+    order: 2;
+  }
+
+  .hero-foot {
+    position: relative;
+    z-index: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    max-width: 1280px;
+    margin-top: auto;
+    padding-top: 36px;
+  }
+
+  /* Desktop: texto e botões nos cantos de baixo, ao lado da moldura. */
+  @media (min-width: 1024px) {
+    .hero-foot {
+      position: absolute;
+      left: 50%;
+      bottom: 40px;
+      width: calc(100% - 2 * var(--margin));
+      padding-top: 0;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .hero-foot > * {
+      pointer-events: auto;
+    }
+  }
+
+  .hero-role {
+    font-family: var(--font-display);
+    font-size: clamp(16px, 1.5vw, 20px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-tagline {
+    max-width: 32ch;
+    margin-top: 6px;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Fitas (marquee) ---------- */
+
+  .ribbons {
+    position: relative;
+    z-index: 3;
+    padding: 34px 0;
+    overflow: clip;
+  }
+
+  .tape {
+    width: 112vw;
+    margin-left: -6vw;
+    padding: 16px 0;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: clamp(18px, 2.2vw, 30px);
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tape-a {
+    background: var(--pink-deep);
+    color: #fff;
+    transform: rotate(-2.2deg);
+  }
+
+  .tape-b {
+    margin-top: -14px;
+    background: var(--lilac);
+    color: var(--dark);
+    transform: rotate(1.8deg);
+  }
+
+  .tape-track {
+    display: flex;
+    width: max-content;
+  }
+
+  .tape-group {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding-right: 30px;
+  }
+
+  .tape-group svg {
+    width: 0.9em;
+    height: 0.9em;
+    color: var(--butter);
+  }
+
+  .tape-b .tape-group svg {
+    color: var(--pink-deep);
+  }
+
+  /* ---------- Secções ---------- */
+
+  .section {
+    position: relative;
+    padding: clamp(84px, 10vw, 140px) var(--margin);
+  }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .glass {
+    border: 1.5px solid var(--surface-border);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- Clips ---------- */
+
+  /* Telemóvel: fila que desliza para o lado (a página fica curta). A folga em cima e em baixo
+     é para os cartões tortos e a sombra não ficarem cortados pelo overflow. */
+  .clips {
+    display: grid;
+    grid-auto-columns: min(78%, 320px);
+    grid-auto-flow: column;
+    gap: 16px;
+    margin: 0 calc(var(--margin) * -1) -30px;
+    padding: 14px var(--margin) 30px;
+    overflow-x: auto;
+    scroll-padding-inline: var(--margin);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .clips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .clip-cell {
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 640px) {
+    .clips {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-inline: 0;
+      margin-bottom: 0;
+      padding: 0;
+      overflow: visible;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .clips {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .clip {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 10px 16px;
+    border-radius: 26px;
+    text-align: left;
+    transform: rotate(var(--r, 0deg));
+    transition:
+      transform var(--dur-hover) var(--spring),
+      box-shadow var(--dur-fade);
+  }
+
+  .clip-thumb {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border-radius: 18px;
+  }
+
+  .clip-thumb img {
+    object-fit: cover;
+  }
+
+  .clip-art {
+    position: absolute;
+    right: -4%;
+    bottom: -16%;
+    width: 50%;
+    transform: rotate(10deg);
+  }
+
+  .clip-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--pink-deep);
+    box-shadow: 0 8px 20px rgb(42 15 47 / 0.25);
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .clip-play svg {
+    width: 22px;
+    margin-left: 2px;
+  }
+
+  .clip-time {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgb(20 10 24 / 0.78);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .clip-title {
+    display: -webkit-box;
+    min-height: 2.5em;
+    padding: 0 6px;
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .clip-meta {
+    margin-top: auto;
+    padding: 0 6px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  @media (hover: hover) {
+    .clip:hover {
+      transform: rotate(0deg) translateY(-6px);
+      box-shadow: var(--shadow);
+    }
+
+    .clip:hover .clip-play {
+      transform: scale(1.15);
+    }
+  }
+
+  /* Modal com o player do clip. */
+  .clip-dialog {
+    width: min(960px, calc(100vw - 2 * var(--margin)));
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    overflow: visible;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .clip-dialog::backdrop {
+    background: rgb(20 10 24 / 0.8);
+  }
+
+  .clip-dialog-box {
+    overflow: hidden;
+    border: 5px solid #fff;
+    border-radius: 28px;
+    background: var(--bg);
+    box-shadow: var(--shadow);
+    animation: dialog-in 0.35s var(--spring);
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.94);
+    }
+  }
+
+  .clip-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    background: #000;
+  }
+
+  .clip-dialog-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .clip-dialog-title {
+    flex: 1;
+    min-width: 12ch;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  /* ---------- Setup ---------- */
+
+  .tabs {
+    position: relative;
+    display: inline-flex;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--surface-strong);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .tab {
+    position: relative;
+    z-index: 1;
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 999px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 800;
+    transition: color 0.3s;
+  }
+
+  .tab[aria-selected="true"] {
+    color: #fff;
+  }
+
+  .tab-glider {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 0;
+    border-radius: 999px;
+    background: var(--glider);
+    transition:
+      transform 0.55s var(--spring),
+      width 0.55s var(--spring);
+  }
+
+  .gear-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .gear {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    aspect-ratio: 1;
+    padding: 10px;
+    border-radius: 26px;
+    text-align: center;
+    transition:
+      transform var(--dur-hover) var(--spring),
+      background-color var(--dur-fade),
+      box-shadow var(--dur-fade);
+  }
+
+  .gear svg {
+    width: 52%;
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .gear-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Telemóvel: 4 colunas estreitas, por isso a etiqueta encolhe para caber ("Microfone"). */
+  @media (max-width: 479px) {
+    .gear {
+      padding: 8px 3px;
+    }
+
+    .gear-label {
+      font-size: 11px;
+      letter-spacing: 0;
+    }
+  }
+
+  .gear[aria-pressed="true"] {
+    background: var(--surface-strong);
+    box-shadow:
+      0 0 0 3px var(--pink),
+      var(--shadow);
+  }
+
+  @media (hover: hover) {
+    .gear:hover {
+      transform: translateY(-6px) rotate(-3deg);
+    }
+
+    .gear:hover svg {
+      transform: scale(1.12) rotate(6deg);
+    }
+  }
+
+  .detail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 100%;
+    padding: clamp(24px, 3vw, 40px);
+    overflow: hidden;
+    border-radius: 34px;
+  }
+
+  .detail-blob {
+    position: absolute;
+    right: -30%;
+    top: -35%;
+    width: 80%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in oklab, var(--pink) 30%, transparent), transparent 65%);
+    pointer-events: none;
+  }
+
+  .detail-icon {
+    width: clamp(96px, 11vw, 150px);
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .detail-name {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.6vw, 38px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .spec-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1.5px dashed var(--line);
+  }
+
+  .spec-row:last-child {
+    border-bottom: 0;
+  }
+
+  .fun-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 150px;
+    padding: 20px;
+    border-radius: 26px;
+    color: var(--dark);
+    transform: rotate(var(--r, 0deg));
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  @media (hover: hover) {
+    .fun-stat:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+  }
+
+  .fun-value {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 4vw, 54px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  /* ---------- Parcerias ---------- */
+
+  /* Folga em cima e em baixo (anulada pela margem) para o hover e a sombra dos cartões
+     não ficarem cortados pelo overflow. */
+  .brands-marquee {
+    display: flex;
+    margin: calc(2rem - 16px) 0 -36px;
+    padding: 16px 0 36px;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  .brands-track {
+    display: flex;
+    flex: none;
+    gap: 14px;
+    padding-right: 14px;
+    animation: marquee 32s linear infinite;
+  }
+
+  .brands-marquee:hover .brands-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  .brand {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 200px;
+    height: 88px;
+    border-radius: 999px;
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .brand img {
+    width: 130px;
+    height: 30px;
+    object-fit: contain;
+    opacity: 0.8;
+  }
+
+  :root[data-theme="dark"] .brand img {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  @media (hover: hover) {
+    .brand:hover {
+      transform: rotate(-4deg) scale(1.06);
+    }
+  }
+
+  .collab {
+    position: relative;
+    overflow: hidden;
+    border-radius: 40px;
+    padding: clamp(28px, 5vw, 64px);
+    background: linear-gradient(135deg, var(--pink-deep) 0%, #b0158a 55%, var(--violet) 100%);
+    color: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .collab-blob {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 420px;
+    height: 420px;
+    margin: -210px 0 0 -210px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(255 255 255 / 0.35), transparent 65%);
+    pointer-events: none;
+  }
+
+  .collab .title .hand {
+    color: var(--butter);
+  }
+
+  .stat-pill {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px 20px;
+    border-radius: 24px;
+    background: rgb(255 255 255 / 0.14);
+    border: 1.5px solid rgb(255 255 255 / 0.3);
+  }
+
+  .stat-pill strong {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.4vw, 32px);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .btn-white {
+    background: #fff;
+    color: var(--pink-deep);
+  }
+
+  .btn-outline-white {
+    color: #fff;
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.8);
+  }
+
+  @media (hover: hover) {
+    .btn-outline-white:hover {
+      background: rgb(255 255 255 / 0.12);
+    }
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 60;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: var(--toast-bg);
+    color: #fff;
+    font-weight: 800;
+    transform: translate(-50%, calc(100% + 40px));
+    visibility: hidden;
+    transition:
+      transform 0.5s var(--spring),
+      visibility 0s 0.5s;
+  }
+
+  .toast[data-show="true"] {
+    transform: translate(-50%, 0);
+    visibility: visible;
+    transition: transform 0.5s var(--spring);
+  }
+
+  /* ---------- Redes ---------- */
+
+  /* Flex em vez de grelha: a última linha estica e nunca fica com um buraco. */
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .socials > li {
+    flex: 1 1 min(100%, 330px);
+  }
+
+  .social {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    overflow: hidden;
+    border-radius: 30px;
+    transition:
+      transform var(--dur-hover) var(--spring),
+      color var(--dur-fade);
+  }
+
+  .social-fill {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--c);
+    clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
+    transition: clip-path 0.45s var(--ease-out);
+  }
+
+  .social-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: var(--c);
+    color: #fff;
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .social-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .social-label {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .social-count {
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.6vw, 22px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .social-meta {
+    color: var(--ink-soft);
+    transition: color var(--dur-fade);
+  }
+
+  /* Com número, é ele que encosta à direita, logo antes da seta. */
+  .social-stat + .social-arrow {
+    margin-left: 0;
+  }
+
+  .social-arrow {
+    margin-left: auto;
+    font-size: 22px;
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  @media (hover: hover) {
+    .social:hover {
+      transform: translateY(-4px);
+      color: #fff;
+    }
+
+    .social:hover .social-fill {
+      clip-path: circle(150% at var(--x, 50%) var(--y, 50%));
+    }
+
+    .social:hover .social-icon {
+      transform: rotate(-10deg) scale(1.1);
+      background: rgb(255 255 255 / 0.2);
+    }
+
+    .social:hover .social-meta {
+      color: rgb(255 255 255 / 0.88);
+    }
+
+    .social:hover .social-arrow {
+      transform: translate(4px, -4px) rotate(10deg);
+    }
+  }
+
+  /* ---------- Rodapé ---------- */
+
+  .footer-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: min(260px, calc((100vw - 2 * var(--margin)) / (var(--chars, 7) * 0.95)));
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-align: center;
+    white-space: nowrap;
+    color: transparent;
+    /* Duas camadas: o gradiente cresce da esquerda por cima do rosa claro. */
+    background:
+      linear-gradient(100deg, var(--pink-deep), var(--pink) 30%, var(--lilac) 65%, var(--butter)) 0 0 / 0% 100% no-repeat,
+      linear-gradient(color-mix(in oklab, var(--pink) 20%, var(--bg)), color-mix(in oklab, var(--pink) 20%, var(--bg)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: background-size 0.7s var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .footer-name:hover {
+      background-size:
+        100% 100%,
+        100% 100%;
+    }
+  }
+}
+
+/* Troca de tema: sem o crossfade por omissão; o círculo é animado no ThemeToggle. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* =========================================================
+   Intro do hero em CSS: arranca no primeiro paint, sem esperar pelo JS.
+   ========================================================= */
+
+@media (prefers-reduced-motion: no-preference) {
+  .intro-drop {
+    animation: drop 1.1s cubic-bezier(0.3, 1.4, 0.4, 1) both;
+    animation-delay: calc(0.1s + var(--i, 0) * 0.07s);
+  }
+
+  .intro-pop {
+    animation: pop 0.9s cubic-bezier(0.3, 1.5, 0.4, 1) both;
+    animation-delay: var(--delay, 0.3s);
+  }
+
+  .intro-rise {
+    animation: rise 0.8s var(--ease-out) both;
+    animation-delay: var(--delay, 0.6s);
+  }
+
+  /* A moldura (com a foto, o LCP) entra só com transform: visível desde o 1.º paint. */
+  .intro-zoom {
+    animation: zoom 1.1s cubic-bezier(0.3, 1.5, 0.4, 1) both;
+  }
+}
+
+@keyframes zoom {
+  from {
+    transform: scale(0.84) rotate(-5deg) translateY(30px);
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-80%) rotate(calc((var(--i, 0) - 3) * 6deg));
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-10deg);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* =========================================================
+   Movimento reduzido: tudo visível e estático.
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .brands-track {
+    animation: none;
+  }
+
+  .brands-marquee {
+    flex-wrap: wrap;
+  }
 }
