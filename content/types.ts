@@ -99,7 +99,14 @@ export type SiteConfig = {
     photoAlt: string;
     /** Tamanho real da imagem (px), para reservar o espaço certo. */
     photoSize: { width: number; height: number };
-    /** Ajuste da foto dentro da moldura: largura relativa e deslocamento vertical. */
+    /**
+     * 'popout' (por omissão): recorte sem fundo, com a cabeça a sair por cima da moldura.
+     * 'cover': imagem com fundo, a encher a moldura.
+     */
+    photoFit?: 'popout' | 'cover';
+    /** Com 'cover': o ponto da imagem que fica à vista quando é cortada (object-position). */
+    photoFocus?: string;
+    /** Com 'popout': largura relativa à moldura e deslocamento vertical. */
     photoScale: number;
     photoOffsetY: number;
     /** Frase manuscrita no canto da moldura. */
@@ -115,6 +122,11 @@ export type SiteConfig = {
     intro: string;
     /** Página com todos os clips. */
     moreUrl: string;
+    /**
+     * Com as chaves da API: mostra os clips mais vistos dos últimos N dias.
+     * Se o canal tiver poucos nesse período, passa para o último ano e depois para desde sempre.
+     */
+    recentDays: number;
     /** Clips de exemplo, usados sem chaves da API (ou se a API falhar). */
     items: Clip[];
   };

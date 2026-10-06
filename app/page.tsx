@@ -38,7 +38,6 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <Nav
         name={site.name}
-        avatar={site.hero.photo}
         watchUrl={watchUrl}
         themeColors={{ light: site.theme.bg, dark: site.theme.darkBg }}
         links={[
@@ -58,6 +57,8 @@ export default async function Home() {
           photoWatching={site.hero.photoWatching}
           photoAlt={site.hero.photoAlt}
           photoSize={site.hero.photoSize}
+          photoFit={site.hero.photoFit}
+          photoFocus={site.hero.photoFocus}
           photoScale={site.hero.photoScale}
           photoOffsetY={site.hero.photoOffsetY}
           note={site.hero.note}

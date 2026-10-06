@@ -12,7 +12,8 @@ export const site: SiteConfig = {
   tagline: 'Jogos, conversa e muitas gargalhadas, sempre com o chat.',
   email: 'kitsunepartnerships@gmail.com',
   url:
-    process.env.NEXT_PUBLIC_SITE_URL ??
+    // "||" e não "??": no .env a variável pode existir vazia (NEXT_PUBLIC_SITE_URL=).
+    process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:3000'),
@@ -34,12 +35,15 @@ export const site: SiteConfig = {
 
   hero: {
     greeting: 'olá! eu sou a',
-    // Ilustração: a Kitsune abraçada a uma raposa. Para usar uma foto: PNG com fundo transparente, recortada até à cintura.
-    photo: '/media/kitsune.svg',
-    // O mesmo desenho com "#watch": as duas viram-se para a televisão.
-    photoWatching: '/media/kitsune.svg#watch',
-    photoAlt: 'Kitsune, de cabelo ruivo comprido, abraçada a uma raposa que pisca o olho',
-    photoSize: { width: 600, height: 760 },
+    // A arte dela, com fundo: enche a moldura ('cover'). Para um recorte sem fundo (PNG ou SVG, até à cintura),
+    // usa photoFit: 'popout' e a cabeça sai por cima da moldura; /media/kitsune.svg é um desenho desses
+    // (com "#watch" em photoWatching, as duas viram-se para a televisão).
+    photo: '/media/kitsune.jpg',
+    photoAlt: 'Kitsune, de cabelo ruivo comprido, encostada a uma raposa que pisca o olho',
+    photoSize: { width: 1254, height: 1254 },
+    photoFit: 'cover',
+    // Mais para a esquerda, para a raposa caber inteira.
+    photoFocus: '25% 50%',
     photoScale: 1.22,
     photoOffsetY: 0,
     note: 'espero-te na live!',
@@ -55,16 +59,20 @@ export const site: SiteConfig = {
     { id: 'youtube', label: 'YouTube', handle: 'KitsuneYoutube', url: 'https://www.youtube.com/c/KitsuneYoutube', followers: 1_290 },
     { id: 'instagram', label: 'Instagram', handle: '@souakitsune', url: 'https://www.instagram.com/souakitsune/', followers: 25_000 },
     { id: 'x', label: 'X', handle: '@souakitsune', url: 'https://x.com/souakitsune', followers: 8_199 },
+    { id: 'discord', label: 'Discord', handle: 'Kitsuniverse', url: 'https://discord.com/invite/4h8NcDu4YR' },
   ],
 
   // Só aparece se houver uma rede com id 'discord' em `socials`.
-  discord: { invite: '', members: 12_480 },
+  // Os membros vêm da API pelo convite; `members` (lido a 6 de outubro de 2026) fica se a API falhar.
+  discord: { invite: '4h8NcDu4YR', members: 1_448 },
 
   clips: {
     title: 'melhores *momentos*',
     intro: 'Os clips mais vistos do canal.',
     moreUrl: 'https://www.twitch.tv/kitsune/clips',
-    // Clips de exemplo. Com as chaves da Twitch no .env, vêm os mais vistos do canal.
+    // Com as chaves da Twitch no .env: os mais vistos dos últimos 30 dias.
+    recentDays: 30,
+    // Clips de exemplo, usados sem as chaves.
     items: [
       {
         id: 'clutch',
@@ -185,7 +193,8 @@ export const site: SiteConfig = {
     intro:
       'Integrações em direto, vídeos dedicados e campanhas nas redes, sempre com um relatório no fim. Respondo em 48 horas.',
     stats: [
-      { value: '1,8 mil', label: 'média de pessoas a ver' },
+      // Soma de `followers` em `socials`, arredondada para baixo. Escrita à mão: atualiza quando passar outro marco.
+      { value: '+100 mil', label: 'seguidores em todas as plataformas' },
       { value: '81%', label: 'audiência entre 18 e 34 anos' },
       { value: '72%', label: 'audiência em Portugal' },
     ],

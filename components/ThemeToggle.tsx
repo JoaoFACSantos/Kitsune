@@ -16,7 +16,8 @@ const isDark = () => document.documentElement.dataset.theme === 'dark';
  * e fica guardado no browser. A troca faz uma revelação circular rápida a partir do botão.
  */
 export function ThemeToggle({ lightColor, darkColor }: { lightColor: string; darkColor: string }) {
-  const dark = useSyncExternalStore(subscribe, isDark, () => false);
+  // No servidor conta como escuro: é o tema de origem.
+  const dark = useSyncExternalStore(subscribe, isDark, () => true);
   // Com rato, a troca arranca logo ao carregar (pointerdown), sem esperar que o botão seja largado.
   const pressed = useRef(false);
 

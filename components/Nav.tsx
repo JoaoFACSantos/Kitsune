@@ -9,7 +9,6 @@ import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
 
 type NavProps = {
   name: string;
-  avatar: string;
   watchUrl: string;
   links: { id: string; label: string }[];
   /** Cor da barra do browser em cada tema. */
@@ -17,7 +16,7 @@ type NavProps = {
 };
 
 /** Nav em pílula: esconde ao descer, volta ao subir; o destaque desliza entre links. */
-export function Nav({ name, avatar, watchUrl, links, themeColors }: NavProps) {
+export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
   const ref = useRef<HTMLElement>(null);
   const status = useLive();
 
@@ -63,11 +62,7 @@ export function Nav({ name, avatar, watchUrl, links, themeColors }: NavProps) {
     <header ref={ref} className="nav">
       <nav aria-label="Principal" className="nav-pill">
         <a href="#topo" className="nav-brand" aria-label={`${name}, voltar ao início`}>
-          <span className="avatar">
-            {/* eslint-disable-next-line @next/next/no-img-element -- recorte da mesma imagem do hero */}
-            <img src={avatar} alt="" width={96} height={122} />
-          </span>
-          <span className="truncate">{name}</span>
+          <span className="nav-name truncate">{name}</span>
         </a>
 
         <div className="nav-links" onPointerLeave={() => moveGlider(null)}>

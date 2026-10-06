@@ -16,7 +16,7 @@
   /* Tinta escura fixa: texto sobre cores claras (fitas, cartões coloridos, stickers). */
   --dark: var(--ink-light, #2a0f2f);
 
-  /* Tema claro (por omissão). As cores base vêm da configuração: --bg-light, --ink-light. */
+  /* Tema claro (escolhido no switch do nav). As cores base vêm da configuração: --bg-light, --ink-light. */
   --bg: var(--bg-light, #fff4f8);
   --ink: var(--dark);
   --ink-soft: color-mix(in oklab, var(--ink) 72%, var(--bg));
@@ -50,7 +50,7 @@
   color-scheme: light;
 }
 
-/* Tema escuro (switch no nav): ameixa-noite com os rosas em néon. */
+/* Tema escuro (o de origem: o <html> vem com data-theme="dark"): ameixa-noite com os rosas em néon. */
 :root[data-theme="dark"] {
   --bg: var(--bg-dark, #140a18);
   --ink: var(--ink-dark, #fbeaf3);
@@ -408,32 +408,35 @@
   .nav-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
     min-width: 0;
-    padding-right: 10px;
+    padding: 0 10px 0 14px;
     font-family: var(--font-display);
-    font-size: 15px;
+    font-size: 19px;
     font-weight: 800;
     letter-spacing: -0.02em;
   }
 
-  .avatar {
-    position: relative;
-    flex: none;
-    width: 44px;
-    height: 44px;
-    overflow: hidden;
-    border-radius: 50%;
-    background: linear-gradient(140deg, var(--pink), var(--lilac));
+  /* Nome com um degradé rosa → roxo a passar (o fundo repete-se: 200% é uma volta completa). */
+  .nav-name {
+    --name-a: var(--pink-deep);
+    --name-b: var(--violet);
+    background: linear-gradient(90deg, var(--name-a), var(--name-b), var(--name-a)) 0 50% / 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: name-flow 4s linear infinite;
   }
 
-  /* Recorte da cara na imagem do hero. */
-  .avatar img {
-    position: absolute;
-    left: -70%;
-    top: -27%;
-    width: 214%;
-    max-width: none;
+  /* No escuro, tons mais claros, para se lerem sobre a pílula. */
+  :root[data-theme="dark"] .nav-name {
+    --name-a: var(--pink);
+    --name-b: var(--lilac);
+  }
+
+  @keyframes name-flow {
+    to {
+      background-position: 200% 50%;
+    }
   }
 
   .nav-links {
@@ -483,9 +486,8 @@
     }
 
     .nav-brand {
-      gap: 8px;
-      padding-right: 0;
-      font-size: 14px;
+      padding: 0 0 0 10px;
+      font-size: 17px;
     }
 
     .nav-actions {
@@ -888,6 +890,30 @@
     -webkit-user-drag: none;
   }
 
+  /* Imagem com fundo (photoFit: 'cover'): enche a moldura em vez de sair por cima dela. */
+  .popout[data-fit="cover"] {
+    overflow: hidden;
+    border-radius: 28px;
+    clip-path: none;
+  }
+
+  /* Um pouco maior do que a moldura, para o parallax não mostrar as bordas. */
+  .popout[data-fit="cover"] .photo {
+    left: -14px;
+    top: -10px;
+    bottom: auto;
+    width: calc(var(--stage-w) + 16px);
+    height: calc(var(--stage-h) + 8px);
+    object-fit: cover;
+    object-position: var(--photo-focus, 50% 50%);
+    transform: none;
+  }
+
+  /* O play desce, para não tapar as caras. */
+  .popout[data-fit="cover"] ~ .live-play {
+    top: 76%;
+  }
+
   .window-bar {
     position: absolute;
     top: 16px;
@@ -946,8 +972,22 @@
     border-radius: 50%;
     background: #fff;
     color: var(--pink-deep);
-    animation: live-ring 1.8s ease-out infinite;
+    /* Sombra sem desvio, para o anel ficar à volta do botão e não descaído. */
+    box-shadow: 0 0 22px rgb(42 15 47 / 0.3);
+    isolation: isolate;
     transition: transform var(--dur-hover) var(--spring);
+  }
+
+  /* O anel é um círculo atrás do botão, animado só com transform e opacity: corre na placa
+     gráfica. Com a sombra animada, o browser redesenhava o botão a cada frame. */
+  .live-play::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 50%;
+    background: #fff;
+    animation: live-ring 1.8s ease-out infinite;
   }
 
   /* Sem margem: o triângulo do ícone já vem desviado o suficiente para parecer centrado. */
@@ -956,16 +996,13 @@
   }
 
   @keyframes live-ring {
-    /* Sombra sem desvio, para o anel ficar à volta do botão e não descaído. */
     from {
-      box-shadow:
-        0 0 22px rgb(42 15 47 / 0.3),
-        0 0 0 0 rgb(255 255 255 / 0.7);
+      opacity: 0.7;
     }
+    /* 76px + 24px para cada lado. */
     to {
-      box-shadow:
-        0 0 22px rgb(42 15 47 / 0.3),
-        0 0 0 24px rgb(255 255 255 / 0);
+      opacity: 0;
+      transform: scale(1.63);
     }
   }
 
@@ -992,10 +1029,6 @@
       --screen-h: clamp(300px, calc(var(--stage-h) - 150px), 340px);
       --screen-w: calc(var(--screen-h) * 16 / 9);
       width: min(92vw, calc(var(--stage-w) * 0.94 + var(--screen-w) + 124px));
-      /* Sem os efeitos de saída do hero: um vídeo a rodar e a encolher cansa. */
-      scale: 1;
-      rotate: none;
-      translate: none;
     }
 
     .stage[data-playing="true"] .stage-float {
@@ -1020,6 +1053,15 @@
     /* Ela dá um saltinho para o lado quando a moldura abre. */
     .stage[data-playing="true"] .popout {
       animation: scoot 0.9s var(--ease-out);
+    }
+
+    /* A imagem com fundo fica à esquerda e esbate-se para a direita, por baixo da televisão. */
+    .stage[data-playing="true"] .popout[data-fit="cover"] {
+      animation: none;
+    }
+
+    .stage[data-playing="true"] .popout[data-fit="cover"] .photo {
+      mask-image: linear-gradient(90deg, #000 74%, transparent);
     }
 
     .stage[data-playing="true"] .likes,
@@ -1132,6 +1174,15 @@
     width: 100%;
     height: 100%;
     border: 0;
+  }
+
+  /* A roda do rato em cima de um iframe vai para o player e não para a página: o scroll suave
+     deixava de funcionar e a página andava aos solavancos. Por isso o player só recebe o rato
+     depois de ele se mexer em cima do ecrã (ver LiveTv). Em ecrãs tácteis fica sempre ativo. */
+  @media (hover: hover) and (pointer: fine) {
+    .tv-screen[data-interactive="false"] iframe {
+      pointer-events: none;
+    }
   }
 
   /* Estática: a televisão "liga" antes de o direto aparecer. */
@@ -2215,7 +2266,51 @@
    os hovers e as animações de entrada. Os valores por omissão são o estado final.
    ========================================================= */
 
+/* As variáveis não passam para os filhos. Se passassem, cada frame de scroll obrigava o browser
+   a recalcular o estilo de todos os descendentes (no hero, perto de 250 elementos). O ScrollFx
+   escreve o valor em cada elemento que o usa: os que estão em `data-scroll-on`. */
+@property --in {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --p {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.5;
+}
+
+@property --out {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --page {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 @layer components {
+  /* Enquanto a animação decorre (classes fx-* postas pelo ScrollFx), o que se mexe ganha uma
+     camada própria e é movido pela placa gráfica, em vez de ser redesenhado a cada frame. */
+  .title.fx-in,
+  .collab.fx-in,
+  .collab.fx-in .stat-pill,
+  .socials.fx-in > li,
+  .hero.fx-out :is(.sticker, .hero-greeting) {
+    will-change: transform, opacity;
+  }
+
+  /* A moldura fica de fora com o direto a passar: não se mexe e tem o player lá dentro. */
+  .title.fx-in .hand,
+  .gear-grid.fx-p .gear svg,
+  .hero.fx-out :is(.letter, .stage:not([data-playing="true"])) {
+    will-change: transform;
+  }
+
   /* Títulos: sobem e ganham cor; a palavra manuscrita roda para o sítio e o sublinhado desenha-se. */
   .title[data-scroll] {
     translate: 0 calc((1 - var(--in, 1)) * 40px);
@@ -2238,7 +2333,9 @@
     rotate: calc(var(--out, 0) * var(--o, 0) * 7deg);
   }
 
-  .hero .stage {
+  /* Com o direto a passar a moldura fica quieta: um vídeo a rodar e a encolher cansa, pesa no
+     scroll (o vídeo é redesenhado torto a cada frame) e a Twitch dá o player como escondido. */
+  .hero .stage:not([data-playing="true"]) {
     scale: calc(1 - var(--out, 0) * 0.16);
     rotate: calc(var(--out, 0) * -5deg);
     translate: 0 calc(var(--out, 0) * 8vh);
@@ -2264,6 +2361,10 @@
 
     .clip-cell:nth-child(even) {
       translate: 0 calc((0.5 - var(--p, 0.5)) * -44px);
+    }
+
+    .clips.fx-p .clip-cell {
+      will-change: transform;
     }
   }
 
@@ -2298,8 +2399,10 @@
     --dir: 1;
   }
 
-  /* Rodapé: o nome pinta-se de cor à medida que se chega ao fim da página. */
+  /* Rodapé: o nome pinta-se de cor à medida que se chega ao fim da página.
+     Sem as animações de scroll fica por pintar (--in a 0) e enche-se no hover. */
   .footer-name[data-scroll] {
+    --in: 0;
     background-size:
       calc(var(--in, 0) * 100%) 100%,
       100% 100%;
@@ -2317,41 +2420,51 @@
   .dots[data-scroll] {
     inset: 0 0 -160px;
     translate: 0 calc(var(--page, 0) * -160px);
+    will-change: transform;
   }
 
   /* A raposa que corre ao lado da página e marca onde vais. */
   .scroll-fox {
+    --track: 34vh;
     position: fixed;
     right: 22px;
     top: 50%;
     z-index: 40;
     display: none;
     width: 3px;
-    height: 34vh;
+    height: var(--track);
     border-radius: 3px;
     background: var(--line);
     translate: 0 -50%;
     pointer-events: none;
   }
 
+  /* A barra e a raposa andam com scale e translate (e não height e top), que não mexem
+     no layout: mudam a cada frame de scroll. */
   .scroll-fox::before {
+    /* Um pseudo-elemento não pode estar em `data-scroll-on`: vai buscar o valor ao pai. */
+    --page: inherit;
     content: "";
     position: absolute;
-    inset: 0 0 auto;
-    height: calc(var(--page, 0) * 100%);
+    inset: 0;
     border-radius: 3px;
     background: var(--pink);
+    transform-origin: 50% 0;
+    scale: 1 var(--page, 0);
+    will-change: transform;
   }
 
   .scroll-fox-runner {
     position: absolute;
     left: 50%;
-    top: calc(var(--page, 0) * 100%);
+    top: 0;
     width: 38px;
     height: 38px;
     margin: -19px 0 0 -19px;
+    translate: 0 calc(var(--page, 0) * var(--track));
     /* Abana a cabeça enquanto corre. */
     rotate: calc(sin(var(--page, 0) * 60) * 14deg);
+    will-change: transform;
   }
 
   @media (min-width: 1280px) {

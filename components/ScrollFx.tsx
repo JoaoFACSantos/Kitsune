@@ -14,9 +14,15 @@ import { MEDIA } from '@/lib/motion';
  * - "out": `--out` sobe de 0 a 1 enquanto o elemento sai por cima;
  * - "page": `--page` é o progresso da página inteira.
  *
+ * As variáveis não passam para os filhos (ver os @property no CSS). Se forem os descendentes
+ * a usar o valor, `data-scroll-on` diz quais, com um seletor: recebem-no também.
+ *
  * O CSS usa as propriedades `translate`, `rotate` e `scale`, que não chocam com o
  * `transform` do GSAP nem com as animações de entrada. Sem JS ou com movimento
  * reduzido, as variáveis ficam no valor final e tudo aparece no sítio.
+ *
+ * Enquanto a animação decorre, o elemento tem também a classe `fx-in`, `fx-p` ou `fx-out`:
+ * o CSS usa-a para dar camada própria (will-change) só ao que se está a mexer.
  */
 export function ScrollFx() {
   const root = useRef<HTMLDivElement>(null);
@@ -27,8 +33,13 @@ export function ScrollFx() {
     document.documentElement.classList.add('scroll-fx');
     const easeIn = gsap.parseEase('power3.out');
     const bind = (el: HTMLElement, name: string, vars: ScrollTrigger.Vars, ease?: (n: number) => number) => {
-      const set = (self: ScrollTrigger) => el.style.setProperty(name, (ease ? ease(self.progress) : self.progress).toFixed(4));
-      ScrollTrigger.create({ ...vars, onUpdate: set, onRefresh: set });
+      const on = el.dataset.scrollOn;
+      const targets = on ? [el, ...el.querySelectorAll<HTMLElement | SVGElement>(on)] : [el];
+      const set = (self: ScrollTrigger) => {
+        const value = (ease ? ease(self.progress) : self.progress).toFixed(4);
+        for (const target of targets) target.style.setProperty(name, value);
+      };
+      ScrollTrigger.create({ ...vars, toggleClass: { targets: el, className: `fx${name.slice(1)}` }, onUpdate: set, onRefresh: set });
     };
 
     gsap.utils.toArray<HTMLElement>('[data-scroll]').forEach((el) => {
@@ -44,7 +55,7 @@ export function ScrollFx() {
 
   // A raposa que corre ao lado da página e marca onde vais (só em ecrãs largos).
   return (
-    <div ref={root} aria-hidden className="scroll-fox" data-scroll="page">
+    <div ref={root} aria-hidden className="scroll-fox" data-scroll="page" data-scroll-on=".scroll-fox-runner">
       <span className="scroll-fox-runner">
         <StickerArt kind="fox" className="h-full w-full" />
       </span>

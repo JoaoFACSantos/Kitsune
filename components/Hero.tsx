@@ -22,6 +22,8 @@ type HeroProps = {
   photoWatching?: string;
   photoAlt: string;
   photoSize: { width: number; height: number };
+  photoFit?: 'popout' | 'cover';
+  photoFocus?: string;
   photoScale: number;
   photoOffsetY: number;
   note: string;
@@ -75,6 +77,8 @@ export function Hero({
   photoWatching,
   photoAlt,
   photoSize,
+  photoFit = 'popout',
+  photoFocus,
   photoScale,
   photoOffsetY,
   note,
@@ -131,7 +135,7 @@ export function Hero({
     );
   };
 
-  /** Clique na foto: rajada de corações, "boop" e mais um like. */
+  /** Clique na foto: rajada de corações e mais um like. */
   const love = (event: React.MouseEvent<HTMLButtonElement>) => {
     const stage = stageRef.current;
     if (!stage) return;
@@ -139,17 +143,9 @@ export function Hero({
     const fromKeyboard = event.detail === 0;
     const x = fromKeyboard ? r.width / 2 : event.clientX - r.left;
     const y = fromKeyboard ? r.height / 2 : event.clientY - r.top;
-    const reduce = window.matchMedia(MEDIA.reduce).matches;
-    const count = reduce ? 3 : 9;
+    const count = window.matchMedia(MEDIA.reduce).matches ? 3 : 9;
     for (let i = 0; i < count; i++) spawnHeart(x, y, 'burst', (i / count) * Math.PI * 2 + Math.random() * 0.4);
     setLikes((n) => n + 1);
-    if (!reduce) {
-      gsap.fromTo(
-        stage.querySelectorAll('.photo'),
-        { scaleX: 1.07, scaleY: 0.9 },
-        { scaleX: 1, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.4)', transformOrigin: '50% 100%', overwrite: 'auto' },
-      );
-    }
   };
 
   useGSAP(
@@ -160,7 +156,8 @@ export function Hero({
       const reduce = window.matchMedia(MEDIA.reduce).matches;
       const fine = window.matchMedia(MEDIA.fine).matches;
       const photos = stage.querySelectorAll<HTMLElement>('.photo');
-      gsap.set(photos, { xPercent: -50, x: 0 });
+      // O recorte centra-se pela sua própria largura; a imagem com fundo já enche a moldura.
+      gsap.set(photos, { xPercent: photoFit === 'cover' ? 0 : -50, x: 0 });
 
       // Stickers arrastáveis, com inércia e um abanão conforme a velocidade.
       // Os plugins carregam quando o browser está livre (ou ao primeiro toque num sticker).
@@ -271,6 +268,7 @@ export function Hero({
       aria-labelledby="hero-name"
       className="hero"
       data-scroll="out"
+      data-scroll-on=".hero-greeting, .letter, .stage, .sticker"
       style={{ '--chars': letters.length } as React.CSSProperties}
     >
       <p className="hero-greeting hand intro-rise" style={{ '--delay': '0.25s' } as React.CSSProperties}>
@@ -312,7 +310,7 @@ export function Hero({
                 </span>
               </div>
               {/* A foto numa só camada, recortada à moldura e livre por cima: a cabeça "sai" do ecrã. */}
-              <div className="popout">
+              <div className="popout" data-fit={photoFit}>
                 <Image
                   src={photoSrc}
                   alt={photoAlt}
@@ -324,7 +322,7 @@ export function Hero({
                   unoptimized={photo.split('#')[0].endsWith('.svg')}
                   sizes="(min-width: 768px) 520px, 95vw"
                   className="photo"
-                  style={{ '--photo-scale': photoScale, '--photo-y': photoOffsetY } as React.CSSProperties}
+                  style={{ '--photo-scale': photoScale, '--photo-y': photoOffsetY, '--photo-focus': photoFocus } as React.CSSProperties}
                   draggable={false}
                 />
               </div>

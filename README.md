@@ -2,7 +2,7 @@
 
 Site de uma página para uma streamer, com tema girly e muita interação:
 
-- a foto sai da moldura de stream;
+- a foto numa moldura de stream, que inclina com o rato;
 - stickers que se arrastam;
 - corações ao clicar;
 - cursor próprio.
@@ -34,13 +34,15 @@ As cores do tema são CSS variables, por isso mudá-las muda o site todo.
 
 ### A foto do hero
 
-A ilustração do hero (a Kitsune abraçada a uma raposa) está em `public/media/kitsune.svg`. Para usar uma foto em vez dela:
+A imagem do hero é a arte da Kitsune com a raposa, em `public/media/kitsune.jpg`. Há duas maneiras de a mostrar, escolhidas em `hero.photoFit`:
 
-1. Recorta a foto até à cintura, com fundo transparente, e exporta em PNG. Podes usar, por exemplo, o remove.bg.
-2. Guarda-a em `public/media/` e muda `hero.photo` e `hero.photoSize` (largura e altura reais em px).
-3. Ajusta `hero.photoScale`, que é o tamanho relativo à moldura. Valores maiores fazem a cabeça sair mais por cima. Se precisares, mexe também em `hero.photoOffsetY`.
+- `'cover'` (a que está em uso): uma imagem com fundo, que enche a moldura. Guarda-a em `public/media/`, muda `hero.photo` e `hero.photoSize` (largura e altura reais em px) e, se o corte esconder algo importante, ajusta `hero.photoFocus` (por exemplo `'25% 50%'`).
+- `'popout'`: um recorte sem fundo, com a cabeça a sair por cima da moldura.
+  1. Recorta a foto até à cintura, com fundo transparente, e exporta em PNG. Podes usar, por exemplo, o remove.bg.
+  2. Guarda-a em `public/media/` e muda `hero.photo` e `hero.photoSize`.
+  3. Ajusta `hero.photoScale`, que é o tamanho relativo à moldura. Valores maiores fazem a cabeça sair mais por cima. Se precisares, mexe também em `hero.photoOffsetY`.
 
-A mesma imagem é usada como avatar no nav.
+`public/media/kitsune.svg` é um desenho para o modo `'popout'`. Com `hero.photoWatching: '/media/kitsune.svg#watch'`, as duas viram-se para a televisão quando o direto começa a passar.
 
 ### Marcas
 
@@ -50,7 +52,7 @@ Os logos em `public/brands/` são de marcas fictícias de exemplo. Troca-os por 
 
 - **Estado do direto**: vem da Twitch Helix quando `TWITCH_CLIENT_ID` e `TWITCH_CLIENT_SECRET` estão definidos. Usa um app token no servidor, com cache de 60 s. O nav e a moldura atualizam-se sozinhos de 60 em 60 s.
 - **Direto na televisão**: em direto, aparece um botão de play na moldura do hero. Ao clicar, a moldura alarga, a ilustração fica à esquerda e o direto passa numa televisão à direita (o player da Twitch só carrega depois do clique). Em ecrãs abaixo de 1024 px, o play abre a Twitch.
-- **Clips**: com as chaves da Twitch, a secção mostra os 4 clips mais vistos do canal (cache de 1 h) e cada um abre num modal. Sem chaves, usa os clips de `clips.items`, que abrem o link do clip.
+- **Clips**: com as chaves da Twitch, a secção mostra os 4 clips mais vistos dos últimos 30 dias (`clips.recentDays`; cache de 1 h) e cada um abre num modal. Se o canal tiver menos de 4 clips nesse período, passa para o último ano e depois para desde sempre. Sem chaves, usa os clips de `clips.items`, que abrem o link do clip.
 - **Seguidores**: o número aparece em cada cartão das redes. Na Twitch vem da Helix (com as chaves acima) e no YouTube da Data API (`YOUTUBE_API_KEY` e `YOUTUBE_CHANNEL_ID`), com cache de 1 h. Instagram, TikTok e X não dão o número sem login: escreve-o em `followers`, em `socials`.
 - **Discord**: com `discord.invite` preenchido, o número de membros vem da API pública de convites.
 - **Outras plataformas**: a fonte de dados está isolada em [`lib/data`](lib/data). Para YouTube ou Kick, cria um adaptador com a mesma interface.

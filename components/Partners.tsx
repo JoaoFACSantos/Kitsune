@@ -72,7 +72,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
           ))}
         </div>
 
-        <div ref={cardRef} className="collab mt-12 md:mt-16" data-scroll="in">
+        <div ref={cardRef} className="collab mt-12 md:mt-16" data-scroll="in" data-scroll-on=".stat-pill">
           <span aria-hidden className="collab-blob" />
           <div className="relative grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-7">

@@ -8,6 +8,7 @@ import type { LiveStatus, StreamSource } from './types';
 
 const HELIX = 'https://api.twitch.tv/helix';
 const MINUTE = 60_000;
+const DAY = 24 * 60 * MINUTE;
 const HOUR_S = 3_600;
 
 type Token = { value: string; expires: number };
@@ -85,6 +86,21 @@ async function broadcasterId() {
   return users.data[0]?.id ?? null;
 }
 
+/** Os clips mais vistos do canal nos últimos `days` dias (null: desde sempre). */
+async function topClips(id: string, days: number | null) {
+  const query = new URLSearchParams({ broadcaster_id: id, first: '100' });
+  if (days !== null) {
+    // O período acaba à meia-noite (UTC) de hoje e não "agora": o URL fica igual o dia todo
+    // e a cache de 1 h funciona. Sem `ended_at`, a Twitch só olha para uma semana.
+    const end = Math.ceil(Date.now() / DAY) * DAY;
+    query.set('started_at', new Date(end - days * DAY).toISOString());
+    query.set('ended_at', new Date(end).toISOString());
+  }
+  const { data } = await helix<{ data: HelixClip[] }>(`/clips?${query}`, HOUR_S);
+  // Pedem-se 100 e ordena-se aqui, para não depender da ordem em que a Twitch os devolve.
+  return data.sort((a, b) => b.view_count - a.view_count);
+}
+
 export const twitchSource: StreamSource = {
   async getLiveStatus(): Promise<LiveStatus> {
     const { data } = await helix<{ data: HelixStream[] }>(`/streams?user_login=${encodeURIComponent(site.handle)}`, 60);
@@ -102,9 +118,14 @@ export const twitchSource: StreamSource = {
   async getClips(limit): Promise<Clip[]> {
     const id = await broadcasterId();
     if (!id) return [];
-    // Sem datas, a Twitch devolve os clips mais vistos de sempre.
-    const { data } = await helix<{ data: HelixClip[] }>(`/clips?broadcaster_id=${id}&first=${limit}`, HOUR_S);
-    return data.map((clip) => ({
+    // Os mais vistos dos últimos dias. Se o canal tiver poucos clips nesse período,
+    // alarga-se para o último ano e, por fim, para desde sempre.
+    let clips: HelixClip[] = [];
+    for (const days of [site.clips.recentDays, 365, null]) {
+      clips = await topClips(id, days);
+      if (clips.length >= limit) break;
+    }
+    return clips.slice(0, limit).map((clip) => ({
       id: clip.id,
       title: clip.title,
       url: clip.url,

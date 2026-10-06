@@ -30,8 +30,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: site.theme.bg,
-  colorScheme: 'light',
+  themeColor: site.theme.darkBg,
+  colorScheme: 'dark',
 };
 
 // Cores do tema vindas da configuração (o CSS escolhe as do tema claro ou escuro).
@@ -49,12 +49,13 @@ const theme = {
   ...cursorVars(site.theme),
 } as React.CSSProperties;
 
-// Antes do primeiro paint: aplica o tema escuro se foi a última escolha (sem piscar).
-const themeScript = `try{if(localStorage.getItem('${THEME_KEY}')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}`;
+// O tema escuro é o de origem: o <html> já vem com data-theme="dark".
+// Antes do primeiro paint: passa para o claro se foi a última escolha no switch (sem piscar).
+const themeScript = `try{if(localStorage.getItem('${THEME_KEY}')==='light')delete document.documentElement.dataset.theme}catch(e){}`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-PT" className={`${display.variable} ${sans.variable} ${hand.variable}`} style={theme} suppressHydrationWarning>
+    <html lang="pt-PT" data-theme="dark" className={`${display.variable} ${sans.variable} ${hand.variable}`} style={theme} suppressHydrationWarning>
       <head>
         <InlineScript html={themeScript} />
       </head>
