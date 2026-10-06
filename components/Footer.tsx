@@ -2,7 +2,7 @@ import { BackToTop } from './BackToTop';
 
 const YEAR = new Date().getFullYear();
 // Quem fez o site.
-const DEVELOPER = { name: 'FAC', url: 'https://github.com/JoaoFACSantos' };
+const DEVELOPER = { name: 'FAC', url: 'https://joaofacsantos.github.io/fac-dev/' };
 
 /** Rodapé: nome enorme em contorno que se enche de cor no hover. */
 export function Footer({ name, email }: { name: string; email: string }) {

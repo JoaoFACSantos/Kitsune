@@ -70,6 +70,10 @@ export function LiveTv({ name, src, onClose }: { name: string; src: string; onCl
           <span className="tv-knob" />
           <span className="tv-speaker" />
         </div>
+        {/* A "marca" da televisão: uma chapa com o nome, pendurada na borda de baixo. */}
+        <span aria-hidden className="tv-brand">
+          {name}
+        </span>
       </div>
       <span aria-hidden className="tv-leg tv-leg-back" />
       <span aria-hidden className="tv-leg tv-leg-l" />

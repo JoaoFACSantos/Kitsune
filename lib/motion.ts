@@ -30,5 +30,15 @@ export const MEDIA = {
 
 export const LENIS_LERP = 0.13;
 
+/**
+ * As entradas (cartões que aparecem, números que contam) disparam com o topo do elemento a 92%
+ * do ecrã. A página chega do servidor com tudo no sítio; se o JS arranca com a pessoa já a meio
+ * da página, só se prepara a entrada do que ainda está para baixo dessa linha. Esconder e voltar
+ * a animar o que ela já está a ver dava um salto.
+ */
+export function isBelowFold(el: Element) {
+  return el.getBoundingClientRect().top > window.innerHeight * 0.92;
+}
+
 /** Chave do localStorage com o tema escolhido no switch ("dark" ou "light"). */
 export const THEME_KEY = 'tema';

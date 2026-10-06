@@ -24,6 +24,7 @@ type HeroProps = {
   photoSize: { width: number; height: number };
   photoFit?: 'popout' | 'cover';
   photoFocus?: string;
+  photoBackdrop?: string;
   photoScale: number;
   photoOffsetY: number;
   note: string;
@@ -79,6 +80,7 @@ export function Hero({
   photoSize,
   photoFit = 'popout',
   photoFocus,
+  photoBackdrop,
   photoScale,
   photoOffsetY,
   note,
@@ -308,6 +310,10 @@ export function Hero({
                     <HeartShape key={i} className="neon-heart" style={{ '--x': h.x, '--y': h.y, '--s': h.size, '--r': `${h.r}deg`, '--d': `${i * -0.8}s` } as React.CSSProperties} />
                   ))}
                 </span>
+                {/* Só carrega em direto: é o fundo da moldura larga, por trás da televisão. */}
+                {live && photoBackdrop ? (
+                  <span aria-hidden className="window-backdrop" style={{ backgroundImage: `url(${photoBackdrop})` }} />
+                ) : null}
               </div>
               {/* A foto numa só camada, recortada à moldura e livre por cima: a cabeça "sai" do ecrã. */}
               <div className="popout" data-fit={photoFit}>

@@ -10,7 +10,15 @@ import { SmoothScroll } from '@/components/providers/SmoothScroll';
 import { cursorVars } from '@/lib/cursor';
 import { THEME_KEY } from '@/lib/motion';
 
-const display = Unbounded({ subsets: ['latin'], variable: '--font-unbounded', display: 'swap' });
+// A reserva automática da Unbounded fica 5 a 8% mais estreita nos títulos: partiam em menos linhas
+// e a página saltava quando a fonte chegava. Usa-se uma reserva própria, afinada no globals.css.
+const display = Unbounded({
+  subsets: ['latin'],
+  variable: '--font-unbounded',
+  display: 'swap',
+  adjustFontFallback: false,
+  fallback: ['Unbounded Reserva', 'Unbounded Reserva Estreita'],
+});
 const sans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta', display: 'swap' });
 const hand = Caveat({ subsets: ['latin'], weight: '700', variable: '--font-caveat', display: 'swap' });
 

@@ -37,6 +37,7 @@ As cores do tema são CSS variables, por isso mudá-las muda o site todo.
 A imagem do hero é a arte da Kitsune com a raposa, em `public/media/kitsune.jpg`. Há duas maneiras de a mostrar, escolhidas em `hero.photoFit`:
 
 - `'cover'` (a que está em uso): uma imagem com fundo, que enche a moldura. Guarda-a em `public/media/`, muda `hero.photo` e `hero.photoSize` (largura e altura reais em px) e, se o corte esconder algo importante, ajusta `hero.photoFocus` (por exemplo `'25% 50%'`).
+  Com a televisão ligada, a moldura alarga e o fundo por trás dela é `hero.photoBackdrop`: a mesma imagem a continuar para a direita (a imagem, o seu espelho e a imagem outra vez, lado a lado), muito desfocada. Se trocares a imagem, gera esse ficheiro outra vez; sem ele, fica o fundo normal da moldura.
 - `'popout'`: um recorte sem fundo, com a cabeça a sair por cima da moldura.
   1. Recorta a foto até à cintura, com fundo transparente, e exporta em PNG. Podes usar, por exemplo, o remove.bg.
   2. Guarda-a em `public/media/` e muda `hero.photo` e `hero.photoSize`.
@@ -46,7 +47,14 @@ A imagem do hero é a arte da Kitsune com a raposa, em `public/media/kitsune.jpg
 
 ### Marcas
 
-Os logos em `public/brands/` são de marcas fictícias de exemplo. Troca-os por SVG ou PNG e atualiza `partners.brands`.
+As parcerias estão em `partners.brands`. Cada uma é um cartão na fila que passa (pára com o rato em cima e dá para arrastar); ao clicar, o cartão cresce e mostra a marca, as vantagens, o código e um botão para o site.
+
+Para acrescentar ou mudar uma marca:
+
+1. Guarda o banner da marca em `public/partners/` e aponta `image` e `imageSize` para ele. Um banner ao alto enche a coluna do cartão aberto; um deitado (um logo, por exemplo) fica inteiro sobre a cor de `color`.
+2. A miniatura do cartão da fila é o mesmo banner cortado em quadrado: `focus` escolhe a parte que fica à vista. Se não ficar bem, usa uma imagem própria em `thumb`.
+3. Preenche `perk` (a vantagem principal, no cartão da fila), `about`, `perks` e `note` (idade mínima, riscos, países onde não funciona). Escreve só vantagens que a marca confirma.
+4. Em `url` põe o link de afiliada. Se ele já leva o código, marca `codeInLink: true`; senão, o código fica copiado quando a pessoa abre o site.
 
 ## Dados
 

@@ -95,6 +95,28 @@
   --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
 }
 
+/* Reserva da fonte dos títulos enquanto a Unbounded não chega: uma fonte do sistema esticada
+   para ocupar a mesma largura (medido com os títulos do site, a peso 800), para o texto partir
+   nas mesmas linhas e nada saltar quando a fonte da web entra. */
+@font-face {
+  font-family: "Unbounded Reserva";
+  src: local("Arial Black"), local("Arial-Black");
+  font-weight: 100 900;
+  /* 118% iguala a largura média; com 121% o título das parcerias parte nas mesmas três linhas. */
+  size-adjust: 121%;
+}
+
+/* Onde não há Arial Black (Android, Linux): um negrito normal, mais estreito, esticado mais.
+   O nome não pode ter algarismos: o next/font escreve-o sem aspas e a lista de fontes ficava inválida. */
+@font-face {
+  font-family: "Unbounded Reserva Estreita";
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Neue Bold"), local("HelveticaNeue-Bold"), local("Roboto Bold"),
+    local("Roboto-Bold"), local("Liberation Sans Bold");
+  font-weight: 100 900;
+  size-adjust: 136%;
+}
+
 @layer base {
   html {
     background: var(--bg);
@@ -211,7 +233,9 @@
   }
 
   .lead {
-    max-width: 46ch;
+    /* Em "em" e não em "ch": o "ch" depende da fonte, e enquanto a fonte da web não chega a
+       caixa ficava mais estreita, o texto partia noutra linha e a página saltava ao carregar. */
+    max-width: 28.75em;
     font-size: clamp(17px, 1.35vw, 20px);
     color: var(--ink-soft);
   }
@@ -493,6 +517,61 @@
     .nav-actions {
       gap: 6px;
     }
+  }
+
+  /* ---------- Seta para voltar ao topo ---------- */
+
+  /* Escondida até se descer um pouco (o data-show vem do BackToTop.tsx). */
+  .to-top {
+    position: fixed;
+    right: clamp(14px, 2vw, 26px);
+    bottom: calc(clamp(14px, 2vw, 26px) + env(safe-area-inset-bottom, 0px));
+    z-index: 45;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: var(--pink-deep);
+    color: #fff;
+    box-shadow: 0 14px 30px -12px color-mix(in oklab, var(--pink-deep) 75%, transparent);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 18px;
+    scale: 0.7;
+    transition:
+      opacity 0.3s,
+      translate 0.45s var(--spring),
+      scale 0.45s var(--spring),
+      visibility 0s 0.45s;
+  }
+
+  .to-top[data-show="true"] {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    scale: 1;
+    transition:
+      opacity 0.3s,
+      translate 0.45s var(--spring),
+      scale 0.45s var(--spring);
+  }
+
+  .to-top svg {
+    width: 22px;
+    height: 22px;
+    transition: translate var(--dur-hover) var(--spring);
+  }
+
+  @media (hover: hover) {
+    .to-top:hover svg {
+      translate: 0 -3px;
+    }
+  }
+
+  .to-top:active {
+    scale: 0.92;
   }
 
   /* ---------- Switch claro / escuro ---------- */
@@ -800,6 +879,18 @@
     background-position: 0 14px;
   }
 
+  /* Com a televisão ligada: a continuação desfocada da imagem enche a moldura por trás dela.
+     Fica alinhada (a olho) com a foto, que se esbate por cima dela. */
+  .window-backdrop {
+    position: absolute;
+    inset: -10px 0 -10px -33px;
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+
   /* Corações em néon no fundo da moldura. */
   .neon-heart {
     position: absolute;
@@ -1055,6 +1146,10 @@
       animation: scoot 0.9s var(--ease-out);
     }
 
+    .stage[data-playing="true"] .window-backdrop {
+      opacity: 1;
+    }
+
     /* A imagem com fundo fica à esquerda e esbate-se para a direita, por baixo da televisão. */
     .stage[data-playing="true"] .popout[data-fit="cover"] {
       animation: none;
@@ -1140,11 +1235,11 @@
     padding: 14px;
     border: 5px solid #fff;
     border-radius: 34px;
-    background: linear-gradient(160deg, var(--lilac), color-mix(in oklab, var(--lilac) 70%, var(--pink)));
+    background: linear-gradient(155deg, #c45bff 0%, var(--violet) 46%, var(--pink-deep) 100%);
     /* Profundidade sem rodar o player (a Twitch pausa players rodados): a caixa repete-se
        para trás e para a direita, em tons mais escuros, e fica a ver-se o lado e o topo. */
-    --side: color-mix(in oklab, var(--lilac) 60%, var(--dark));
-    --side-far: color-mix(in oklab, var(--lilac) 45%, var(--dark));
+    --side: color-mix(in oklab, var(--violet) 62%, var(--dark));
+    --side-far: color-mix(in oklab, var(--violet) 42%, var(--dark));
     box-shadow:
       3px -2px 0 var(--side),
       6px -4px 0 var(--side),
@@ -1257,7 +1352,32 @@
     margin-top: auto;
     margin-bottom: 6px;
     border-radius: 8px;
-    background: repeating-linear-gradient(0deg, rgb(42 15 47 / 0.45) 0 4px, transparent 4px 9px);
+    background: repeating-linear-gradient(0deg, rgb(42 15 47 / 0.6) 0 4px, transparent 4px 9px);
+  }
+
+  /* A marca: uma chapa com o nome, pendurada na borda de baixo e centrada com o ecrã.
+     Não toca no ecrã: nada pode ficar por cima do player. */
+  .tv-brand {
+    position: absolute;
+    left: calc(14px + var(--screen-w) / 2);
+    bottom: -17px;
+    display: grid;
+    place-items: center;
+    height: 24px;
+    /* O espaço entre letras sobra à direita da última: compensa-se à esquerda. */
+    padding: 0 13px 0 calc(13px + 0.2em);
+    border: 3px solid #fff;
+    border-radius: 999px;
+    background: var(--pink-deep);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    translate: -50% 0;
   }
 
   .tv-antenna {
@@ -1518,7 +1638,8 @@
   }
 
   .hero-tagline {
-    max-width: 32ch;
+    /* Em "em" e não em "ch": ver .lead. */
+    max-width: 20em;
     margin-top: 6px;
     color: var(--ink-soft);
   }
@@ -1994,50 +2115,270 @@
     padding: 16px 0 36px;
     overflow: hidden;
     mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    /* Num ecrã táctil, arrastar para os lados move a fila; para cima e para baixo, a página. */
+    touch-action: pan-y;
   }
 
   .brands-track {
     display: flex;
     flex: none;
-    gap: 14px;
-    padding-right: 14px;
-    animation: marquee 32s linear infinite;
+    gap: 16px;
+    padding-right: 16px;
+    /* Quem a move é o Partners.tsx (anda sozinha, pára com o rato e deixa-se arrastar).
+       Sem JS fica parada no início. */
+    will-change: transform;
   }
 
-  .brands-marquee:hover .brands-track {
-    animation-play-state: paused;
-  }
-
-  @keyframes marquee {
-    to {
-      transform: translateX(-100%);
-    }
-  }
-
-  .brand {
-    display: grid;
+  .brands-track > li {
     flex: none;
-    place-items: center;
-    width: 200px;
-    height: 88px;
-    border-radius: 999px;
+  }
+
+  /* A arrastar: o cursor de agarrar em todo o lado e os cartões sem o salto do hover. */
+  .brands-marquee[data-dragging="true"],
+  .brands-marquee[data-dragging="true"] * {
+    cursor: var(--cursor-grabbing, grabbing);
+  }
+
+  .brands-marquee[data-dragging="true"] .brand {
+    transform: none;
+  }
+
+  /* Cartão de uma marca: miniatura do banner, nome e a vantagem principal. */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: min(360px, 82vw);
+    padding: 12px 22px 12px 12px;
+    border-radius: 34px;
+    text-align: left;
     transition: transform var(--dur-hover) var(--spring);
   }
 
-  .brand img {
-    width: 130px;
-    height: 30px;
-    object-fit: contain;
-    opacity: 0.8;
+  .brand-thumb {
+    position: relative;
+    flex: none;
+    width: 92px;
+    height: 92px;
+    overflow: hidden;
+    border-radius: 24px;
   }
 
-  :root[data-theme="dark"] .brand img {
-    filter: invert(1) hue-rotate(180deg);
+  .brand-thumb img,
+  .partner-art img {
+    object-fit: cover;
+  }
+
+  .brand-text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .brand-name,
+  .brand-category {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-category {
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .brand-perk {
+    margin-top: 5px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    font-size: 12.5px;
+    font-weight: 800;
+    white-space: nowrap;
   }
 
   @media (hover: hover) {
     .brand:hover {
-      transform: rotate(-4deg) scale(1.06);
+      transform: rotate(-2deg) scale(1.04);
+    }
+  }
+
+  /* Cartão aberto de uma marca: cresce a partir do cartão da fila (a animação está em Partners.tsx). */
+  .partner-dialog {
+    width: min(1020px, calc(100vw - 2 * var(--margin)));
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    overflow: visible;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .partner-dialog::backdrop {
+    background: rgb(20 10 24 / 0.8);
+    animation: backdrop-in 0.3s ease-out;
+    transition: opacity 0.3s;
+  }
+
+  .partner-dialog[data-closing="true"]::backdrop {
+    opacity: 0;
+  }
+
+  @keyframes backdrop-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .partner-box {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    /* Altura fixa (até onde o ecrã deixar): a imagem enche-a e o texto faz scroll se não couber. */
+    grid-template-rows: minmax(0, 1fr);
+    height: min(690px, calc(100dvh - 40px));
+    overflow: hidden;
+    border: 5px solid #fff;
+    border-radius: 34px;
+    background: var(--bg);
+    box-shadow: var(--shadow);
+  }
+
+  .partner-art {
+    position: relative;
+    min-height: 0;
+  }
+
+  .partner-art[data-fit="contain"] img {
+    object-fit: contain;
+  }
+
+  .partner-body {
+    display: flex;
+    flex-direction: column;
+    /* "safe": se o texto não couber, começa em cima (e faz scroll) em vez de ficar cortado. */
+    justify-content: safe center;
+    gap: 20px;
+    padding: clamp(24px, 4vw, 52px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .partner-name {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4.6vw, 52px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .partner-about {
+    color: var(--ink-soft);
+    font-size: clamp(16px, 1.5vw, 18px);
+    line-height: 1.5;
+  }
+
+  .partner-perks {
+    display: grid;
+    gap: 10px;
+  }
+
+  .partner-perks li {
+    position: relative;
+    padding-left: 28px;
+    font-size: clamp(16px, 1.4vw, 17px);
+    font-weight: 600;
+  }
+
+  .partner-perks li::before {
+    content: "♡";
+    position: absolute;
+    left: 0;
+    color: var(--link);
+    font-weight: 800;
+  }
+
+  .partner-code {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px 10px 18px;
+    border: 2px dashed var(--link);
+    border-radius: 22px;
+    background: var(--chip-bg);
+  }
+
+  .partner-code strong {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 2.6vw, 30px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+  }
+
+  .partner-note {
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  .partner-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 2px var(--ink);
+    transition: transform var(--dur-hover) var(--spring);
+  }
+
+  .partner-close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  @media (hover: hover) {
+    .partner-close:hover {
+      transform: rotate(90deg);
+    }
+  }
+
+  /* Ecrãs estreitos: a imagem passa para cima, em faixa, e a caixa toda faz scroll. */
+  @media (max-width: 759px) {
+    .partner-box {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      height: auto;
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+    }
+
+    .partner-art {
+      height: 220px;
+    }
+
+    .partner-body {
+      justify-content: flex-start;
+      overflow: visible;
     }
   }
 
@@ -2557,11 +2898,20 @@
     scroll-behavior: auto !important;
   }
 
+  /* A fila das marcas fica parada: os cartões arrumam-se em linhas e a cópia some. */
   .brands-track {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-right: 0;
     animation: none;
   }
 
+  .brands-track[aria-hidden="true"] {
+    display: none;
+  }
+
   .brands-marquee {
-    flex-wrap: wrap;
+    mask-image: none;
   }
 }

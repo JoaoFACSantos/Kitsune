@@ -9,6 +9,7 @@ import { Ribbon } from '@/components/Ribbon';
 import { ScrollFx } from '@/components/ScrollFx';
 import { Setup } from '@/components/Setup';
 import { Socials } from '@/components/Socials';
+import { ToTopArrow } from '@/components/ToTopArrow';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
 
 // ISR: a página é estática e regenera no máximo a cada 60 s (estado do direto).
@@ -59,6 +60,7 @@ export default async function Home() {
           photoSize={site.hero.photoSize}
           photoFit={site.hero.photoFit}
           photoFocus={site.hero.photoFocus}
+          photoBackdrop={site.hero.photoBackdrop}
           photoScale={site.hero.photoScale}
           photoOffsetY={site.hero.photoOffsetY}
           note={site.hero.note}
@@ -91,6 +93,7 @@ export default async function Home() {
         />
       </main>
       <Footer name={site.name} email={site.email} />
+      <ToTopArrow />
       <ScrollFx />
     </LiveProvider>
   );

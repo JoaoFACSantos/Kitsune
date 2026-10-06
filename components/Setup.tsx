@@ -5,7 +5,7 @@ import type { FunStat, Gear, Spec } from '@/content/types';
 import { GearGlyph } from '@/components/icons';
 import { Title } from '@/components/Title';
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
-import { MEDIA } from '@/lib/motion';
+import { isBelowFold, MEDIA } from '@/lib/motion';
 
 type SetupProps = { title: string; intro: string; gear: Gear[]; pc: Spec[]; funStats: FunStat[] };
 
@@ -48,7 +48,8 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
     () => {
       if (window.matchMedia(MEDIA.reduce).matches) return;
       // Anima as células (li), não os cartões: o hover dos cartões usa transform em CSS.
-      const cards = gsap.utils.toArray<HTMLElement>('.gear-cell', root.current);
+      // Só os que ainda estão para baixo do ecrã: os que já se veem ficam como estão.
+      const cards = gsap.utils.toArray<HTMLElement>('.gear-cell', root.current).filter(isBelowFold);
       gsap.set(cards, { opacity: 0, y: 40, scale: 0.85 });
       ScrollTrigger.batch(cards, {
         start: 'top 92%',

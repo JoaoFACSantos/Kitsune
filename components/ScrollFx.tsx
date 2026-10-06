@@ -35,9 +35,34 @@ export function ScrollFx() {
     const bind = (el: HTMLElement, name: string, vars: ScrollTrigger.Vars, ease?: (n: number) => number) => {
       const on = el.dataset.scrollOn;
       const targets = on ? [el, ...el.querySelectorAll<HTMLElement | SVGElement>(on)] : [el];
-      const set = (self: ScrollTrigger) => {
-        const value = (ease ? ease(self.progress) : self.progress).toFixed(4);
+      // O valor com que a página chega do servidor (o initial-value do @property, ou o do CSS).
+      const initial = Number.parseFloat(getComputedStyle(el).getPropertyValue(name)) || 0;
+      // Se o JS arranca com o elemento já no ecrã (quem desce antes de a página acabar de
+      // carregar), passar de repente do valor inicial para o do scroll via-se como um salto:
+      // - uma entrada apanhada a meio fica no fim até o elemento sair do ecrã ou acabar de entrar;
+      // - os outros efeitos vão do valor inicial ao do scroll em meio segundo.
+      let first = true;
+      let held = false;
+      let current = initial;
+      const mix = { k: 1 };
+      const render = () => {
+        const value = (held ? initial : initial + (current - initial) * mix.k).toFixed(4);
         for (const target of targets) target.style.setProperty(name, value);
+      };
+      const set = (self: ScrollTrigger) => {
+        current = ease ? ease(self.progress) : self.progress;
+        const partial = self.progress > 0 && self.progress < 1;
+        if (first) {
+          first = false;
+          if (name === '--in' && initial === 1) held = partial;
+          else if (Math.abs(current - initial) > 0.02 && ScrollTrigger.isInViewport(el)) {
+            mix.k = 0;
+            gsap.to(mix, { k: 1, duration: 0.5, ease: 'power2.out', onUpdate: render });
+          }
+        } else if (held && !partial) {
+          held = false;
+        }
+        render();
       };
       ScrollTrigger.create({ ...vars, toggleClass: { targets: el, className: `fx${name.slice(1)}` }, onUpdate: set, onRefresh: set });
     };

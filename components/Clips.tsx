@@ -9,7 +9,7 @@ import { Title } from '@/components/Title';
 import { clipEmbedUrl } from '@/lib/embed';
 import { formatCompact, formatDate, formatDuration } from '@/lib/format';
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
-import { MEDIA } from '@/lib/motion';
+import { isBelowFold, MEDIA } from '@/lib/motion';
 
 type ClipsProps = { title: string; intro: string; moreUrl: string; clips: Clip[] };
 
@@ -33,7 +33,8 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
     () => {
       if (window.matchMedia(MEDIA.reduce).matches) return;
       // Anima as células (li), não os cartões: o hover dos cartões usa transform em CSS.
-      const cells = gsap.utils.toArray<HTMLElement>('.clip-cell', root.current);
+      // Só os que ainda estão para baixo do ecrã: os que já se veem ficam como estão.
+      const cells = gsap.utils.toArray<HTMLElement>('.clip-cell', root.current).filter(isBelowFold);
       gsap.set(cells, { opacity: 0, y: 40, scale: 0.9 });
       ScrollTrigger.batch(cells, {
         start: 'top 92%',

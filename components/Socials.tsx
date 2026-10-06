@@ -6,7 +6,7 @@ import { SocialIcon } from '@/components/icons';
 import { Title } from '@/components/Title';
 import { formatCompact } from '@/lib/format';
 import { gsap, useGSAP } from '@/lib/gsap';
-import { MEDIA } from '@/lib/motion';
+import { isBelowFold, MEDIA } from '@/lib/motion';
 
 // Cores das plataformas, escurecidas onde era preciso para texto branco com contraste AA.
 const COLORS: Record<SocialId, string> = {
@@ -33,13 +33,15 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
     () => {
       if (window.matchMedia(MEDIA.reduce).matches) return;
       gsap.utils.toArray<HTMLElement>('[data-count]', root.current).forEach((el) => {
+        // Já à vista quando o JS arranca: fica com o número final, sem voltar a zero.
+        if (!isBelowFold(el)) return;
         const target = Number(el.dataset.count);
         const value = { n: 0 };
         el.textContent = formatCompact(0);
         gsap.to(value, {
           n: target,
-          duration: 1.6,
-          ease: 'power3.out',
+          duration: 3.2,
+          ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 92%', once: true },
           onUpdate: () => {
             el.textContent = formatCompact(value.n);

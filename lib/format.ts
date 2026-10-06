@@ -16,7 +16,8 @@ export function formatCompact(value: number) {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace('.', ',')}${NBSP}M`;
   if (value >= 10_000) return `${Math.round(value / 1_000)}${NBSP}mil`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1).replace('.', ',')}${NBSP}mil`;
-  return String(value);
+  // Arredondado: os contadores animados passam por valores como 531.66287.
+  return String(Math.round(value));
 }
 
 /** "o meu *setup*" → { before: "o meu ", em: "setup", after: "" }. */

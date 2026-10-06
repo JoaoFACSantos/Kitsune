@@ -36,7 +36,38 @@ export type Spec = { label: string; value: string };
 
 export type FunStat = { value: string; label: string };
 
-export type Brand = { name: string; logo: string; url?: string };
+/** Uma parceria: um cartão na fila e, ao clicar, o cartão aberto com os detalhes. */
+export type Brand = {
+  name: string;
+  /** O que a marca é, em duas ou três palavras. */
+  category: string;
+  /** A vantagem principal, em poucas palavras: aparece no cartão da fila. */
+  perk: string;
+  /** Uma ou duas frases sobre a marca, no cartão aberto. */
+  about: string;
+  /** Vantagens de usar o código ou o link. Só o que a marca confirma: nada de números inventados. */
+  perks: string[];
+  /** O código dela, se houver. */
+  code?: string;
+  /** true se o `url` já leva o código; senão, é para colar no checkout (e fica copiado ao abrir o site). */
+  codeInLink?: boolean;
+  /** Para onde vai o botão (de preferência o link de afiliada, já com o código). */
+  url: string;
+  /** Texto do botão: "Ir para a loja GTZ". */
+  cta: string;
+  /** Imagem da parceria (o banner da marca), em /public/partners. */
+  image: string;
+  /** Tamanho real da imagem (px). */
+  imageSize: { width: number; height: number };
+  /** Miniatura do cartão da fila, se a imagem não servir cortada em quadrado. */
+  thumb?: string;
+  /** O ponto da imagem que fica à vista quando é cortada (object-position). */
+  focus?: string;
+  /** Cor de fundo da imagem: vê-se atrás dela enquanto carrega ou quando não enche o espaço. */
+  color: string;
+  /** Aviso em letra pequena: idade mínima, risco, países onde não funciona. */
+  note?: string;
+};
 
 /** Um clip (melhor momento). Com as chaves da Twitch vêm da API; sem elas, de `clips.items`. */
 export type Clip = {
@@ -106,6 +137,11 @@ export type SiteConfig = {
     photoFit?: 'popout' | 'cover';
     /** Com 'cover': o ponto da imagem que fica à vista quando é cortada (object-position). */
     photoFocus?: string;
+    /**
+     * Com 'cover': a continuação da imagem para a direita, bem desfocada (a imagem, o seu espelho e
+     * a imagem outra vez, lado a lado). Com a televisão ligada, enche a moldura por trás dela.
+     */
+    photoBackdrop?: string;
     /** Com 'popout': largura relativa à moldura e deslocamento vertical. */
     photoScale: number;
     photoOffsetY: number;
