@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import { site } from '@/content/site.config';
+import { getSite } from '@/lib/content/site';
 import { getLiveStatus } from '@/lib/data';
 import { formatInt } from '@/lib/format';
 
@@ -18,7 +19,8 @@ const fonts = Promise.all([
 ]);
 
 export default async function Image() {
-  const [[display, sans, hand], live] = await Promise.all([fonts, getLiveStatus()]);
+  // O cumprimento e o "papel" podem ter sido mudados no painel.
+  const [[display, sans, hand], live, { hero, role }] = await Promise.all([fonts, getLiveStatus(), getSite()]);
   const { theme } = site;
   const status = live.live ? `EM DIRETO · ${formatInt(live.viewers)} A VER` : 'OFFLINE';
 
@@ -70,7 +72,7 @@ export default async function Image() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontFamily: 'Caveat', fontSize: 64, color: theme.pinkDeep, transform: 'rotate(-4deg)' }}>{site.hero.greeting}</div>
+          <div style={{ fontFamily: 'Caveat', fontSize: 64, color: theme.pinkDeep, transform: 'rotate(-4deg)' }}>{hero.greeting}</div>
           <div
             style={{
               fontFamily: 'Unbounded',
@@ -86,7 +88,7 @@ export default async function Image() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 30 }}>
-          <span>{site.role}</span>
+          <span>{role}</span>
           <span style={{ color: theme.pinkDeep }}>twitch.tv/{site.handle}</span>
         </div>
       </div>

@@ -32,6 +32,8 @@ Todo o conteúdo está em [`content/site.config.ts`](content/site.config.ts):
 
 As cores do tema são CSS variables, por isso mudá-las muda o site todo.
 
+Os textos, as redes, o setup e as parcerias também se mudam sem tocar no código, no [painel](#painel-admin): o que lá for guardado passa à frente do que está neste ficheiro.
+
 ### A foto do hero
 
 A imagem do hero é a arte da Kitsune com a raposa, em `public/media/kitsune.jpg`. Há duas maneiras de a mostrar, escolhidas em `hero.photoFit`:
@@ -56,6 +58,31 @@ Para acrescentar ou mudar uma marca:
 3. Preenche `perk` (a vantagem principal, no cartão da fila), `about`, `perks` e `note` (idade mínima, riscos, países onde não funciona). Escreve só vantagens que a marca confirma.
 4. Em `url` põe o link de afiliada. Se ele já leva o código, marca `codeInLink: true`; senão, o código fica copiado quando a pessoa abre o site.
 
+## Painel (/admin)
+
+Em `/admin` a streamer muda o conteúdo do site sozinha: parcerias (com envio de imagens), redes e seguidores, textos e setup. Ao guardar, o site fica atualizado nesse momento.
+
+Para o ligar, define `ADMIN_PASSWORD` no ambiente do servidor, com 12 caracteres ou mais, e reinicia-o. Sem password o painel fica fechado. A sessão dura duas semanas; mudar a password fecha todas as sessões.
+
+O que fica no painel e o que fica no código:
+
+- **No painel**: `role`, `tagline`, `email`, `hero.greeting`, `hero.note`, `hero.ribbon`, `socials`, `discord`, o texto de `clips`, `setup`, `partners` e `socialsSection` (o tipo `EditableContent`, em [`content/types.ts`](content/types.ts)).
+- **Só no código**: nome, handle, plataforma, cores e a imagem do hero.
+
+O painel guarda tudo numa pasta do servidor (`CONTENT_DIR`; por omissão `./data`, fora do git):
+
+| Ficheiro | O que é |
+| --- | --- |
+| `content.json` | O conteúdo em vigor. Sem ele, o site usa o de `site.config.ts` |
+| `backups/` | Cópia do `content.json` antes de cada gravação (ficam as últimas 30) |
+| `uploads/` | As imagens enviadas, já convertidas em WebP e sem metadados |
+
+Para voltar atrás numa alteração, copia um ficheiro de `backups/` para o lugar do `content.json`; o site mostra-o no máximo um minuto depois. Para levar o conteúdo para outro servidor, copia a pasta inteira.
+
+Como isto escreve no disco, **o servidor tem de ter um disco que não se apague**: um VPS ou um PC servem. Na Vercel e noutros alojamentos sem disco o painel abre mas não consegue guardar; para esses é preciso trocar [`lib/content/store.ts`](lib/content/store.ts) por uma versão que fale com uma base de dados (o resto do site só usa as funções que esse ficheiro exporta).
+
+Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](lib/content/validate.ts)): textos com tamanho máximo, só links `http(s)` e só imagens do próprio site. Um campo novo na configuração só aparece no painel depois de entrar em `EditableContent`, na validação e em [`components/admin/sections.tsx`](components/admin/sections.tsx).
+
 ## Dados
 
 - **Estado do direto**: vem da Twitch Helix quando `TWITCH_CLIENT_ID` e `TWITCH_CLIENT_SECRET` estão definidos. Usa um app token no servidor, com cache de 60 s. O nav e a moldura atualizam-se sozinhos de 60 em 60 s.
@@ -71,6 +98,8 @@ Para acrescentar ou mudar uma marca:
 | --- | --- |
 | `/` | A página (ISR, regenera no máximo a cada 60 s) |
 | `/api/live` | Estado do direto (cache de 60 s) |
+| `/admin` | O painel da streamer (com password) |
+| `/uploads/…` | As imagens enviadas no painel |
 | `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |
 | `/sitemap.xml`, `/robots.txt`, `/icon` | SEO e ícones |
 
@@ -82,4 +111,6 @@ Para acrescentar ou mudar uma marca:
 
 ## Deploy
 
-Na Vercel: importa o repositório e define as variáveis de ambiente do [`.env.example`](.env.example).
+Num servidor com disco (um VPS, por exemplo): `npm run build` e `npm run start`, com as variáveis de ambiente do [`.env.example`](.env.example) e um proxy com HTTPS à frente. A pasta do [painel](#painel-admin) (`./data` ou `CONTENT_DIR`) tem de sobreviver às atualizações do site.
+
+Na Vercel: importa o repositório e define as mesmas variáveis. O site funciona, mas o painel não consegue guardar (não há disco).

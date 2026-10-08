@@ -19,8 +19,8 @@ export type LiveStatus =
  */
 export interface StreamSource {
   getLiveStatus(): Promise<LiveStatus>;
-  /** Os clips mais vistos do canal, de preferência recentes (`clips.recentDays`). */
-  getClips(limit: number): Promise<Clip[]>;
+  /** Os clips mais vistos do canal, de preferência dos últimos `recentDays` dias (`clips.recentDays`). */
+  getClips(limit: number, recentDays: number): Promise<Clip[]>;
   /** Seguidores do canal, ou null se a fonte não souber. */
   getFollowers(): Promise<number | null>;
 }

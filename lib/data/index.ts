@@ -1,5 +1,6 @@
 import 'server-only';
 import { site } from '@/content/site.config';
+import { getSite } from '@/lib/content/site';
 import { mockSource } from './mock';
 import { twitchSource } from './twitch';
 import { getYoutubeSubscribers } from './youtube';
@@ -32,7 +33,7 @@ export async function getLiveStatus(): Promise<LiveStatus> {
 /** Os clips mais vistos. Se a API falhar ou o canal ainda não tiver clips, usa os da configuração. */
 export async function getClips(limit = 4): Promise<Clip[]> {
   try {
-    const clips = await source().getClips(limit);
+    const clips = await source().getClips(limit, (await getSite()).clips.recentDays);
     if (clips.length) return clips;
   } catch (error) {
     console.error('[dados] clips', error);
@@ -45,7 +46,7 @@ export async function getClips(limit = 4): Promise<Clip[]> {
  * Nas outras (e se uma API falhar) fica o valor `followers` da configuração.
  */
 export async function getFollowers(): Promise<Partial<Record<SocialId, number>>> {
-  const youtube = site.socials.find((s) => s.id === 'youtube');
+  const youtube = (await getSite()).socials.find((s) => s.id === 'youtube');
   const [main, subscribers] = await Promise.allSettled([
     source().getFollowers(),
     youtube ? getYoutubeSubscribers(youtube.handle) : Promise.resolve(null),
@@ -60,12 +61,13 @@ export async function getFollowers(): Promise<Partial<Record<SocialId, number>>>
 
 /** Membros do Discord pela API pública de convites (with_counts=true). */
 export async function getDiscord(): Promise<DiscordInfo> {
-  const url = site.socials.find((s) => s.id === 'discord')?.url ?? `https://discord.gg/${site.discord.invite}`;
-  const fallback: DiscordInfo = { members: site.discord.members, url };
-  if (!site.discord.invite) return fallback;
+  const { socials, discord } = await getSite();
+  const url = socials.find((s) => s.id === 'discord')?.url ?? `https://discord.gg/${discord.invite}`;
+  const fallback: DiscordInfo = { members: discord.members, url };
+  if (!discord.invite) return fallback;
   try {
     const res = await fetch(
-      `https://discord.com/api/v10/invites/${encodeURIComponent(site.discord.invite)}?with_counts=true`,
+      `https://discord.com/api/v10/invites/${encodeURIComponent(discord.invite)}?with_counts=true`,
       { next: { revalidate: 3_600 } },
     );
     if (!res.ok) return fallback;

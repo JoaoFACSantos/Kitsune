@@ -182,3 +182,13 @@ export type SiteConfig = {
   };
   socialsSection: { title: Title; note: string };
 };
+
+/**
+ * A parte do site que se muda no painel (/admin), sem mexer no código: textos, redes, setup e
+ * parcerias. O resto (nome, handle, cores, imagem do hero) vem só de `content/site.config.ts`.
+ * O que o painel guarda substitui estes campos; enquanto não houver nada guardado, valem os da configuração.
+ */
+export type EditableContent = Pick<SiteConfig, 'role' | 'tagline' | 'email' | 'socials' | 'discord' | 'setup' | 'partners' | 'socialsSection'> & {
+  hero: Pick<SiteConfig['hero'], 'greeting' | 'note' | 'ribbon'>;
+  clips: Pick<SiteConfig['clips'], 'title' | 'intro' | 'moreUrl' | 'recentDays'>;
+};

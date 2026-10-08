@@ -115,13 +115,13 @@ export const twitchSource: StreamSource = {
       thumbnail: stream.thumbnail_url.replace('{width}', '1280').replace('{height}', '720'),
     };
   },
-  async getClips(limit): Promise<Clip[]> {
+  async getClips(limit, recentDays): Promise<Clip[]> {
     const id = await broadcasterId();
     if (!id) return [];
     // Os mais vistos dos últimos dias. Se o canal tiver poucos clips nesse período,
     // alarga-se para o último ano e, por fim, para desde sempre.
     let clips: HelixClip[] = [];
-    for (const days of [site.clips.recentDays, 365, null]) {
+    for (const days of [recentDays, 365, null]) {
       clips = await topClips(id, days);
       if (clips.length >= limit) break;
     }

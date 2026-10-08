@@ -1,4 +1,3 @@
-import { site } from '@/content/site.config';
 import { Clips } from '@/components/Clips';
 import { Footer } from '@/components/Footer';
 import { Hero } from '@/components/Hero';
@@ -10,13 +9,16 @@ import { ScrollFx } from '@/components/ScrollFx';
 import { Setup } from '@/components/Setup';
 import { Socials } from '@/components/Socials';
 import { ToTopArrow } from '@/components/ToTopArrow';
+import { getSite } from '@/lib/content/site';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
 
 // ISR: a página é estática e regenera no máximo a cada 60 s (estado do direto).
+// Quando se guarda alguma coisa no painel (/admin), regenera logo.
 export const revalidate = 60;
 
 export default async function Home() {
-  const [live, discord, clips, followers] = await Promise.all([getLiveStatus(), getDiscord(), getClips(), getFollowers()]);
+  // A configuração com o que foi mudado no painel.
+  const [site, live, discord, clips, followers] = await Promise.all([getSite(), getLiveStatus(), getDiscord(), getClips(), getFollowers()]);
   // O número da API, quando existe, substitui o que está escrito na configuração.
   const socials = site.socials.map((s) => ({ ...s, followers: followers[s.id] ?? s.followers }));
   const watchUrl = site.socials.find((s) => s.id === site.platform)?.url ?? '#';

@@ -20,6 +20,9 @@
 # production
 /build
 
+# o que a streamer muda no painel (/admin): conteúdo, cópias de segurança e imagens
+/data/
+
 # misc
 .DS_Store
 *.pem

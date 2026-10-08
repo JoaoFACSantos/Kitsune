@@ -7,6 +7,7 @@ import { Analytics } from '@/components/Analytics';
 import { Cursor } from '@/components/Cursor';
 import { InlineScript } from '@/components/InlineScript';
 import { SmoothScroll } from '@/components/providers/SmoothScroll';
+import { getSite } from '@/lib/content/site';
 import { cursorVars } from '@/lib/cursor';
 import { THEME_KEY } from '@/lib/motion';
 
@@ -22,20 +23,22 @@ const display = Unbounded({
 const sans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta', display: 'swap' });
 const hand = Caveat({ subsets: ['latin'], weight: '700', variable: '--font-caveat', display: 'swap' });
 
-const title = `${site.name} · ${site.role}`;
-const xHandle = site.socials.find((s) => s.id === 'x')?.handle;
-
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: { default: title, template: `%s · ${site.name}` },
-  description: site.description,
-  applicationName: site.name,
-  alternates: { canonical: '/' },
-  openGraph: { type: 'profile', locale: 'pt_PT', url: '/', siteName: site.name, title, description: site.description },
-  twitter: { card: 'summary_large_image', title, description: site.description, creator: xHandle },
-  robots: { index: true, follow: true },
-  formatDetection: { telephone: false, email: false, address: false },
-};
+// O "papel" (role) e o @ do X podem ter sido mudados no painel: lê-se a configuração já com isso.
+export async function generateMetadata(): Promise<Metadata> {
+  const { role, socials } = await getSite();
+  const title = `${site.name} · ${role}`;
+  return {
+    metadataBase: new URL(site.url),
+    title: { default: title, template: `%s · ${site.name}` },
+    description: site.description,
+    applicationName: site.name,
+    alternates: { canonical: '/' },
+    openGraph: { type: 'profile', locale: 'pt_PT', url: '/', siteName: site.name, title, description: site.description },
+    twitter: { card: 'summary_large_image', title, description: site.description, creator: socials.find((s) => s.id === 'x')?.handle },
+    robots: { index: true, follow: true },
+    formatDetection: { telephone: false, email: false, address: false },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: site.theme.darkBg,

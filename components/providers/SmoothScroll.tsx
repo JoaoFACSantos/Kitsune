@@ -47,11 +47,13 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       lenis = null;
     };
 
+    // No painel (/admin) o scroll fica o do browser: há campos e listas com scroll próprio.
+    const wanted = () => !reduce.matches && !window.location.pathname.startsWith('/admin');
     gsap.ticker.lagSmoothing(0);
-    if (!reduce.matches) start();
+    if (wanted()) start();
     const onChange = () => {
       stop();
-      if (!reduce.matches) start();
+      if (wanted()) start();
     };
     reduce.addEventListener('change', onChange);
 

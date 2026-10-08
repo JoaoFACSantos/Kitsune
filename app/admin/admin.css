@@ -1,0 +1,1468 @@
+/* O painel (/admin). Usa as cores e as peças do site (botões, vidro, tipos de letra) e acrescenta
+   as suas: a barra das secções, o resumo do Início, os campos e as listas que abrem e fecham.
+   Tudo dentro de `.admin`. */
+
+.admin {
+  --danger: #c2183f;
+  /* Estados (aviso e certo): vão sempre com um ícone e uma frase, nunca só a cor. */
+  --warn: #fab219;
+  --good: #0ca30c;
+  --pad: clamp(12px, 2vw, 24px);
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: var(--pad);
+  /* O site não deixa selecionar texto; aqui é preciso, para copiar e colar. */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+:root[data-theme="dark"] .admin {
+  --danger: #ff8a9c;
+}
+
+.admin-narrow {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(100%, 460px);
+  min-height: 100svh;
+}
+
+/* O cursor em coração do site fica nos botões; nos campos de texto volta o do browser. */
+html .admin :is(input:not([type="checkbox"], [type="color"], [type="file"]), textarea) {
+  cursor: text;
+}
+
+html .admin button.image-pick,
+html .admin button.image-pick * {
+  cursor: crosshair;
+}
+
+.admin code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--chip-bg);
+  font-size: 0.92em;
+}
+
+.admin .btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.admin .btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Entrada ---------- */
+
+.admin-login {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(24px, 5vw, 40px);
+  border-radius: 34px;
+}
+
+.admin-login h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* A raposa do site, pousada no canto do cartão. */
+.admin-login-mark {
+  position: absolute;
+  top: -34px;
+  right: 22px;
+  width: 84px;
+  rotate: 8deg;
+}
+
+/* ---------- Estrutura: barra das secções à esquerda, conteúdo à direita ---------- */
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.admin-side {
+  position: sticky;
+  top: var(--pad);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  height: calc(100svh - 2 * var(--pad));
+  padding: 18px 14px 14px;
+  overflow-y: auto;
+  border-radius: 30px;
+  scrollbar-width: none;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 6px 0;
+}
+
+.admin-brand-mark {
+  flex: none;
+  width: 46px;
+  height: 46px;
+}
+
+.admin-brand-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.admin-brand-text .nav-name {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-brand-text small {
+  align-self: flex-start;
+  margin-top: -3px;
+  color: var(--link);
+  font-family: var(--font-hand);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  rotate: -4deg;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-tab {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 16px;
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fade),
+    color var(--dur-fade);
+}
+
+.admin-tab svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.admin-tab[aria-current="page"] {
+  background: var(--pink-deep);
+  color: #fff;
+  box-shadow: 0 12px 24px -14px color-mix(in oklab, var(--pink-deep) 85%, transparent);
+}
+
+@media (hover: hover) {
+  .admin-tab:not([aria-current]):hover {
+    background: var(--hover-soft);
+    color: var(--ink);
+  }
+}
+
+.admin-tab-flag {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #fff;
+  color: #c2183f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-side-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding: 14px 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.admin-side-foot .live-pill {
+  align-self: flex-start;
+}
+
+.admin-top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 700;
+  transition: color var(--dur-fade);
+}
+
+.admin-link svg {
+  width: 17px;
+  height: 17px;
+}
+
+@media (hover: hover) {
+  .admin-link:hover {
+    color: var(--ink);
+  }
+}
+
+.admin-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* O cabeçalho acompanha o scroll: o nome da secção e o botão de guardar ficam sempre à mão. */
+.admin-head {
+  position: sticky;
+  top: var(--pad);
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 14px 14px 14px 26px;
+  border: 1.5px solid var(--surface-border);
+  border-radius: 28px;
+  background: var(--nav-bg);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(18px) saturate(1.4);
+}
+
+/* Com pouco espaço é a frase que se parte em linhas; o guardar fica na mesma linha. */
+.admin-head-text {
+  min-width: 0;
+  flex: 1 1 220px;
+}
+
+.admin-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.admin-head-text p {
+  margin-top: 3px;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.4;
+}
+
+/* ---------- Guardar ---------- */
+
+.admin-save {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.admin-save p {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 26em;
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* A bolinha repete o que a frase já diz. */
+.admin-save-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--ink) 30%, transparent);
+}
+
+.admin-save[data-state="dirty"] p {
+  color: var(--ink);
+}
+
+.admin-save[data-state="dirty"] .admin-save-dot {
+  background: var(--warn);
+}
+
+.admin-save[data-state="saved"] .admin-save-dot {
+  background: var(--good);
+}
+
+.admin-save[data-state="saving"] .admin-save-dot {
+  background: var(--link);
+  animation: live-pulse 1s ease-in-out infinite;
+}
+
+.admin-save[data-status="error"] p {
+  color: var(--danger);
+}
+
+.admin-save[data-status="error"] .admin-save-dot {
+  background: var(--danger);
+}
+
+.admin-save-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.admin-issues {
+  padding: 16px 20px;
+  border: 1.5px solid var(--danger);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--danger) 10%, transparent);
+  font-size: 15px;
+}
+
+.admin-issues ul {
+  margin-top: 6px;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.admin-issues button {
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Ecrãs estreitos: a barra das secções passa para cima, deitada, e o guardar para o fundo do ecrã. */
+@media (max-width: 999px) {
+  .admin {
+    /* Espaço para a barra de guardar, presa ao fundo. */
+    padding-bottom: 150px;
+  }
+
+  .admin-shell {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .admin-side {
+    position: static;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 12px 14px;
+    height: auto;
+    padding: 12px 14px;
+    overflow: visible;
+    border-radius: 26px;
+  }
+
+  .admin-brand {
+    flex: 1;
+    padding: 0;
+  }
+
+  .admin-brand-mark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .admin-side-foot {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .admin-side-foot .live-pill,
+  .admin-side-foot .admin-link:first-child {
+    display: none;
+  }
+
+  /* As secções passam de lado, de borda a borda; a última a ver-se esbate, a dizer que há mais. */
+  .admin-tabs {
+    order: 3;
+    flex: none;
+    flex-direction: row;
+    gap: 6px;
+    width: calc(100% + 28px);
+    margin: 0 -14px;
+    padding: 0 36px 0 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  }
+
+  .admin-tab {
+    height: 42px;
+    gap: 9px;
+    padding: 0 14px;
+    border-radius: 999px;
+  }
+
+  .admin-tab svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .admin-head {
+    position: static;
+    padding: 6px 6px 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .admin-save {
+    position: fixed;
+    left: 50%;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    width: calc(100% - 2 * var(--pad));
+    margin: 0;
+    padding: 12px 12px 12px 18px;
+    border: 1.5px solid var(--surface-border);
+    border-radius: 26px;
+    background: var(--nav-bg);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(1.4);
+    translate: -50% 0;
+  }
+
+  /* Sem nada por guardar, a barra sai da frente do conteúdo. */
+  .admin-save[data-state="clean"] {
+    display: none;
+  }
+
+  .admin-save[data-dirty="true"] {
+    border-color: var(--link);
+  }
+
+  .admin-save p {
+    max-width: none;
+    flex: 1 1 200px;
+  }
+
+  .admin-save-actions {
+    margin-left: auto;
+  }
+}
+
+/* ---------- Início: o resumo ---------- */
+
+.dash {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Boas-vindas, com o rosa e o violeta do site ao fundo. */
+.dash-hello {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: 24px;
+  padding: clamp(20px, 3vw, 34px);
+  border-radius: 32px;
+  background:
+    linear-gradient(120deg, color-mix(in oklab, var(--pink-deep) 30%, transparent), color-mix(in oklab, var(--violet) 26%, transparent)),
+    var(--surface);
+}
+
+.dash-hello-text {
+  position: relative;
+  min-width: 0;
+  padding-right: 110px;
+}
+
+.dash-hand {
+  color: var(--link);
+  font-size: 32px;
+  line-height: 0.9;
+  rotate: -4deg;
+  transform-origin: left bottom;
+}
+
+.dash-name {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 4.4vw, 56px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.dash-lead {
+  max-width: 30em;
+  margin-top: 12px;
+  color: var(--ink-soft);
+}
+
+.dash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.dash-fox {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  width: 100px;
+  rotate: 8deg;
+}
+
+.dash-live {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1.5px solid var(--surface-border);
+  border-radius: 24px;
+  background: color-mix(in oklab, var(--bg) 55%, transparent);
+}
+
+.dash-live-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-weight: 800;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Os números. O primeiro é o que mais conta e é o único grande. */
+.dash-tiles {
+  display: grid;
+  grid-template-columns: 1.35fr repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.tile {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 22px;
+  border-radius: 26px;
+}
+
+.tile-label {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.tile-value {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.tile[data-hero] .tile-value {
+  font-size: clamp(48px, 4.6vw, 60px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.tile-sub {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 22px;
+}
+
+@media (max-width: 1180px) {
+  .dash-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .dash-hello {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dash-hello-text {
+    padding-right: 0;
+  }
+
+  .dash-fox {
+    top: -14px;
+    width: 76px;
+  }
+
+  .tile {
+    padding: 16px 18px;
+  }
+
+  .tile-value {
+    font-size: 26px;
+  }
+}
+
+/* Gráfico de barras, em tabela: nome, barra e número. Uma cor só (as redes não têm ordem
+   nem "bom e mau"); o número vai escrito na ponta de cada barra. */
+.bars {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bars th {
+  width: 1%;
+  padding: 8px 16px 8px 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.bar-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 10px;
+  border-radius: 9px;
+  background: var(--chip-bg);
+  color: var(--ink-soft);
+  vertical-align: middle;
+}
+
+.bar-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* A linha de base das barras: um traço fino, que não compete com elas. */
+.bars td {
+  position: relative;
+  padding: 8px 0;
+  border-left: 1px solid var(--line);
+}
+
+.bar-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Direita no lado da base, arredondada na ponta. Fica sempre lugar para o número ao lado. */
+.bar {
+  flex: none;
+  width: max(3px, calc(var(--v) * (100% - 78px)));
+  height: 16px;
+  border-radius: 0 4px 4px 0;
+  background: var(--pink-deep);
+  transition: filter var(--dur-fade);
+}
+
+.bar-value {
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* O número por extenso, ao passar o rato ou com o foco do teclado. */
+.bar-tip {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 12px;
+  z-index: 3;
+  /* Nunca mais largo do que a coluna das barras: em ecrãs estreitos o texto parte-se em linhas. */
+  width: max-content;
+  max-width: calc(100% - 12px);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--dark);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-fade),
+    visibility 0s var(--dur-fade);
+}
+
+:root[data-theme="dark"] .bar-tip {
+  background: #fff;
+  color: var(--dark);
+}
+
+.bar-tip strong {
+  font-size: 15px;
+}
+
+.bar-tip small {
+  display: block;
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+.bar-row:is(:hover, :focus-visible) .bar {
+  filter: brightness(1.25);
+}
+
+.bar-row:is(:hover, :focus-visible) .bar-tip {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-fade);
+}
+
+.bar-row:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Coisas a rever: um ícone e uma frase cada uma (a cor do ícone só reforça). */
+.reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reviews li,
+.reviews-clear {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--surface-strong) 45%, transparent);
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+
+.reviews p {
+  min-width: 0;
+  flex: 1;
+  align-self: center;
+}
+
+.reviews-clear {
+  align-items: center;
+}
+
+.review-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  background: var(--chip-bg);
+}
+
+.review-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reviews li[data-level="warn"] .review-icon {
+  background: color-mix(in oklab, var(--warn) 30%, transparent);
+}
+
+.reviews-clear .review-icon {
+  background: color-mix(in oklab, var(--good) 26%, transparent);
+}
+
+.review-action {
+  flex: none;
+  align-self: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--ink) 40%, transparent);
+  font-size: 13px;
+  font-weight: 800;
+  transition: background-color var(--dur-fade);
+}
+
+/* Listas de atalhos (parcerias e clips): uma linha clicável por item. */
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.rows li + li {
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin: 2px 0;
+  padding: 8px;
+  border-radius: 16px;
+  text-align: left;
+  transition: background-color var(--dur-fade);
+}
+
+.row-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.row-text strong,
+.row-text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-text strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.row-text small {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.admin .row-code {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.row-arrow {
+  flex: none;
+  color: var(--ink-soft);
+}
+
+.row-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (hover: hover) {
+  .row:hover,
+  .review-action:hover {
+    background: var(--hover-soft);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin .row-code {
+    display: none;
+  }
+}
+
+/* ---------- Blocos ---------- */
+
+.admin-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(18px, 2.4vw, 28px);
+  border-radius: 30px;
+}
+
+.admin-card > header h2 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.admin-card > header p {
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+}
+
+.admin-help {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
+  color: var(--ink-soft);
+  list-style: disc;
+}
+
+.admin .admin-danger {
+  color: var(--danger);
+  box-shadow: inset 0 0 0 2px var(--danger);
+}
+
+/* ---------- Campos ---------- */
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.field-count {
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.field-hint {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.field-row {
+  display: grid;
+  gap: 18px;
+}
+
+@media (min-width: 700px) {
+  .field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  transition:
+    border-color var(--dur-fade),
+    box-shadow var(--dur-fade);
+}
+
+textarea.input {
+  resize: vertical;
+}
+
+.input::placeholder {
+  color: color-mix(in oklab, var(--ink) 38%, transparent);
+}
+
+.input:focus-visible {
+  border-color: var(--focus);
+  border-radius: 14px;
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--focus) 30%, transparent);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+/* A lista de opções abre com as cores do sistema: no tema escuro precisa de fundo próprio. */
+select.input option {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  accent-color: var(--pink-deep);
+}
+
+.check span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.check strong {
+  font-size: 15px;
+}
+
+.check small {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.color {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color input {
+  width: 56px;
+  height: 40px;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: none;
+}
+
+.more {
+  padding-top: 14px;
+  border-top: 1.5px dashed var(--line);
+}
+
+.more summary {
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.more[open] summary {
+  margin-bottom: 16px;
+}
+
+.more > .field + .field {
+  margin-top: 18px;
+}
+
+/* ---------- Listas ---------- */
+
+.line {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.line-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add {
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1.5px dashed color-mix(in oklab, var(--ink) 35%, transparent);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  transition:
+    background-color var(--dur-fade),
+    border-color var(--dur-fade);
+}
+
+.add:disabled {
+  opacity: 0.4;
+}
+
+.tools {
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+
+.tool {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  transition:
+    background-color var(--dur-fade),
+    color var(--dur-fade);
+}
+
+.tool svg {
+  width: 17px;
+  height: 17px;
+}
+
+.tool:disabled {
+  opacity: 0.28;
+}
+
+@media (hover: hover) {
+  .add:not(:disabled):hover {
+    border-color: var(--link);
+    background: var(--hover-soft);
+  }
+
+  .tool:not(:disabled):hover {
+    background: var(--hover-soft);
+    color: var(--ink);
+  }
+
+  .tool[data-danger]:not(:disabled):hover {
+    color: var(--danger);
+  }
+}
+
+.repeater {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Um item que abre e fecha (marca, rede, periférico). */
+.rep-item {
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--surface-strong) 45%, transparent);
+  transition: border-color var(--dur-fade);
+}
+
+.rep-item[data-open="true"] {
+  border-color: color-mix(in oklab, var(--link) 65%, transparent);
+}
+
+.rep-item[data-invalid] {
+  border-color: var(--danger);
+}
+
+.rep-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 8px 8px;
+}
+
+.rep-toggle {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  padding: 4px;
+  border-radius: 16px;
+  text-align: left;
+}
+
+.rep-title {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.rep-title strong,
+.rep-title small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rep-title strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.rep-title small {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+
+.rep-flag {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chevron {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--ink-soft);
+  transition: rotate var(--dur-hover) var(--spring);
+}
+
+.rep-item[data-open="true"] .chevron {
+  rotate: 180deg;
+}
+
+.rep-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 2px 18px 0;
+  padding: 18px 0 20px;
+  border-top: 1.5px dashed var(--line);
+}
+
+/* Um item com os campos todos à vista, em linha (números, peças do PC). */
+.rep-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.rep-fields {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 12px;
+}
+
+.rep-row .tools {
+  padding-bottom: 5px;
+}
+
+@media (max-width: 599px) {
+  /* Ecrãs estreitos: os botões de ordem e de apagar passam para baixo do título, que assim cabe inteiro. */
+  .rep-head {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .rep-toggle {
+    flex-basis: 100%;
+  }
+
+  .rep-row {
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 12px;
+    border-bottom: 1.5px dashed var(--line);
+  }
+
+  .rep-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rep-row .tools {
+    justify-content: flex-end;
+    padding-bottom: 0;
+  }
+}
+
+.thumb {
+  display: block;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--dark);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-icon {
+  display: grid;
+  place-items: center;
+  background: var(--chip-bg);
+}
+
+.thumb-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* ---------- Imagens ---------- */
+
+.image-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+/* A imagem inteira: clica-se nela para escolher a parte que fica à vista. */
+.image-pick {
+  position: relative;
+  display: block;
+  flex: none;
+  width: min(100%, 230px);
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--dark);
+}
+
+.image-pick img {
+  width: 100%;
+  height: auto;
+}
+
+.image-dot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--pink-deep);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+
+.image-side {
+  display: flex;
+  min-width: 180px;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Como a imagem fica cortada no cartão pequeno do site. */
+.image-thumb {
+  display: block;
+  width: 92px;
+  height: 92px;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--dark);
+}
+
+.image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.image-empty {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 120px;
+  border: 2px dashed color-mix(in oklab, var(--ink) 35%, transparent);
+  border-radius: 18px;
+  font-weight: 800;
+}
+
+.image-field[data-invalid] .image-empty {
+  border-color: var(--danger);
+}
+
+@media (hover: hover) {
+  .image-empty:not(:disabled):hover {
+    border-color: var(--link);
+    background: var(--hover-soft);
+  }
+}
+
+/* Miniatura deitada, para os clips. */
+.thumb-wide {
+  width: 92px;
+  border-radius: 12px;
+}
+
+/* Quem chega do Início vai dar a um item aberto: fica logo abaixo do cabeçalho, que anda com o scroll.
+   O site já reserva o espaço do seu menu (--scroll-offset) em todos os saltos; aqui desconta-se. */
+.rep-item {
+  scroll-margin-top: calc(var(--pad) + 104px - var(--scroll-offset, 0px));
+}
+
+@media (max-width: 999px) {
+  .rep-item {
+    scroll-margin-top: calc(16px - var(--scroll-offset, 0px));
+  }
+}
