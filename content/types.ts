@@ -148,8 +148,19 @@ export type SiteConfig = {
     greeting: string;
     /** PNG recortado (fundo transparente) ou SVG. A cabeça sai da moldura. */
     photo: string;
-    /** Imagem enquanto o direto passa na televisão (as personagens viradas para ela). Opcional. */
+    /**
+     * Imagem enquanto o direto passa na televisão (as personagens viradas para ela). Opcional.
+     * Com 'popout' troca a ilustração; com 'cover' aparece por cima da outra, a esbater.
+     */
     photoWatching?: string;
+    /** Com 'cover': o ponto de `photoWatching` que fica à vista (object-position). Sem isto, vale `photoFocus`. */
+    photoWatchingFocus?: string;
+    /**
+     * A mascote que salta do colo quando o direto abre: atravessa a moldura à frente da televisão
+     * enquanto ela liga e senta-se do lado direito dela. Dois desenhos com fundo transparente:
+     * `run` a saltar para a direita, `sit` sentada a olhar para a esquerda (para a televisão).
+     */
+    pet?: { run: string; sit: string };
     photoAlt: string;
     /** Tamanho real da imagem (px), para reservar o espaço certo. */
     photoSize: { width: number; height: number };

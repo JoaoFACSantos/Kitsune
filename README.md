@@ -48,6 +48,12 @@ A imagem do hero é a arte da Kitsune com a raposa, em `public/media/kitsune.jpg
   2. Guarda-a em `public/media/` e muda `hero.photo` e `hero.photoSize`.
   3. Ajusta `hero.photoScale`, que é o tamanho relativo à moldura. Valores maiores fazem a cabeça sair mais por cima. Se precisares, mexe também em `hero.photoOffsetY`.
 
+Quando o direto abre na televisão (ecrãs largos), a cena muda:
+
+- `hero.photoWatching` é ela virada para a televisão, já sem a raposa ao colo. Aparece por cima da imagem normal, a esbater; `hero.photoWatchingFocus` escolhe a parte que fica à vista. Foi gerada a partir da arte com o modelo FLUX.1 Kontext (e espelhada, para ela olhar para a direita).
+- `hero.pet` é a raposa: dois desenhos com fundo transparente, `run` (a saltar para a direita) e `sit` (sentada, a olhar para a esquerda). Salta do colo, passa à frente da televisão enquanto ela liga e senta-se do lado direito, numa faixa que a moldura ganha para ela. Passa antes de o direto aparecer e nunca fica por cima do ecrã: a Twitch pausa um player tapado. Os desenhos foram gerados com Stable Diffusion XL sobre fundo verde e recortados.
+- Sem estes campos, fica tudo como antes: a imagem normal e a televisão encostada à direita.
+
 `public/media/kitsune.svg` é um desenho para o modo `'popout'`. Com `hero.photoWatching: '/media/kitsune.svg#watch'`, as duas viram-se para a televisão quando o direto começa a passar.
 
 ### Marcas

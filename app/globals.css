@@ -1020,6 +1020,24 @@
     opacity: 1;
   }
 
+  /* Ela virada para a televisão, por cima da imagem normal: aparece a esbater e a assentar,
+     como uma câmara a aproximar-se, quando a televisão liga. */
+  .photo-watching {
+    opacity: 0;
+    scale: 1.12;
+    transition:
+      opacity 0.3s ease-in,
+      scale 0.3s ease-in;
+  }
+
+  .photo-watching[data-show="true"] {
+    opacity: 1;
+    scale: 1;
+    transition:
+      opacity 0.7s var(--ease-out) 0.15s,
+      scale 1.1s var(--ease-out) 0.15s;
+  }
+
   /* O play desce, para não tapar as caras. */
   .popout[data-fit="cover"] ~ .live-play {
     top: 68%;
@@ -1140,7 +1158,14 @@
       /* O player da Twitch pede pelo menos 400 × 300. */
       --screen-h: clamp(300px, calc(var(--stage-h) - 156px), 340px);
       --screen-w: calc(var(--screen-h) * 16 / 9);
-      width: min(92vw, calc(var(--stage-w) * 0.94 + var(--screen-w) + 134px));
+      width: min(92vw, calc(var(--stage-w) * 0.94 + var(--screen-w) + 134px + var(--pet-space, 0px)));
+    }
+
+    /* Com mascote: a moldura alarga mais um pouco e a televisão chega-se à esquerda, para a
+       mascote se sentar do lado direito dela sem tapar nada. */
+    .stage[data-playing="true"][data-pet] {
+      --pet-w: clamp(76px, 7.4vw, 112px);
+      --pet-space: calc(var(--pet-w) + 4px);
     }
 
     .stage[data-playing="true"] .stage-float {
@@ -1210,7 +1235,7 @@
     /* Enche o lado direito da moldura, de cima a baixo, sem sair dela. */
     .tv {
       position: absolute;
-      right: 16px;
+      right: calc(16px + var(--pet-space, 0px));
       top: 16px;
       /* Espaço por baixo para a espessura da caixa e os pés, ainda dentro da moldura. */
       bottom: 30px;
@@ -1227,6 +1252,177 @@
       animation: none;
     }
 
+  }
+
+  /* ---------- Mascote ---------- */
+
+  /* Sai do colo dela (à esquerda), atravessa a moldura aos saltos e senta-se à direita da televisão.
+     A viagem é um número de 0 a 1: a posição calcula-se a cada instante a partir da largura da
+     moldura, que ainda está a alargar enquanto a mascote salta. */
+  .pet {
+    --pet-t: 0;
+    position: absolute;
+    bottom: 12px;
+    left: calc(
+      (var(--stage-w) * 0.24 - var(--pet-w) * 0.5) * (1 - var(--pet-t)) + (100% - var(--pet-w) - 12px) * var(--pet-t)
+    );
+    z-index: 7;
+    display: none;
+    width: var(--pet-w);
+    aspect-ratio: 355 / 420;
+    pointer-events: none;
+  }
+
+  @media (min-width: 1024px) {
+    .pet {
+      display: block;
+      animation: pet-travel 1.3s cubic-bezier(0.35, 0.05, 0.55, 1) 0.25s both;
+    }
+  }
+
+  @keyframes pet-travel {
+    to {
+      --pet-t: 1;
+    }
+  }
+
+  /* Três saltos, cada um mais baixo; nasce pequena no colo e cresce no primeiro. */
+  .pet-hop {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 100%;
+    animation: pet-hop 1.3s linear 0.25s both;
+  }
+
+  @keyframes pet-hop {
+    0% {
+      translate: 0 0;
+      scale: 0.35;
+      opacity: 0;
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    7% {
+      opacity: 1;
+    }
+    17% {
+      translate: 0 calc(var(--pet-w) * -0.95);
+      scale: 1;
+      animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4);
+    }
+    34% {
+      translate: 0 0;
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    50% {
+      translate: 0 calc(var(--pet-w) * -0.75);
+      animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4);
+    }
+    67% {
+      translate: 0 0;
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    84% {
+      translate: 0 calc(var(--pet-w) * -0.55);
+      animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4);
+    }
+    100% {
+      translate: 0 0;
+      scale: 1;
+      opacity: 1;
+    }
+  }
+
+  .pet img {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    max-width: none;
+    translate: -50% 0;
+    -webkit-user-drag: none;
+  }
+
+  /* A saltar: mais larga do que alta, com o focinho a subir e a descer com o salto. */
+  .pet-run {
+    width: 138%;
+    transform-origin: 50% 70%;
+    animation: pet-tilt 1.3s ease-in-out 0.25s both;
+  }
+
+  @keyframes pet-tilt {
+    0%,
+    34%,
+    67% {
+      rotate: -14deg;
+    }
+    17%,
+    50%,
+    84% {
+      rotate: 0deg;
+    }
+    28%,
+    61%,
+    100% {
+      rotate: 12deg;
+    }
+  }
+
+  .pet-sit {
+    width: 100%;
+    opacity: 0;
+  }
+
+  /* Chegou: troca para o desenho sentado, com um pequeno assentar, e fica a abanar devagar.
+     As animações da viagem saem (a posição final fica escrita). */
+  .pet[data-landed="true"] {
+    --pet-t: 1;
+    animation: none;
+  }
+
+  .pet[data-landed="true"] .pet-hop {
+    animation: pet-idle 3.4s ease-in-out 0.5s infinite;
+  }
+
+  .pet[data-landed="true"] .pet-run {
+    display: none;
+  }
+
+  .pet[data-landed="true"] .pet-sit {
+    opacity: 1;
+    transform-origin: 50% 100%;
+    animation: pet-settle 0.5s var(--spring);
+  }
+
+  @keyframes pet-settle {
+    from {
+      scale: 1.14 0.82;
+    }
+  }
+
+  @keyframes pet-idle {
+    50% {
+      rotate: -2.5deg;
+      scale: 1 1.02;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pet,
+    .pet-hop,
+    .pet-run {
+      animation: none;
+    }
+
+    .pet {
+      --pet-t: 1;
+    }
+
+    .pet-run {
+      display: none;
+    }
+
+    .pet-sit {
+      opacity: 1;
+    }
   }
 
   .sticker {
@@ -2939,6 +3135,13 @@
 /* As variáveis não passam para os filhos. Se passassem, cada frame de scroll obrigava o browser
    a recalcular o estilo de todos os descendentes (no hero, perto de 250 elementos). O ScrollFx
    escreve o valor em cada elemento que o usa: os que estão em `data-scroll-on`. */
+/* A viagem da mascote (0: no colo; 1: sentada ao lado da televisão). Registada para poder ser animada. */
+@property --pet-t {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 @property --in {
   syntax: "<number>";
   inherits: false;

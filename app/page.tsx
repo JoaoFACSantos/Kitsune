@@ -65,6 +65,8 @@ export default async function Home() {
           tagline={site.tagline}
           photo={site.hero.photo}
           photoWatching={site.hero.photoWatching}
+          photoWatchingFocus={site.hero.photoWatchingFocus}
+          pet={site.hero.pet}
           photoAlt={site.hero.photoAlt}
           photoSize={site.hero.photoSize}
           photoFit={site.hero.photoFit}
