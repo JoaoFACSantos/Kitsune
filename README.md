@@ -63,7 +63,7 @@ Para acrescentar ou mudar uma marca:
 
 ## Giveaways
 
-A secção dos giveaways fica logo a seguir ao topo e só existe quando faz falta: aparece (com o link no menu) se estiver ligada no painel e houver pelo menos um giveaway por terminar. Cada giveaway tem o prémio, uma imagem (opcional), os passos para participar, um link (opcional) e o último dia para participar (opcional). O dia conta pelo relógio de Lisboa: no dia seguinte, o cartão sai do site sozinho; sem data, fica até ser apagado.
+A secção dos giveaways fica a seguir às parcerias e só existe quando faz falta: aparece (com o link no menu) se estiver ligada no painel e houver pelo menos um giveaway por terminar. Cada giveaway tem o prémio, uma imagem (opcional), os passos para participar, um link (opcional) e o último dia para participar (opcional). O dia conta pelo relógio de Lisboa: no dia seguinte, o cartão sai do site sozinho; sem data, fica até ser apagado.
 
 Os giveaways escrevem-se no painel. Em [`content/site.config.ts`](content/site.config.ts) ficam só o título e a frase da secção (`giveaways.title` e `giveaways.intro`).
 

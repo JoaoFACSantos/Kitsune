@@ -49,10 +49,10 @@ export default async function Home() {
         watchUrl={watchUrl}
         themeColors={{ light: site.theme.bg, dark: site.theme.darkBg }}
         links={[
-          ...(giveaways.length ? [{ id: 'giveaways', label: 'Giveaways' }] : []),
           { id: 'clips', label: 'Clips' },
           { id: 'setup', label: 'Setup' },
           { id: 'parcerias', label: 'Parcerias' },
+          ...(giveaways.length ? [{ id: 'giveaways', label: 'Giveaways' }] : []),
           { id: 'redes', label: 'Redes' },
         ]}
       />
@@ -79,7 +79,6 @@ export default async function Home() {
           handle={site.handle}
         />
         <Ribbon words={site.hero.ribbon} />
-        {giveaways.length ? <Giveaways title={site.giveaways.title} intro={site.giveaways.intro} items={giveaways} today={day} /> : null}
         <Clips title={site.clips.title} intro={site.clips.intro} moreUrl={site.clips.moreUrl} clips={clips} />
         <Setup
           title={site.setup.title}
@@ -96,6 +95,7 @@ export default async function Home() {
           email={site.email}
           mailSubject={site.partners.mailSubject}
         />
+        {giveaways.length ? <Giveaways title={site.giveaways.title} intro={site.giveaways.intro} items={giveaways} today={day} /> : null}
         <Socials
           title={site.socialsSection.title}
           note={site.socialsSection.note}

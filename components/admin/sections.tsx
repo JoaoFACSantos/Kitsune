@@ -183,7 +183,7 @@ export function GiveawaysSection({ open }: { open?: number }) {
   const running = items.filter((item) => isOpen(item, day)).length;
   return (
     <>
-      <Card title="No site" hint="A secção fica logo a seguir ao topo do site, com um link no menu.">
+      <Card title="No site" hint="A secção fica a seguir às parcerias, com um link no menu.">
         <Toggle
           path="giveaways.active"
           label="Mostrar a secção de giveaways"
