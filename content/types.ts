@@ -156,6 +156,12 @@ export type SiteConfig = {
     /** Com 'cover': o ponto de `photoWatching` que fica à vista (object-position). Sem isto, vale `photoFocus`. */
     photoWatchingFocus?: string;
     /**
+     * Com 'cover' e `photoWatching`: um vídeo curto, sem som, dela a virar-se para a televisão. Começa
+     * no fotograma de `photo` e acaba no de `photoWatching`. Toca uma vez quando o direto abre; sem
+     * ele (ou com movimento reduzido), a imagem troca a esbater.
+     */
+    photoTurn?: string;
+    /**
      * A mascote que salta do colo quando o direto abre: atravessa a moldura à frente da televisão
      * enquanto ela liga e senta-se do lado direito dela. Dois desenhos com fundo transparente:
      * `run` a saltar para a direita, `sit` sentada a olhar para a esquerda (para a televisão).

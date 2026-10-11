@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Platform } from '@/content/types';
 import { HeroLoop } from '@/components/HeroLoop';
+import { HeroTurn } from '@/components/HeroTurn';
 import { HeartShape, PlayIcon, StickerArt, type StickerKind } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
 import { LiveTv } from '@/components/LiveTv';
@@ -22,6 +23,7 @@ type HeroProps = {
   photo: string;
   photoWatching?: string;
   photoWatchingFocus?: string;
+  photoTurn?: string;
   pet?: { run: string; sit: string };
   photoAlt: string;
   photoSize: { width: number; height: number };
@@ -81,6 +83,7 @@ export function Hero({
   photo,
   photoWatching,
   photoWatchingFocus,
+  photoTurn,
   pet,
   photoAlt,
   photoSize,
@@ -111,6 +114,10 @@ export function Hero({
   // ('popout') troca de imagem; uma imagem com fundo ('cover') recebe a outra por cima, a esbater.
   const watchingOver = photoFit === 'cover' && Boolean(photoWatching);
   const photoSrc = playing && photoWatching && !watchingOver ? photoWatching : photo;
+  // Com vídeo dela a virar-se: a imagem virada só fica depois de ele acabar (ou de não poder tocar).
+  const turnOn = watchingOver && Boolean(photoTurn);
+  const [turned, setTurned] = useState(false);
+  const onTurned = useCallback(() => setTurned(true), []);
   // A mascote só entra com a televisão (ecrãs largos, ver .pet no CSS).
   const petOn = Boolean(pet) && playing;
   const letters = Array.from(name.toUpperCase());
@@ -311,6 +318,7 @@ export function Hero({
         data-live={live}
         data-playing={playing}
         data-pet={pet ? true : undefined}
+        data-turn={turnOn ? true : undefined}
       >
         {/* Em direto, os desenhos da mascote vêm logo: ao clicar no play já estão prontos. */}
         {live && pet ? (
@@ -361,9 +369,21 @@ export function Hero({
                     height={photoSize.height}
                     sizes="(min-width: 768px) 520px, 95vw"
                     className="photo photo-watching"
-                    data-show={playing}
+                    data-show={playing && (turned || !turnOn)}
+                    data-after-turn={turnOn ? true : undefined}
                     style={{ '--photo-focus': photoWatchingFocus ?? photoFocus } as React.CSSProperties}
                     draggable={false}
+                  />
+                ) : null}
+                {/* Ela a virar-se, em vídeo, por cima de tudo: quando acaba, fica a imagem virada por baixo. */}
+                {turnOn && live && photoTurn ? (
+                  <HeroTurn
+                    src={photoTurn}
+                    playing={playing}
+                    focusFrom={photoFocus}
+                    focusTo={photoWatchingFocus ?? photoFocus}
+                    onDone={onTurned}
+                    className="photo photo-turn"
                   />
                 ) : null}
               </div>
@@ -394,7 +414,11 @@ export function Hero({
                       type="button"
                       className="live-play hidden lg:grid"
                       aria-label={playLabel}
-                      onClick={() => setHost(window.location.hostname)}
+                      onClick={() => {
+                        // Cada vez que a televisão liga, o vídeo dela a virar-se toca de novo.
+                        setTurned(false);
+                        setHost(window.location.hostname);
+                      }}
                     >
                       <PlayIcon />
                     </button>

@@ -66,6 +66,8 @@ export default async function Home() {
           photo={site.hero.photo}
           photoWatching={site.hero.photoWatching}
           photoWatchingFocus={site.hero.photoWatchingFocus}
+          // Tal como o vídeo em loop, sai por /hero-video (o Safari precisa de pedidos parciais).
+          photoTurn={site.hero.photoTurn ? '/hero-video?clip=turn' : undefined}
           pet={site.hero.pet}
           photoAlt={site.hero.photoAlt}
           photoSize={site.hero.photoSize}
