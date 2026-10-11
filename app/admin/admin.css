@@ -773,6 +773,161 @@ html .admin button.image-pick * {
   outline-offset: 2px;
 }
 
+/* Visitas: quatro totais e, por baixo, as pessoas de cada dia em colunas. */
+.visit-figures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 22px;
+}
+
+.visit-figure {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.visit-chart {
+  margin: 0;
+}
+
+/* Colunas a crescer de uma linha de base fina. A mesma cor das barras das redes: é uma série só.
+   Cada dia ocupa a faixa toda (é a faixa que recebe o rato); a coluna é mais estreita do que ela
+   e fica com 1 px de folga de cada lado. O espaço por cima é para o número do dia com mais gente. */
+.cols {
+  display: flex;
+  height: 170px;
+  padding-top: 26px;
+  border-bottom: 1px solid var(--line);
+}
+
+.col {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1px;
+}
+
+/* Um dia com pouca gente ao lado de um com muita ainda se vê: a coluna nunca tem menos de 3 px.
+   Um dia sem ninguém fica sem coluna, só com a linha de base. */
+.col-bar {
+  width: min(100%, 24px);
+  height: max(3px, calc(var(--v) * 100%));
+  border-radius: 4px 4px 0 0;
+  background: var(--pink-deep);
+  transition: filter var(--dur-fade);
+}
+
+.col[data-empty] .col-bar {
+  display: none;
+}
+
+/* Só o dia com mais gente leva o número escrito, por cima da coluna. */
+.col-label {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  translate: -50% 0;
+}
+
+/* O número por extenso, por cima da coluna, ao passar o rato ou com o foco do teclado. */
+.col-tip {
+  position: absolute;
+  bottom: calc(var(--v) * 100% + 10px);
+  left: 50%;
+  z-index: 3;
+  width: max-content;
+  max-width: 240px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--dark);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  translate: -50% 0;
+  transition:
+    opacity var(--dur-fade),
+    visibility 0s var(--dur-fade);
+}
+
+/* Nas pontas, a caixa encosta ao lado de dentro: ao centro saía do cartão. */
+.col[data-side="start"] .col-tip {
+  left: 0;
+  translate: none;
+}
+
+.col[data-side="end"] .col-tip {
+  right: 0;
+  left: auto;
+  translate: none;
+}
+
+:root[data-theme="dark"] .col-tip {
+  background: #fff;
+  color: var(--dark);
+}
+
+.col-tip strong {
+  font-size: 15px;
+}
+
+.col-tip small {
+  display: block;
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+.col:is(:hover, :focus-visible) .col-bar {
+  filter: brightness(1.25);
+}
+
+.col:is(:hover, :focus-visible) .col-tip {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-fade);
+}
+
+.col:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* Com a caixa aberta, o número escrito por cima da coluna sai: diziam os dois o mesmo. */
+.col:is(:hover, :focus-visible) .col-label {
+  visibility: hidden;
+}
+
+.cols-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .visit-figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cols {
+    height: 140px;
+  }
+}
+
 /* Coisas a rever: um ícone e uma frase cada uma (a cor do ícone só reforça). */
 .reviews {
   display: flex;

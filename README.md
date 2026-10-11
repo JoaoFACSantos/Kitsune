@@ -86,6 +86,7 @@ O painel guarda tudo numa base de dados D1 da Cloudflare (o binding `DB`, em [`c
 | `backups` | Cópia do conteúdo antes de cada gravação (ficam as últimas 30) |
 | `uploads` | As imagens enviadas, já convertidas em WebP e sem metadados |
 | `settings`, `login_failures` | A chave das sessões do painel e as tentativas de entrada falhadas |
+| `visits`, `visitors` | As visitas e as pessoas de cada dia (ver [Visitas](#visitas)) |
 
 As imagens enviadas são reescritas pelo serviço de imagens da Cloudflare (o binding `IMAGES`), que no plano grátis dá 5000 transformações por mês.
 
@@ -96,6 +97,16 @@ npx cf d1 query <id-da-base-de-dados> --sql "INSERT OR REPLACE INTO content (id,
 ```
 
 Um Worker não tem disco: para pôr o site num alojamento sem D1, é preciso trocar [`lib/content/store.ts`](lib/content/store.ts) e [`lib/db.ts`](lib/db.ts) (o resto do site só usa as funções que esses ficheiros exportam).
+
+### Visitas
+
+O Início do painel mostra quantas pessoas abriram o site: hoje, nos últimos 7 e 30 dias e desde o início, com um gráfico dos últimos 30 dias. A contagem é do próprio site ([`lib/visits.ts`](lib/visits.ts)), sem serviços de fora e sem cookies:
+
+- A página avisa o servidor uma vez ao abrir ([`components/VisitBeacon.tsx`](components/VisitBeacon.tsx), `POST /api/visit`). Tem de ser assim porque a página vem da cache e não passa pelo servidor.
+- **Visitas** são todas as vezes que o site foi aberto. **Pessoas** contam uma vez por dia: quem volta noutro dia conta outra vez, e a mesma pessoa com dois browsers conta duas.
+- Para não contar a mesma pessoa duas vezes no dia guarda-se uma impressão digital curta, feita do dia, do endereço IP, do browser e de um segredo do site. O endereço IP não fica guardado, e as impressões apagam-se no dia seguinte: ficam só os totais por dia.
+- Robôs e browsers comandados por programas não contam. Quem já abriu o painel num browser também não (fica marcado nesse browser), para a streamer não se contar a si própria.
+- Os dias são os de Lisboa. Cada visita são duas escritas na D1 (o plano grátis dá 100 mil por dia).
 
 Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](lib/content/validate.ts)): textos com tamanho máximo, só links `http(s)` e só imagens do próprio site. Um campo novo na configuração só aparece no painel depois de entrar em `EditableContent`, na validação e em [`components/admin/sections.tsx`](components/admin/sections.tsx).
 
@@ -115,6 +126,7 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/` | A página (ISR, regenera no máximo a cada 60 s) |
 | `/api/live` | Estado do direto (cache de 60 s) |
 | `/admin` | O painel da streamer (com password) |
+| `/api/visit` | Conta uma visita (a página pede-o ao abrir) |
 | `/uploads/…` | As imagens enviadas no painel |
 | `/hero-video` | O vídeo do hero (`hero.photoVideo`), com resposta a pedidos parciais, que o Safari exige |
 | `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |

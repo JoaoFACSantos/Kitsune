@@ -6,6 +6,7 @@ import { site } from '@/content/site.config';
 import { adminStatus, isAdmin, MIN_PASSWORD } from '@/lib/admin/auth';
 import { getContent } from '@/lib/content/site';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
+import { getVisits } from '@/lib/visits';
 import './admin.css';
 
 export const metadata: Metadata = { title: 'Painel', robots: { index: false, follow: false } };
@@ -45,7 +46,14 @@ export default async function AdminPage() {
   }
 
   // O conteúdo a editar e, para o resumo do Início, os mesmos números que o site mostra.
-  const [{ content, savedAt }, live, followers, discord, clips] = await Promise.all([getContent(), getLiveStatus(), getFollowers(), getDiscord(), getClips()]);
+  const [{ content, savedAt }, live, followers, discord, clips, visits] = await Promise.all([
+    getContent(),
+    getLiveStatus(),
+    getFollowers(),
+    getDiscord(),
+    getClips(),
+    getVisits(),
+  ]);
 
   return (
     <main id="conteudo" tabIndex={-1} className="admin">
@@ -59,7 +67,7 @@ export default async function AdminPage() {
             twitch: site.platform === 'twitch' && Boolean(process.env.TWITCH_CLIENT_ID && process.env.TWITCH_CLIENT_SECRET),
             youtube: Boolean(process.env.YOUTUBE_API_KEY && process.env.YOUTUBE_CHANNEL_ID),
           }}
-          overview={{ followers, discordMembers: discord.members, clips }}
+          overview={{ followers, discordMembers: discord.members, clips, visits }}
           themeColors={{ light: site.theme.bg, dark: site.theme.darkBg }}
         />
       </LiveProvider>

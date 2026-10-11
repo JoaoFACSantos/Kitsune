@@ -6,8 +6,10 @@ import { LivePill } from '@/components/LivePill';
 import { useLive } from '@/components/providers/Live';
 import { isOpen, today } from '@/lib/content/giveaways';
 import { formatCompact, formatDate, formatInt } from '@/lib/format';
+import type { VisitStats } from '@/lib/visits';
 import { useForm } from './form';
 import { ArrowIcon, CheckIcon, InfoIcon, PlusIcon, WarnIcon } from './icons';
+import { Visits } from './Visits';
 
 /** O que o servidor foi buscar para o resumo: números das APIs e os clips mais vistos. */
 export type Overview = {
@@ -15,6 +17,8 @@ export type Overview = {
   followers: Partial<Record<SocialId, number>>;
   discordMembers: number;
   clips: Clip[];
+  /** Pessoas e visitas ao site, por dia e no total. */
+  visits: VisitStats;
 };
 
 export type Section = 'parcerias' | 'giveaways' | 'redes' | 'setup';
@@ -183,6 +187,8 @@ export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps
           sub={savedAt ? formatDate(savedAt) : 'conteúdo de origem'}
         />
       </div>
+
+      <Visits stats={overview.visits} />
 
       <div className="dash-grid">
         <section className="admin-card glass">

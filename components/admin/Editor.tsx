@@ -6,6 +6,7 @@ import type { EditableContent, SocialId } from '@/content/types';
 import { StickerArt } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { VISIT_SKIP_KEY } from '@/components/VisitBeacon';
 import type { Issue } from '@/lib/content/validate';
 import { Dashboard, type Overview, type Section } from './Dashboard';
 import { Card, type FormApi, FormProvider, getAt, setAt } from './form';
@@ -136,6 +137,15 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
   }, []);
 
   const form = useMemo<FormApi>(() => ({ draft, set, errors }), [draft, set, errors]);
+
+  // Quem trata do site não conta como visita: este browser deixa de avisar o contador.
+  useEffect(() => {
+    try {
+      localStorage.setItem(VISIT_SKIP_KEY, '1');
+    } catch {
+      // Sem armazenamento (modo privado de alguns browsers): as visitas deste browser contam.
+    }
+  }, []);
 
   // Avisa antes de fechar o separador com coisas por guardar.
   useEffect(() => {

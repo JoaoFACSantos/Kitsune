@@ -10,6 +10,7 @@ import { ScrollFx } from '@/components/ScrollFx';
 import { Setup } from '@/components/Setup';
 import { Socials } from '@/components/Socials';
 import { ToTopArrow } from '@/components/ToTopArrow';
+import { VisitBeacon } from '@/components/VisitBeacon';
 import { isOpen, today } from '@/lib/content/giveaways';
 import { getSite } from '@/lib/content/site';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
@@ -106,6 +107,7 @@ export default async function Home() {
       <Footer name={site.name} />
       <ToTopArrow />
       <ScrollFx />
+      <VisitBeacon />
     </LiveProvider>
   );
 }
