@@ -1,6 +1,8 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
+// Um Worker não tem disco de onde ler as fontes: vão dentro do código, em base64.
+import caveat from '@/assets/og/Caveat-700.ttf?inline';
+import jakarta from '@/assets/og/PlusJakartaSans-700.ttf?inline';
+import unbounded from '@/assets/og/Unbounded-900.ttf?inline';
 import { site } from '@/content/site.config';
 import { getSite } from '@/lib/content/site';
 import { getLiveStatus } from '@/lib/data';
@@ -12,11 +14,8 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const revalidate = 60;
 
-const fonts = Promise.all([
-  readFile(join(process.cwd(), 'assets/og/Unbounded-900.ttf')),
-  readFile(join(process.cwd(), 'assets/og/PlusJakartaSans-700.ttf')),
-  readFile(join(process.cwd(), 'assets/og/Caveat-700.ttf')),
-]);
+const font = (dataUrl: string) => Uint8Array.from(Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64')).buffer;
+const fonts = [unbounded, jakarta, caveat].map(font);
 
 export default async function Image() {
   // O cumprimento e o "papel" podem ter sido mudados no painel.

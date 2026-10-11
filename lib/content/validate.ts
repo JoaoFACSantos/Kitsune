@@ -1,4 +1,4 @@
-import type { Brand, EditableContent, FunStat, Gear, GearIcon, Social, SocialId, Spec } from '@/content/types';
+import type { Brand, EditableContent, Gear, GearIcon, Social, SocialId, Spec } from '@/content/types';
 import { GEAR_ICONS, IMAGE_PATH, MAX, SOCIAL_IDS, SOCIAL_LABELS } from './editable';
 
 // Validação do conteúdo do painel. Tudo o que chega do browser passa por aqui antes de ser
@@ -107,11 +107,6 @@ function position(value: unknown): string | undefined {
   return `${Number(match[1])}% ${Number(match[2])}%`;
 }
 
-function stat(bag: Bag, value: unknown, path: string): FunStat {
-  const v = record(value);
-  return { value: text(bag, v.value, `${path}.value`, 12), label: text(bag, v.label, `${path}.label`, 50) };
-}
-
 function spec(bag: Bag, value: unknown, path: string): Spec {
   const v = record(value);
   return { label: text(bag, v.label, `${path}.label`, 30), value: text(bag, v.value, `${path}.value`, 60) };
@@ -186,12 +181,6 @@ function discordInvite(value: unknown): string {
   return /^[\w-]{2,40}$/.test(code) ? code : '';
 }
 
-function email(bag: Bag, value: unknown, path: string): string {
-  const clean = text(bag, value, path, 120);
-  if (clean && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) bag.push({ path, message: 'Não parece um email.' });
-  return clean;
-}
-
 /**
  * Devolve o conteúdo limpo e a lista de problemas (vazia se estiver tudo bem).
  * `base` é o conteúdo de origem: o que faltar em `input` vem de lá, para um ficheiro guardado
@@ -203,15 +192,9 @@ export function validateContent(input: unknown, base: EditableContent, platform:
   const top = (key: keyof EditableContent): unknown => (src[key] === undefined ? base[key] : src[key]);
   const part = (key: keyof EditableContent): Rec => ({ ...(base[key] as object), ...record(src[key]) });
 
-  const hero = part('hero');
   const discord = part('discord');
-  const clips = part('clips');
   const setup = part('setup');
   const partners = part('partners');
-  const socialsSection = part('socialsSection');
-
-  const ribbon = list(bag, hero.ribbon, 'hero.ribbon', MAX.ribbon, (entry, p) => text(bag, entry, p, 30), 1);
-  unique(bag, ribbon, 'hero.ribbon', (word) => word, '');
 
   const socials = list(bag, top('socials'), 'socials', MAX.socials, (entry, p) => social(bag, entry, p), 1);
   unique(bag, socials, 'socials', (s) => s.id, 'id');
@@ -223,53 +206,19 @@ export function validateContent(input: unknown, base: EditableContent, platform:
   unique(bag, gearList, 'setup.gear', (g) => g.name, 'name');
   const pc = list(bag, setup.pc, 'setup.pc', MAX.pc, (entry, p) => spec(bag, entry, p));
   unique(bag, pc, 'setup.pc', (s) => s.label, 'label');
-  const funStats = list(bag, setup.funStats, 'setup.funStats', MAX.funStats, (entry, p) => stat(bag, entry, p));
-  unique(bag, funStats, 'setup.funStats', (s) => s.label, 'label');
 
-  const stats = list(bag, partners.stats, 'partners.stats', MAX.partnerStats, (entry, p) => stat(bag, entry, p));
-  unique(bag, stats, 'partners.stats', (s) => s.label, 'label');
   const brands = list(bag, partners.brands, 'partners.brands', MAX.brands, (entry, p) => brand(bag, entry, p));
   unique(bag, brands, 'partners.brands', (b) => b.name, 'name');
 
   const content: EditableContent = {
-    role: text(bag, top('role'), 'role', 60),
-    tagline: text(bag, top('tagline'), 'tagline', 160),
-    email: email(bag, top('email'), 'email'),
-    hero: {
-      greeting: text(bag, hero.greeting, 'hero.greeting', 40),
-      note: text(bag, hero.note, 'hero.note', 40, false),
-      ribbon,
-    },
     socials,
     discord: {
       // O convite sai do link do Discord na lista de redes: é por ele que se contam os membros.
       invite: inviteCode(socials.find((s) => s.id === 'discord')?.url) ?? discordInvite(discord.invite),
       members: int(bag, discord.members, 'discord.members', 0, 100_000_000),
     },
-    clips: {
-      title: text(bag, clips.title, 'clips.title', 60),
-      intro: text(bag, clips.intro, 'clips.intro', 200, false),
-      moreUrl: link(bag, clips.moreUrl, 'clips.moreUrl'),
-      recentDays: int(bag, clips.recentDays, 'clips.recentDays', 1, 3650),
-    },
-    setup: {
-      title: text(bag, setup.title, 'setup.title', 60),
-      intro: text(bag, setup.intro, 'setup.intro', 200, false),
-      gear: gearList,
-      pc,
-      funStats,
-    },
-    partners: {
-      title: text(bag, partners.title, 'partners.title', 60),
-      intro: text(bag, partners.intro, 'partners.intro', 300, false),
-      stats,
-      brands,
-      mailSubject: text(bag, partners.mailSubject, 'partners.mailSubject', 80),
-    },
-    socialsSection: {
-      title: text(bag, socialsSection.title, 'socialsSection.title', 60),
-      note: text(bag, socialsSection.note, 'socialsSection.note', 40, false),
-    },
+    setup: { gear: gearList, pc },
+    partners: { brands },
   };
 
   return { content, issues: bag };

@@ -1,23 +1,23 @@
 import 'server-only';
-import { createHash, createHmac, scryptSync, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { cookies, headers } from 'next/headers';
+import { db, ensureSchema, isMissingTable } from '@/lib/db';
 
-// Entrada no painel (/admin): uma password só, definida em ADMIN_PASSWORD no ambiente do
-// servidor. Quem acerta fica com um cookie assinado que dura duas semanas. Não há base de
-// dados de sessões: mudar a password invalida todos os cookies antigos.
+// Entrada no painel (/admin): uma password só, definida em ADMIN_PASSWORD nos segredos do
+// Worker. Quem acerta fica com um cookie assinado que dura duas semanas. Não há tabela de
+// sessões: mudar a password invalida todos os cookies antigos.
 
 const COOKIE = 'painel';
 const MAX_AGE_S = 14 * 24 * 60 * 60;
 /** Uma password curta num endereço público adivinha-se: abaixo disto o painel não liga. */
 export const MIN_PASSWORD = 12;
 
-// Tentativas falhadas, em memória (chega para um servidor só). Por endereço IP e, como o endereço
-// se consegue falsificar quando não há um proxy de confiança à frente, também no total: passado
-// esse total a porta fecha para toda a gente até a janela acabar.
+// Tentativas falhadas, na base de dados (um Worker corre em muitas instâncias ao mesmo tempo, a
+// memória de uma não serve). Por endereço IP e também no total: passado esse total a porta fecha
+// para toda a gente até a janela acabar. O total também limita o que um ataque consegue escrever.
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 8;
 const MAX_FAILURES_TOTAL = 60;
-const failures = new Map<string, { count: number; until: number }>();
 const TOTAL = '*';
 
 function password(): string | null {
@@ -33,13 +33,36 @@ export function adminStatus(): 'ready' | 'missing' | 'weak' {
 
 const digest = (value: string) => createHash('sha256').update(value).digest();
 
-// A chave das assinaturas sai da password (sem mais segredos para configurar), por uma função
-// lenta de propósito: quem apanhasse um cookie não conseguia testar passwords contra ele depressa.
-// Calcula-se uma vez por password e fica guardada.
-let signingKey: { secret: string; key: Buffer } | null = null;
+const SECRET = "SELECT value FROM settings WHERE key = 'session_secret'";
 
-function sign(payload: string, secret: string) {
-  if (signingKey?.secret !== secret) signingKey = { secret, key: scryptSync(secret, 'painel:sessao', 32) };
+/** O segredo das sessões: aleatório, criado na primeira entrada e guardado na base de dados. */
+async function sessionSecret(create: boolean): Promise<string | null> {
+  try {
+    const row = await db().prepare(SECRET).first<{ value: string }>();
+    if (row) return row.value;
+  } catch (error) {
+    if (!isMissingTable(error)) throw error;
+  }
+  if (!create) return null;
+  await ensureSchema();
+  // Duas entradas ao mesmo tempo: fica o segredo da primeira, e as duas leem esse.
+  await db().prepare("INSERT OR IGNORE INTO settings (key, value) VALUES ('session_secret', ?)").bind(randomBytes(32).toString('base64url')).run();
+  return (await db().prepare(SECRET).first<{ value: string }>())?.value ?? null;
+}
+
+// A chave das assinaturas sai do segredo das sessões e da password (sem mais segredos para
+// configurar). Quem apanhasse um cookie não conseguia testar passwords contra ele: falta-lhe o
+// segredo. E não se usa uma função lenta, que não cabia no tempo de processador de um Worker.
+// Calcula-se uma vez por password e fica guardada.
+let signingKey: { password: string; key: Buffer } | null = null;
+
+/** A assinatura, ou null se ainda não houver segredo (ninguém entrou até agora). */
+async function sign(payload: string, password: string, create = false) {
+  if (signingKey?.password !== password) {
+    const secret = await sessionSecret(create);
+    if (!secret) return null;
+    signingKey = { password, key: createHmac('sha256', secret).update(password).digest() };
+  }
   return createHmac('sha256', signingKey.key).update(payload).digest('base64url');
 }
 
@@ -53,16 +76,21 @@ export function checkPassword(attempt: string) {
   return secret !== null && same(attempt, secret);
 }
 
-/** Atrás do túnel ou de um proxy, o HTTPS acaba antes de chegar aqui: vale o cabeçalho. */
+/** Na Cloudflare é sempre HTTPS; só em desenvolvimento, no próprio computador, é que não. */
 async function isHttps() {
-  return (await headers()).get('x-forwarded-proto')?.split(',')[0]?.trim() === 'https';
+  const h = await headers();
+  const proto = h.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  if (proto) return proto === 'https';
+  return !/^(?:localhost|127.0.0.1|[::1])(?::d+)?$/.test(h.get('host') ?? '');
 }
 
 export async function createSession() {
   const secret = password();
   if (!secret) return;
   const expires = String(Date.now() + MAX_AGE_S * 1000);
-  (await cookies()).set(COOKIE, `${expires}.${sign(expires, secret)}`, {
+  const signature = await sign(expires, secret, true);
+  if (!signature) throw new Error('Não consegui criar o segredo das sessões');
+  (await cookies()).set(COOKIE, `${expires}.${signature}`, {
     httpOnly: true,
     sameSite: 'lax',
     secure: await isHttps(),
@@ -82,7 +110,8 @@ export async function isAdmin(): Promise<boolean> {
   if (!secret) return false;
   const [expires, signature] = ((await cookies()).get(COOKIE)?.value ?? '').split('.');
   if (!expires || !signature || !/^\d+$/.test(expires) || Number(expires) < Date.now()) return false;
-  return same(signature, sign(expires, secret));
+  const expected = await sign(expires, secret);
+  return expected !== null && same(signature, expected);
 }
 
 /** O endereço de quem faz o pedido, para contar tentativas. */
@@ -91,36 +120,38 @@ export async function clientIp() {
   return (h.get('cf-connecting-ip') ?? h.get('x-forwarded-for')?.split(',')[0] ?? h.get('x-real-ip') ?? 'local').trim();
 }
 
-function failuresOf(key: string) {
-  const entry = failures.get(key);
-  if (!entry) return 0;
-  if (entry.until < Date.now()) {
-    failures.delete(key);
-    return 0;
+export async function tooManyFailures(ip: string) {
+  try {
+    const { results } = await db()
+      .prepare('SELECT key, count FROM login_failures WHERE key IN (?1, ?2) AND until > ?3')
+      .bind(ip, TOTAL, Date.now())
+      .all<{ key: string; count: number }>();
+    return results.some(({ key, count }) => count >= (key === TOTAL ? MAX_FAILURES_TOTAL : MAX_FAILURES));
+  } catch (error) {
+    if (isMissingTable(error)) return false;
+    throw error;
   }
-  return entry.count;
 }
 
-export function tooManyFailures(ip: string) {
-  return failuresOf(ip) >= MAX_FAILURES || failuresOf(TOTAL) >= MAX_FAILURES_TOTAL;
-}
-
-export function recordFailure(ip: string) {
+export async function recordFailure(ip: string) {
+  await ensureSchema();
   const now = Date.now();
-  // Não deixa o mapa crescer sem fim com endereços que já expiraram.
-  if (failures.size > 5000) {
-    for (const [key, entry] of failures) if (entry.until < now) failures.delete(key);
-  }
-  for (const key of [ip, TOTAL]) {
-    const entry = failures.get(key);
-    if (!entry || entry.until < now) failures.set(key, { count: 1, until: now + WINDOW_MS });
-    else entry.count += 1;
-  }
+  const count = db().prepare('INSERT INTO login_failures (key, count, until) VALUES (?, 1, ?) ON CONFLICT (key) DO UPDATE SET count = count + 1');
+  await db().batch([
+    // As janelas que já acabaram saem primeiro: a tabela não cresce sem fim e a contagem recomeça.
+    db().prepare('DELETE FROM login_failures WHERE until < ?').bind(now),
+    count.bind(ip, now + WINDOW_MS),
+    count.bind(TOTAL, now + WINDOW_MS),
+  ]);
 }
 
 /** Entrou: as falhas desse endereço deixam de contar (as do total só saem com o tempo). */
-export function clearFailures(ip: string) {
-  failures.delete(ip);
+export async function clearFailures(ip: string) {
+  try {
+    await db().prepare('DELETE FROM login_failures WHERE key = ?').bind(ip).run();
+  } catch (error) {
+    if (!isMissingTable(error)) throw error;
+  }
 }
 
 /** O pedido vem do próprio site? (Para os envios de imagens, que não são ações do Next.) */

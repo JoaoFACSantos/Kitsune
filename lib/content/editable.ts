@@ -6,16 +6,10 @@ import type { EditableContent, GearIcon, SiteConfig, SocialId } from '@/content/
 /** Os campos editáveis, tirados de uma configuração completa. */
 export function pickEditable(site: SiteConfig): EditableContent {
   return {
-    role: site.role,
-    tagline: site.tagline,
-    email: site.email,
-    hero: { greeting: site.hero.greeting, note: site.hero.note, ribbon: site.hero.ribbon },
     socials: site.socials,
     discord: site.discord,
-    clips: { title: site.clips.title, intro: site.clips.intro, moreUrl: site.clips.moreUrl, recentDays: site.clips.recentDays },
-    setup: site.setup,
-    partners: site.partners,
-    socialsSection: site.socialsSection,
+    setup: { gear: site.setup.gear, pc: site.setup.pc },
+    partners: { brands: site.partners.brands },
   };
 }
 
@@ -23,16 +17,10 @@ export function pickEditable(site: SiteConfig): EditableContent {
 export function applyContent(site: SiteConfig, content: EditableContent): SiteConfig {
   return {
     ...site,
-    role: content.role,
-    tagline: content.tagline,
-    email: content.email,
-    hero: { ...site.hero, ...content.hero },
     socials: content.socials,
     discord: content.discord,
-    clips: { ...site.clips, ...content.clips },
-    setup: content.setup,
-    partners: content.partners,
-    socialsSection: content.socialsSection,
+    setup: { ...site.setup, ...content.setup },
+    partners: { ...site.partners, ...content.partners },
   };
 }
 
@@ -64,12 +52,9 @@ export const GEAR_ICONS = Object.keys(GEAR_LABELS) as GearIcon[];
 /** Quantos itens cabem em cada lista (o painel e a validação usam os mesmos). */
 export const MAX = {
   socials: SOCIAL_IDS.length,
-  ribbon: 12,
   gear: 12,
   gearTags: 4,
   pc: 12,
-  funStats: 8,
-  partnerStats: 4,
   brands: 24,
   brandPerks: 6,
 } as const;

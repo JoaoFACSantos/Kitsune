@@ -12,9 +12,9 @@ const DAY = 24 * 60 * MINUTE;
 const HOUR_S = 3_600;
 
 type Token = { value: string; expires: number };
+// Guarda-se o token e não o pedido em curso: num Worker, um pedido não pode ficar à espera de
+// uma promessa que nasceu noutro. Chamadas em paralelo pedem o token cada uma (é raro).
 let token: Token | null = null;
-// Pedido de token em curso, partilhado por chamadas em paralelo.
-let pending: Promise<string> | null = null;
 
 function credentials() {
   const id = process.env.TWITCH_CLIENT_ID;
@@ -28,9 +28,8 @@ async function requestToken() {
   const res = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
     body: new URLSearchParams({ client_id: id, client_secret: secret, grant_type: 'client_credentials' }),
-    // Em cache 1 h (o token dura semanas). Com 'no-store', a página deixava de poder ser
-    // estática e os dados da Twitch falhavam em produção.
-    cache: 'force-cache',
+    // Em cache 1 h (o token dura semanas). Sem `cache: 'force-cache'`: num Worker, um POST com
+    // essa opção rebenta ("Unsupported cache mode"), e os dados da Twitch falhavam todos.
     next: { revalidate: HOUR_S },
   });
   if (!res.ok) throw new Error(`Twitch token: ${res.status}`);
@@ -41,10 +40,7 @@ async function requestToken() {
 
 async function appToken(force = false) {
   if (!force && token && token.expires > Date.now() + MINUTE) return token.value;
-  pending ??= requestToken().finally(() => {
-    pending = null;
-  });
-  return pending;
+  return requestToken();
 }
 
 async function helix<T>(path: string, revalidate: number): Promise<T> {

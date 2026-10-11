@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 import type { Platform } from '@/content/types';
+import { HeroLoop } from '@/components/HeroLoop';
 import { HeartShape, PlayIcon, StickerArt, type StickerKind } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
 import { LiveTv } from '@/components/LiveTv';
@@ -24,6 +25,7 @@ type HeroProps = {
   photoSize: { width: number; height: number };
   photoFit?: 'popout' | 'cover';
   photoFocus?: string;
+  photoVideo?: string;
   photoBackdrop?: string;
   photoScale: number;
   photoOffsetY: number;
@@ -80,6 +82,7 @@ export function Hero({
   photoSize,
   photoFit = 'popout',
   photoFocus,
+  photoVideo,
   photoBackdrop,
   photoScale,
   photoOffsetY,
@@ -331,6 +334,8 @@ export function Hero({
                   style={{ '--photo-scale': photoScale, '--photo-y': photoOffsetY, '--photo-focus': photoFocus } as React.CSSProperties}
                   draggable={false}
                 />
+                {/* A mesma arte em vídeo, por cima da imagem (ver HeroLoop). */}
+                {photoVideo && photoFit === 'cover' && photoSrc === photo ? <HeroLoop src={photoVideo} focus={photoFocus} className="photo photo-loop" /> : null}
               </div>
               <p className="window-note hand">{note}</p>
               <div className="window-bar">

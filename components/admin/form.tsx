@@ -312,11 +312,13 @@ type RepeaterProps<T> = {
   confirmRemove?: (item: T) => string;
   /** O item que já aparece aberto (quem chega do Início vem para editar um em concreto). */
   initialOpen?: number;
+  /** Com `false`, a lista fica sem as setas de subir e descer: a ordem não se mexe no painel. */
+  sortable?: boolean;
   children: (itemPath: string, item: T, index: number) => ReactNode;
 };
 
 /** Lista de coisas com vários campos (marcas, redes, periféricos): acrescentar, tirar e trocar a ordem. */
-export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confirmRemove, initialOpen, children }: RepeaterProps<T>) {
+export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confirmRemove, initialOpen, sortable = true, children }: RepeaterProps<T>) {
   const { draft, set, errors } = useForm();
   const items = (getAt(draft, path) as T[] | undefined) ?? [];
   // Uma chave por item, que o acompanha quando muda de posição: é ela que diz qual está aberto.
@@ -357,12 +359,16 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
 
   const tools = (i: number) => (
     <div className="tools">
-      <Tool label="Subir" disabled={i === 0} onClick={() => move(i, -1)}>
-        <Up />
-      </Tool>
-      <Tool label="Descer" disabled={i === items.length - 1} onClick={() => move(i, 1)}>
-        <Down />
-      </Tool>
+      {sortable ? (
+        <>
+          <Tool label="Subir" disabled={i === 0} onClick={() => move(i, -1)}>
+            <Up />
+          </Tool>
+          <Tool label="Descer" disabled={i === items.length - 1} onClick={() => move(i, 1)}>
+            <Down />
+          </Tool>
+        </>
+      ) : null}
       <Tool label="Apagar" danger disabled={items.length <= min} onClick={() => remove(i)}>
         <Cross />
       </Tool>

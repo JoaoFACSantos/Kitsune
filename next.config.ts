@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // As imagens saem tal como estão em /public, sem passar pelo Worker: os ficheiros estáticos
+    // não contam para o limite diário de pedidos do plano grátis da Cloudflare.
+    unoptimized: true,
     // Miniaturas de direto e de clips da Twitch.
     remotePatterns: [
       { protocol: 'https', hostname: 'static-cdn.jtvnw.net' },

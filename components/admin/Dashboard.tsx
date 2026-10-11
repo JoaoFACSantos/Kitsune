@@ -16,7 +16,7 @@ export type Overview = {
   clips: Clip[];
 };
 
-export type Section = 'parcerias' | 'redes' | 'textos' | 'setup';
+export type Section = 'parcerias' | 'redes' | 'setup';
 
 type DashboardProps = {
   name: string;

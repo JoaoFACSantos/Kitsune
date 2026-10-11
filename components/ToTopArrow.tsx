@@ -4,7 +4,8 @@ import { useRef } from 'react';
 import { ScrollTrigger, useGSAP } from '@/lib/gsap';
 
 /**
- * Seta no canto de baixo, à direita, para voltar ao topo. Só aparece depois de se descer um pouco.
+ * Seta no canto de baixo, à direita, para voltar ao topo. Só aparece depois de se descer um pouco
+ * e desaparece no rodapé, onde já está o botão «Voltar ao topo».
  * É um link para #topo: o scroll suave vem do SmoothScroll, e sem JS continua a funcionar.
  */
 export function ToTopArrow() {
@@ -15,9 +16,12 @@ export function ToTopArrow() {
       const el = ref.current;
       if (!el) return;
       let shown = false;
-      // Aparece com pouco mais de meio ecrã descido e fica até ao fim da página.
+      const footerButton = document.querySelector<HTMLElement>('[data-back-to-top]');
+      // Aparece com pouco mais de meio ecrã descido e sai quando o botão do rodapé entra no ecrã:
+      // dois botões para o mesmo, lado a lado, eram de mais.
       const update = (self: ScrollTrigger) => {
-        const next = self.scroll() > window.innerHeight * 0.6;
+        const atFooter = footerButton ? footerButton.getBoundingClientRect().top < window.innerHeight : false;
+        const next = self.scroll() > window.innerHeight * 0.6 && !atFooter;
         if (next === shown) return;
         shown = next;
         el.dataset.show = String(next);

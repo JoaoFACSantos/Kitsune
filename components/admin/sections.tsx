@@ -1,17 +1,13 @@
 'use client';
 
-import type { Brand, FunStat, Gear, Social, SocialId, Spec } from '@/content/types';
+import type { Brand, Gear, Social, SocialId, Spec } from '@/content/types';
 import { GearGlyph, SocialIcon } from '@/components/icons';
 import { GEAR_ICONS, GEAR_LABELS, MAX, SOCIAL_IDS, SOCIAL_LABELS } from '@/lib/content/editable';
 import { formatCompact } from '@/lib/format';
 import { Card, Check, ColorField, NumberField, Repeater, Row, SelectField, StringList, TextArea, TextField, useForm } from './form';
 import { ImageField } from './ImageField';
 
-// As quatro secções do painel. Os limites (max) são os mesmos da validação do servidor.
-
-const EMPHASIS = 'Põe uma palavra entre *asteriscos* para ela sair na letra manuscrita.';
-
-const emptyStat = (): FunStat => ({ value: '', label: '' });
+// As três secções do painel. Os limites (max) são os mesmos da validação do servidor.
 
 /* ---------- Parcerias ---------- */
 
@@ -129,25 +125,6 @@ export function PartnersSection({ open }: { open?: number }) {
         </Repeater>
       </Card>
 
-      <Card title="Números para as marcas" hint="Os números do cartão cor-de-rosa, para quem quer trabalhar contigo.">
-        <Repeater<FunStat> path="partners.stats" max={MAX.partnerStats} addLabel="Adicionar número" make={emptyStat}>
-          {(path) => (
-            <>
-              <TextField path={`${path}.value`} label="Número" max={12} placeholder="+100 mil" />
-              <TextField path={`${path}.label`} label="O que é" max={50} placeholder="seguidores em todas as plataformas" />
-            </>
-          )}
-        </Repeater>
-      </Card>
-
-      <Card title="Texto do convite" hint="O cartão cor-de-rosa, por baixo das marcas.">
-        <TextField path="partners.title" label="Título" max={60} hint={EMPHASIS} />
-        <TextArea path="partners.intro" label="Texto" max={300} />
-        <Row>
-          <TextField path="email" type="email" label="Email de parcerias" max={120} hint="Para onde vão os pedidos. Também aparece no rodapé." />
-          <TextField path="partners.mailSubject" label="Assunto do email" max={80} hint="Já vem escrito quando clicam em Enviar email." />
-        </Row>
-      </Card>
     </>
   );
 }
@@ -226,46 +203,6 @@ export function SocialsSection({ auto, open }: { auto: Partial<Record<SocialId, 
         </Repeater>
       </Card>
 
-      <Card title="Título da secção">
-        <Row>
-          <TextField path="socialsSection.title" label="Título" max={60} hint={EMPHASIS} />
-          <TextField path="socialsSection.note" label="Frase manuscrita ao lado" max={40} />
-        </Row>
-      </Card>
-    </>
-  );
-}
-
-/* ---------- Textos ---------- */
-
-export function TextsSection() {
-  return (
-    <>
-      <Card title="Topo do site" hint="O que se vê logo ao entrar.">
-        <Row>
-          <TextField path="hero.greeting" label="Frase por cima do nome" max={40} placeholder="olá! eu sou a" />
-          <TextField path="hero.note" label="Frase manuscrita na moldura" max={40} placeholder="espero-te na live!" />
-        </Row>
-        <TextField path="role" label="O que fazes" max={60} hint="Aparece no topo, no separador do browser e quando partilham o site." />
-        <TextArea path="tagline" label="Frase de apresentação" max={160} rows={2} />
-        <StringList
-          path="hero.ribbon"
-          label="Palavras da fita que passa"
-          max={MAX.ribbon}
-          itemMax={30}
-          addLabel="Adicionar palavra"
-          placeholder="cozy games"
-        />
-      </Card>
-
-      <Card title="Clips" hint="Os clips em si vêm da Twitch: aqui muda-se só o texto à volta.">
-        <Row>
-          <TextField path="clips.title" label="Título" max={60} hint={EMPHASIS} />
-          <NumberField path="clips.recentDays" label="Mostrar os mais vistos dos últimos (dias)" min={1} max={3650} hint="Se houver poucos clips nesse tempo, o site vai buscar mais antigos." />
-        </Row>
-        <TextArea path="clips.intro" label="Texto por baixo do título" max={200} rows={2} />
-        <TextField path="clips.moreUrl" type="url" label="Link do botão «Ver todos os clips»" placeholder="https://" />
-      </Card>
     </>
   );
 }
@@ -278,9 +215,10 @@ const emptySpec = (): Spec => ({ label: '', value: '' });
 export function SetupSection() {
   return (
     <>
-      <Card title="Periféricos" hint="O que usas para fazer diretos. A ordem aqui é a ordem no site.">
+      <Card title="Periféricos" hint="O que usas para fazer diretos. Clica num para lhe mudar a marca e o modelo.">
         <Repeater<Gear>
           path="setup.gear"
+          sortable={false}
           min={1}
           max={MAX.gear}
           addLabel="Adicionar periférico"
@@ -321,21 +259,6 @@ export function SetupSection() {
         </Repeater>
       </Card>
 
-      <Card title="Estatísticas a brincar" hint="Os quadradinhos coloridos ao lado do PC.">
-        <Repeater<FunStat> path="setup.funStats" max={MAX.funStats} addLabel="Adicionar estatística" make={emptyStat}>
-          {(path) => (
-            <>
-              <TextField path={`${path}.value`} label="Número" max={12} placeholder="47" />
-              <TextField path={`${path}.label`} label="O que é" max={50} placeholder="separadores abertos" />
-            </>
-          )}
-        </Repeater>
-      </Card>
-
-      <Card title="Título da secção">
-        <TextField path="setup.title" label="Título" max={60} hint={EMPHASIS} />
-        <TextArea path="setup.intro" label="Texto por baixo do título" max={200} rows={2} />
-      </Card>
     </>
   );
 }

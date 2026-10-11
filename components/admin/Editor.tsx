@@ -10,7 +10,7 @@ import type { Issue } from '@/lib/content/validate';
 import { Dashboard, type Overview, type Section } from './Dashboard';
 import { Card, type FormApi, FormProvider, getAt, setAt } from './form';
 import { ArrowIcon, LogoutIcon, NavGlyph, type NavIcon } from './icons';
-import { emptyBrand, PartnersSection, SetupSection, SocialsSection, TextsSection } from './sections';
+import { emptyBrand, PartnersSection, SetupSection, SocialsSection } from './sections';
 
 type EditorProps = {
   name: string;
@@ -29,10 +29,9 @@ type EditorProps = {
 // um erro ao guardar sabe em que secção aparecer.
 const TABS: readonly { id: string; label: string; icon: NavIcon; hint: string; paths: readonly string[] }[] = [
   { id: 'inicio', label: 'Início', icon: 'home', hint: 'O site num relance e atalhos para o que mexes mais.', paths: [] },
-  { id: 'parcerias', label: 'Parcerias', icon: 'partners', hint: 'As marcas, os códigos e o convite para quem quer trabalhar contigo.', paths: ['partners', 'email'] },
-  { id: 'redes', label: 'Redes', icon: 'socials', hint: 'Os links e os seguidores de cada rede.', paths: ['socials', 'discord', 'socialsSection'] },
-  { id: 'textos', label: 'Textos', icon: 'texts', hint: 'As frases do topo do site e da secção dos clips.', paths: ['role', 'tagline', 'hero', 'clips'] },
-  { id: 'setup', label: 'Setup', icon: 'setup', hint: 'Os periféricos, o PC e as estatísticas a brincar.', paths: ['setup'] },
+  { id: 'parcerias', label: 'Parcerias', icon: 'partners', hint: 'As marcas e os códigos de cada parceria.', paths: ['partners'] },
+  { id: 'redes', label: 'Redes', icon: 'socials', hint: 'Os links e os seguidores de cada rede.', paths: ['socials', 'discord'] },
+  { id: 'setup', label: 'Setup', icon: 'setup', hint: 'Os periféricos e o PC.', paths: ['setup'] },
   { id: 'definicoes', label: 'Definições', icon: 'settings', hint: 'Como o painel funciona e como voltar ao site de origem.', paths: [] },
 ];
 
@@ -100,7 +99,6 @@ function tidy(content: EditableContent): EditableContent {
   const lines = (list: string[] | undefined) => (list ?? []).map((line) => line.trim()).filter(Boolean);
   return {
     ...content,
-    hero: { ...content.hero, ribbon: lines(content.hero.ribbon) },
     setup: { ...content.setup, gear: content.setup.gear.map((gear) => ({ ...gear, tags: lines(gear.tags) })) },
     partners: { ...content.partners, brands: content.partners.brands.map((brand) => ({ ...brand, perks: lines(brand.perks) })) },
   };
@@ -344,7 +342,6 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
             {tab.id === 'inicio' ? <Dashboard name={name} overview={overview} dirty={dirty} savedAt={savedAt} go={go} /> : null}
             {tab.id === 'parcerias' ? <PartnersSection open={view.open} /> : null}
             {tab.id === 'redes' ? <SocialsSection auto={auto} open={view.open} /> : null}
-            {tab.id === 'textos' ? <TextsSection /> : null}
             {tab.id === 'setup' ? <SetupSection /> : null}
             {tab.id === 'definicoes' ? (
               <>
@@ -353,7 +350,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                     <li>Muda o que quiseres nas secções e carrega em «Guardar e publicar». O site fica atualizado nesse momento.</li>
                     <li>Enquanto não guardares, nada muda no site. «Descartar» volta ao que estava guardado.</li>
                     <li>O estado do direto, os clips e os seguidores da Twitch vêm sozinhos da Twitch: não se mexem aqui.</li>
-                    <li>O nome, as cores e a imagem do topo não estão no painel: para esses, fala com quem trata do site.</li>
+                    <li>O nome, as cores, a imagem do topo, os textos e os títulos não estão no painel: para esses, fala com quem trata do site.</li>
                   </ul>
                 </Card>
                 <Card

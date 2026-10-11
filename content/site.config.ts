@@ -44,6 +44,9 @@ export const site: SiteConfig = {
     photoFit: 'cover',
     // Mais para a esquerda, para a raposa caber inteira.
     photoFocus: '25% 50%',
+    // A mesma arte com vida (ela a pestanejar, a raposa também): um vídeo em loop por cima da imagem.
+    // Foi feito a partir desta imagem; se a trocares, troca-o também ou tira esta linha.
+    photoVideo: '/media/kitsune-loop.mp4',
     // A mesma arte a continuar para a direita, desfocada: é o fundo por trás da televisão.
     photoBackdrop: '/media/kitsune-wide.jpg',
     photoScale: 1.22,
@@ -250,6 +253,7 @@ export const site: SiteConfig = {
         imageSize: { width: 320, height: 574 },
         focus: '50% 0%',
         color: '#4a1fb8',
+        note: 'Joga com responsabilidade.',
       },
       {
         name: 'CSGO-Skins',
@@ -265,7 +269,7 @@ export const site: SiteConfig = {
         imageSize: { width: 320, height: 600 },
         focus: '50% 14%',
         color: '#101c4a',
-        note: 'Abrir caixas envolve dinheiro real: joga com responsabilidade.',
+        note: 'Joga com responsabilidade.',
       },
       {
         name: 'BingX',
@@ -284,7 +288,7 @@ export const site: SiteConfig = {
         imageSize: { width: 320, height: 536 },
         focus: '50% 100%',
         color: '#16171c',
-        note: 'Os criptoativos são de alto risco: podes perder tudo o que investires. A BingX não aceita registos de alguns países; em outubro de 2026, Portugal era um deles.',
+        note: 'Joga com responsabilidade.',
       },
       {
         name: 'Beyond Industries',

@@ -377,24 +377,29 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
         }}
       >
         {active ? (
-          <div ref={boxRef} className="partner-box" data-lenis-prevent>
+          <div
+            ref={boxRef}
+            className="partner-box"
+            data-lenis-prevent
+            // A coluna da imagem ajusta-se ao formato do banner (largura a dividir pela altura).
+            style={{ '--art-ratio': active.imageSize.width / active.imageSize.height } as React.CSSProperties}
+          >
             <button type="button" className="partner-close" aria-label="Fechar" onClick={closeBrand}>
               <svg viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
-            <div
-              className="partner-art"
-              // Um banner ao alto enche a coluna; um deitado (um logo, por exemplo) fica inteiro.
-              data-fit={active.imageSize.width > active.imageSize.height ? 'contain' : 'cover'}
-              style={{ background: active.color }}
-            >
+            <div className="partner-art" style={{ background: active.color }}>
+              {/* O banner nunca é cortado (as marcas põem texto até à margem); o que sobrar à volta
+                  leva o próprio banner, desfocado. O "contain" vai aqui e não no CSS: o Image com
+                  `fill` escreve o object-fit no próprio elemento. */}
+              <span aria-hidden className="partner-art-fill" style={{ backgroundImage: `url("${active.image}")` }} />
               <Image
                 src={active.image}
                 alt={`Imagem da parceria com a ${active.name}`}
                 fill
-                sizes="(min-width: 760px) 340px, 100vw"
-                style={{ objectPosition: active.focus }}
+                sizes="(min-width: 760px) 470px, 100vw"
+                style={{ objectFit: 'contain' }}
               />
             </div>
             <div className="partner-body" data-lenis-prevent>

@@ -17,15 +17,15 @@ export type LoginState = { error: string } | null;
 export async function login(_state: LoginState, formData: FormData): Promise<LoginState> {
   if (adminStatus() !== 'ready') return { error: 'O painel está desligado neste servidor.' };
   const ip = await clientIp();
-  if (tooManyFailures(ip)) return { error: 'Demasiadas tentativas. Espera uns minutos e tenta outra vez.' };
+  if (await tooManyFailures(ip)) return { error: 'Demasiadas tentativas. Espera uns minutos e tenta outra vez.' };
   const attempt = formData.get('password');
   if (typeof attempt !== 'string' || !checkPassword(attempt)) {
-    recordFailure(ip);
+    await recordFailure(ip);
     // Meio segundo por tentativa falhada: quem anda a adivinhar não consegue ir depressa.
     await new Promise((resolve) => setTimeout(resolve, 500));
     return { error: 'Password errada.' };
   }
-  clearFailures(ip);
+  await clearFailures(ip);
   await createSession();
   redirect('/admin');
 }

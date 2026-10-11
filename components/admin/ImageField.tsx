@@ -38,9 +38,8 @@ export function ImageField({ path, label, hint, sizePath, focusPath, tint, previ
     setBusy(true);
     setProblem(null);
     try {
-      const body = new FormData();
-      body.append('file', file);
-      const response = await fetch('/admin/upload', { method: 'POST', body });
+      // O ficheiro vai tal e qual no corpo do pedido (ver app/admin/upload/route.ts).
+      const response = await fetch('/admin/upload', { method: 'POST', body: file });
       const data = (await response.json().catch(() => null)) as { url?: string; width?: number; height?: number; error?: string } | null;
       if (!response.ok || !data?.url) {
         setProblem(data?.error ?? 'Não consegui enviar a imagem. Tenta outra vez.');

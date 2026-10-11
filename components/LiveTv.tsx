@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { StickerArt } from '@/components/icons';
+import { LivePill } from '@/components/LivePill';
 
 // Depois de a página parar, o browser atualiza o hover com um movimento de rato "falso":
 // só passado este tempo é que um movimento conta como sendo da pessoa.
 const SETTLE_MS = 250;
 
 /**
- * A televisão que aparece na moldura do hero com o direto lá dentro.
+ * A televisão que aparece na moldura do hero com o direto lá dentro: uma caixa retro com a
+ * barra do estado em cima, o ecrã com os comandos ao lado e a base com a marca.
  *
  * A Twitch pausa o player se ele estiver rodado, com transform ativo ou com alguma coisa
  * por cima. Por isso a entrada da televisão e a estática são retiradas assim que acabam.
@@ -57,30 +60,51 @@ export function LiveTv({ name, src, onClose }: { name: string; src: string; onCl
         if (event.animationName === 'tv-on') setStaticDone(true);
       }}
     >
-      <span aria-hidden className="tv-antenna tv-antenna-l" />
-      <span aria-hidden className="tv-antenna tv-antenna-r" />
       <div className="tv-body">
-        <div ref={screen} className="tv-screen" data-interactive="false">
-          <iframe src={src} title={`Direto de ${name}`} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-          {/* Chuva de estática enquanto a televisão "liga". */}
-          {staticDone ? null : <span aria-hidden className="tv-static" />}
+        <div className="tv-top">
+          <LivePill />
+          <span aria-hidden className="tv-leds">
+            <i />
+            <i />
+            <i />
+          </span>
+          <button type="button" className="tv-close" aria-label="Fechar o direto" onClick={onClose}>
+            <span aria-hidden>✕</span>
+          </button>
         </div>
-        <div aria-hidden className="tv-side">
-          <span className="tv-knob" />
-          <span className="tv-knob" />
-          <span className="tv-speaker" />
+        <div className="tv-main">
+          <div className="tv-tube">
+            <div ref={screen} className="tv-screen" data-interactive="false">
+              <iframe src={src} title={`Direto de ${name}`} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+              {/* Chuva de estática enquanto a televisão "liga". */}
+              {staticDone ? null : <span aria-hidden className="tv-static" />}
+            </div>
+          </div>
+          <div aria-hidden className="tv-side">
+            <span className="tv-dial" />
+            <span className="tv-tag">CH</span>
+            <span className="tv-knob" />
+            <span className="tv-tag">VOL</span>
+            <span className="tv-meter">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="tv-speaker" />
+          </div>
         </div>
-        {/* A "marca" da televisão: uma chapa com o nome, pendurada na borda de baixo. */}
-        <span aria-hidden className="tv-brand">
-          {name}
-        </span>
+        <div aria-hidden className="tv-base">
+          <span className="tv-vent" />
+          <span className="tv-brand">
+            <StickerArt kind="fox" />
+            {name} TV
+          </span>
+          <span className="tv-power">ON</span>
+        </div>
       </div>
-      <span aria-hidden className="tv-leg tv-leg-back" />
-      <span aria-hidden className="tv-leg tv-leg-l" />
-      <span aria-hidden className="tv-leg tv-leg-r" />
-      <button type="button" className="tv-close" aria-label="Fechar o direto" onClick={onClose}>
-        <span aria-hidden>✕</span>
-      </button>
+      <span aria-hidden className="tv-foot tv-foot-l" />
+      <span aria-hidden className="tv-foot tv-foot-r" />
     </div>
   );
 }

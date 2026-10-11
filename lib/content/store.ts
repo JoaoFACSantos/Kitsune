@@ -1,89 +1,80 @@
 import 'server-only';
-import { copyFile, mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
-import path from 'node:path';
 import type { EditableContent } from '@/content/types';
+import { db, ensureSchema, isMissingTable } from '@/lib/db';
 import { UPLOAD_NAME } from './editable';
 
-// Onde o painel guarda as coisas: uma pasta no disco do servidor (CONTENT_DIR, ou ./data).
+// Onde o painel guarda as coisas: a base de dados D1 da Cloudflare (as tabelas estão em lib/db.ts).
 //
-//   content.json   o conteúdo em vigor
-//   backups/       cópias do content.json antes de cada gravação (ficam as últimas 30)
-//   uploads/       as imagens carregadas no painel
+//   content   o conteúdo em vigor, no mesmo formato do antigo content.json
+//   backups   cópias do conteúdo antes de cada gravação (ficam as últimas 30)
+//   uploads   as imagens carregadas no painel
 //
-// Precisa de um disco que não se apague: um VPS ou um PC servem. Em alojamentos sem disco
-// (Vercel, Cloudflare Workers) isto não grava: aí é preciso trocar este ficheiro por um que
-// fale com uma base de dados. O resto do site só usa as funções exportadas aqui.
+// Um Worker não tem disco: por isso é uma base de dados e não uma pasta. O resto do site só usa
+// as funções exportadas aqui.
 
-const ROOT = path.resolve(process.env.CONTENT_DIR || path.join(/* turbopackIgnore: true */ process.cwd(), 'data'));
-const FILE = path.join(ROOT, 'content.json');
-const BACKUPS = path.join(ROOT, 'backups');
-const UPLOADS = path.join(ROOT, 'uploads');
 const KEEP_BACKUPS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
+// Uma linha da D1 leva 2 MB no máximo.
+export const MAX_UPLOAD_BYTES = 1_900_000;
 
-const isMissing = (error: unknown) => (error as NodeJS.ErrnoException | null)?.code === 'ENOENT';
-
-/** O conteúdo guardado, tal como está no disco (ainda por validar), ou null se não houver. */
+/** O conteúdo guardado, tal como está na base de dados (ainda por validar), ou null se não houver. */
 export async function readStored(): Promise<{ content: unknown; savedAt: string | null } | null> {
   try {
-    const data: unknown = JSON.parse(await readFile(FILE, 'utf8'));
+    const row = await db().prepare('SELECT data FROM content WHERE id = 1').first<{ data: string }>();
+    if (!row) return null;
+    const data: unknown = JSON.parse(row.data);
     if (typeof data !== 'object' || data === null || !('content' in data)) return null;
     const savedAt = 'savedAt' in data && typeof data.savedAt === 'string' ? data.savedAt : null;
     return { content: data.content, savedAt };
   } catch (error) {
-    // Ficheiro estragado: o site continua de pé com o conteúdo de origem.
-    if (!isMissing(error)) console.error('[conteúdo] não consegui ler', FILE, error);
+    // Conteúdo estragado ou base de dados em baixo: o site continua de pé com o conteúdo de origem.
+    if (!isMissingTable(error)) console.error('[conteúdo] não consegui ler', error);
     return null;
   }
 }
 
-/** Guarda a cópia de segurança do ficheiro atual, se existir. */
-async function backup() {
-  await mkdir(BACKUPS, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  try {
-    await copyFile(FILE, path.join(BACKUPS, `content-${stamp}.json`));
-  } catch (error) {
-    if (!isMissing(error)) throw error;
-    return;
-  }
-  const old = (await readdir(BACKUPS)).filter((name) => name.startsWith('content-')).sort();
-  await Promise.all(old.slice(0, -KEEP_BACKUPS).map((name) => unlink(path.join(BACKUPS, name)).catch(() => undefined)));
-}
+/** Guarda a cópia de segurança do conteúdo atual, se existir. */
+const backup = (savedAt: string) => db().prepare('INSERT INTO backups (saved_at, data) SELECT ?, data FROM content WHERE id = 1').bind(savedAt);
 
 /** Grava o conteúdo (já validado). Devolve a data da gravação. */
 export async function writeStored(content: EditableContent): Promise<string> {
-  await mkdir(ROOT, { recursive: true });
-  await backup();
+  await ensureSchema();
   const savedAt = new Date().toISOString();
-  // Escreve ao lado e troca no fim: se a gravação falhar a meio, o ficheiro bom fica intacto.
-  const temp = `${FILE}.${process.pid}.tmp`;
-  await writeFile(temp, `${JSON.stringify({ version: 1, savedAt, content }, null, 2)}\n`, 'utf8');
-  await rename(temp, FILE);
+  // Vai tudo numa transação: se a gravação falhar a meio, o conteúdo bom fica intacto.
+  await db().batch([
+    backup(savedAt),
+    db()
+      .prepare('INSERT INTO content (id, data) VALUES (1, ?1) ON CONFLICT (id) DO UPDATE SET data = ?1')
+      .bind(JSON.stringify({ version: 1, savedAt, content })),
+    db().prepare('DELETE FROM backups WHERE id NOT IN (SELECT id FROM backups ORDER BY id DESC LIMIT ?)').bind(KEEP_BACKUPS),
+  ]);
   return savedAt;
 }
 
 /** Apaga o conteúdo guardado: o site volta ao de origem. Fica uma cópia de segurança. */
 export async function clearStored() {
-  await backup();
-  await unlink(FILE).catch((error) => {
-    if (!isMissing(error)) throw error;
-  });
+  await ensureSchema();
+  await db().batch([backup(new Date().toISOString()), db().prepare('DELETE FROM content')]);
 }
 
-export async function saveUpload(name: string, data: Buffer) {
+export async function saveUpload(name: string, data: Uint8Array) {
   if (!UPLOAD_NAME.test(name)) throw new Error(`Nome de ficheiro inválido: ${name}`);
-  await mkdir(UPLOADS, { recursive: true });
-  await writeFile(path.join(UPLOADS, name), data);
+  if (data.byteLength > MAX_UPLOAD_BYTES) throw new Error(`Imagem grande de mais: ${data.byteLength} bytes`);
+  await ensureSchema();
+  await db()
+    .prepare('INSERT INTO uploads (name, created_at, data) VALUES (?1, ?2, ?3) ON CONFLICT (name) DO UPDATE SET created_at = ?2')
+    .bind(name, Date.now(), data)
+    .run();
 }
 
-export async function readUpload(name: string): Promise<Buffer | null> {
-  // O nome vem do URL: só passa o formato exato dos nossos ficheiros, sem barras nem "..".
+export async function readUpload(name: string): Promise<Uint8Array<ArrayBuffer> | null> {
+  // O nome vem do URL: só passa o formato exato dos nossos ficheiros.
   if (!UPLOAD_NAME.test(name)) return null;
   try {
-    return await readFile(path.join(UPLOADS, name));
+    const row = await db().prepare('SELECT data FROM uploads WHERE name = ?').bind(name).first<{ data: ArrayBuffer | number[] }>();
+    return row ? new Uint8Array(row.data) : null;
   } catch (error) {
-    if (!isMissing(error)) console.error('[conteúdo] não consegui ler a imagem', name, error);
+    if (!isMissingTable(error)) console.error('[conteúdo] não consegui ler a imagem', name, error);
     return null;
   }
 }
@@ -93,22 +84,15 @@ export async function readUpload(name: string): Promise<Buffer | null> {
  * podem ser de uma edição que ainda não foi guardada.
  */
 export async function pruneUploads(inUse: Set<string>) {
-  let names: string[];
   try {
-    names = await readdir(UPLOADS);
-  } catch {
-    return;
+    const { results } = await db()
+      .prepare('SELECT name FROM uploads WHERE created_at < ?')
+      .bind(Date.now() - DAY_MS)
+      .all<{ name: string }>();
+    const unused = results.filter(({ name }) => !inUse.has(name));
+    if (unused.length) await db().batch(unused.map(({ name }) => db().prepare('DELETE FROM uploads WHERE name = ?').bind(name)));
+  } catch (error) {
+    // Fica para a próxima gravação.
+    if (!isMissingTable(error)) console.error('[conteúdo] não consegui limpar as imagens', error);
   }
-  await Promise.all(
-    names
-      .filter((name) => UPLOAD_NAME.test(name) && !inUse.has(name))
-      .map(async (name) => {
-        const file = path.join(UPLOADS, name);
-        try {
-          if (Date.now() - (await stat(file)).mtimeMs > DAY_MS) await unlink(file);
-        } catch {
-          // Já não existe, ou está em uso: fica para a próxima.
-        }
-      }),
-  );
 }

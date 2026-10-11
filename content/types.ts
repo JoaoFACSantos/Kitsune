@@ -138,6 +138,11 @@ export type SiteConfig = {
     /** Com 'cover': o ponto da imagem que fica à vista quando é cortada (object-position). */
     photoFocus?: string;
     /**
+     * Com 'cover': a mesma arte num vídeo curto, sem som, que começa e acaba no fotograma da imagem
+     * (para repetir sem salto). Toca em loop por cima da imagem, que fica como reserva.
+     */
+    photoVideo?: string;
+    /**
      * Com 'cover': a continuação da imagem para a direita, bem desfocada (a imagem, o seu espelho e
      * a imagem outra vez, lado a lado). Com a televisão ligada, enche a moldura por trás dela.
      */
@@ -184,11 +189,12 @@ export type SiteConfig = {
 };
 
 /**
- * A parte do site que se muda no painel (/admin), sem mexer no código: textos, redes, setup e
- * parcerias. O resto (nome, handle, cores, imagem do hero) vem só de `content/site.config.ts`.
+ * A parte do site que se muda no painel (/admin), sem mexer no código: as redes, os periféricos,
+ * o PC e as marcas das parcerias. O resto (nome, handle, cores, imagem do hero e todos os textos
+ * e títulos) vem só de `content/site.config.ts`.
  * O que o painel guarda substitui estes campos; enquanto não houver nada guardado, valem os da configuração.
  */
-export type EditableContent = Pick<SiteConfig, 'role' | 'tagline' | 'email' | 'socials' | 'discord' | 'setup' | 'partners' | 'socialsSection'> & {
-  hero: Pick<SiteConfig['hero'], 'greeting' | 'note' | 'ribbon'>;
-  clips: Pick<SiteConfig['clips'], 'title' | 'intro' | 'moreUrl' | 'recentDays'>;
+export type EditableContent = Pick<SiteConfig, 'socials' | 'discord'> & {
+  setup: Pick<SiteConfig['setup'], 'gear' | 'pc'>;
+  partners: Pick<SiteConfig['partners'], 'brands'>;
 };
