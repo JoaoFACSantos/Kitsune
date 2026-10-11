@@ -4,7 +4,7 @@ import { BackToTop } from './BackToTop';
 const DEVELOPER = { name: 'FAC', url: 'https://joaofacsantos.github.io/fac-dev/' };
 
 /** Rodapé: nome enorme em contorno que se enche de cor no hover. */
-export function Footer({ name, email }: { name: string; email: string }) {
+export function Footer({ name }: { name: string }) {
   // O ano lê-se aqui dentro e não no topo do ficheiro: num Worker, fora de um pedido, o relógio
   // está parado em 1970.
   const year = new Date().getFullYear();
@@ -25,9 +25,6 @@ export function Footer({ name, email }: { name: string; email: string }) {
             {DEVELOPER.name}
           </a>
         </p>
-        <a href={`mailto:${email}`} className="py-2.5 transition-colors hover:text-link">
-          {email}
-        </a>
         <BackToTop />
       </div>
     </footer>

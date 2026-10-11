@@ -34,7 +34,7 @@ Todo o conteúdo está em [`content/site.config.ts`](content/site.config.ts):
 
 As cores do tema são CSS variables, por isso mudá-las muda o site todo.
 
-As redes, os periféricos, o PC e as marcas das parcerias também se mudam sem tocar no código, no [painel](#painel-admin): o que lá for guardado passa à frente do que está neste ficheiro. Os textos e os títulos mudam-se só aqui.
+As redes, os periféricos, o PC, as marcas das parcerias e os giveaways também se mudam sem tocar no código, no [painel](#painel-admin): o que lá for guardado passa à frente do que está neste ficheiro. Os textos e os títulos mudam-se só aqui.
 
 ### A foto do hero
 
@@ -61,15 +61,21 @@ Para acrescentar ou mudar uma marca:
 3. Preenche `perk` (a vantagem principal, no cartão da fila), `about`, `perks` e `note` (idade mínima, riscos, países onde não funciona). Escreve só vantagens que a marca confirma.
 4. Em `url` põe o link de afiliada. Se ele já leva o código, marca `codeInLink: true`; senão, o código fica copiado quando a pessoa abre o site.
 
+## Giveaways
+
+A secção dos giveaways fica logo a seguir ao topo e só existe quando faz falta: aparece (com o link no menu) se estiver ligada no painel e houver pelo menos um giveaway por terminar. Cada giveaway tem o prémio, uma imagem (opcional), os passos para participar, um link (opcional) e o último dia para participar (opcional). O dia conta pelo relógio de Lisboa: no dia seguinte, o cartão sai do site sozinho; sem data, fica até ser apagado.
+
+Os giveaways escrevem-se no painel. Em [`content/site.config.ts`](content/site.config.ts) ficam só o título e a frase da secção (`giveaways.title` e `giveaways.intro`).
+
 ## Painel (/admin)
 
-Em `/admin` a streamer muda o conteúdo do site sozinha: as marcas das parcerias (com envio de imagens), as redes e os seguidores, os periféricos e o PC. Ao guardar, o site fica atualizado nesse momento.
+Em `/admin` a streamer muda o conteúdo do site sozinha: as marcas das parcerias (com envio de imagens), os giveaways, as redes e os seguidores, os periféricos e o PC. A ordem das marcas, dos giveaways e das redes muda-se a arrastar os cartões (com o teclado: foco na pega e setas para cima e para baixo). Ao guardar, o site fica atualizado nesse momento.
 
 Para o ligar, define o segredo `ADMIN_PASSWORD` no Worker (ver [Deploy](#deploy)), com 12 caracteres ou mais. Sem password o painel fica fechado. A sessão dura duas semanas; mudar a password fecha todas as sessões.
 
 O que fica no painel e o que fica no código:
 
-- **No painel**: `socials`, `discord`, `setup.gear`, `setup.pc` e `partners.brands` (o tipo `EditableContent`, em [`content/types.ts`](content/types.ts)).
+- **No painel**: `socials`, `discord`, `setup.gear`, `setup.pc`, `partners.brands`, `giveaways.active` e `giveaways.items` (o tipo `EditableContent`, em [`content/types.ts`](content/types.ts)).
 - **Só no código**: nome, handle, plataforma, cores, a imagem do hero e todos os textos e títulos (o topo, os clips, o cartão de convite das parcerias e os seus números, as estatísticas a brincar).
 
 O painel guarda tudo numa base de dados D1 da Cloudflare (o binding `DB`, em [`cloudflare.config.ts`](cloudflare.config.ts)). As tabelas criam-se sozinhas na primeira gravação ([`lib/db.ts`](lib/db.ts)):

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, type ReactNode, useContext, useId, useRef, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useId, useRef, useState } from 'react';
 import type { EditableContent } from '@/content/types';
 
 // As peças do formulário do painel. Cada campo liga-se ao conteúdo por um caminho
@@ -202,6 +202,40 @@ export function Check({ path, label, hint }: FieldProps & { path: string }) {
   );
 }
 
+/** Interruptor (ligado ou desligado), com a explicação ao lado. Guarda sempre true ou false. */
+export function Toggle({ path, label, hint }: FieldProps & { path: string }) {
+  const { value, set } = useField<boolean>(path);
+  return (
+    <label className="toggle">
+      <input type="checkbox" role="switch" checked={value === true} onChange={(event) => set(event.target.checked)} />
+      <span aria-hidden className="toggle-track" />
+      <span className="toggle-text">
+        <strong>{label}</strong>
+        {hint ? <small>{hint}</small> : null}
+      </span>
+    </label>
+  );
+}
+
+/** Um dia do calendário ("2026-10-31"). Vazio, o campo fica sem valor. */
+export function DateField({ path, label, hint, min }: FieldProps & { path: string; min?: string }) {
+  const id = useId();
+  const { value, set, error } = useField<string>(path);
+  return (
+    <Field id={id} label={label} hint={hint} error={error}>
+      <input
+        id={id}
+        type="date"
+        className="input"
+        value={value ?? ''}
+        min={min}
+        aria-invalid={error ? true : undefined}
+        onChange={(event) => set(event.target.value || undefined)}
+      />
+    </Field>
+  );
+}
+
 export function ColorField({ path, label, hint }: FieldProps & { path: string }) {
   const id = useId();
   const { value, set, error } = useField<string>(path);
@@ -240,6 +274,16 @@ const Down = () => (
 const Cross = () => (
   <svg {...ICON}>
     <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+);
+const Grip = () => (
+  <svg viewBox="0 0 24 24" aria-hidden fill="currentColor">
+    <circle cx="9" cy="6" r="1.7" />
+    <circle cx="15" cy="6" r="1.7" />
+    <circle cx="9" cy="12" r="1.7" />
+    <circle cx="15" cy="12" r="1.7" />
+    <circle cx="9" cy="18" r="1.7" />
+    <circle cx="15" cy="18" r="1.7" />
   </svg>
 );
 const Chevron = () => (
@@ -312,12 +356,28 @@ type RepeaterProps<T> = {
   confirmRemove?: (item: T) => string;
   /** O item que já aparece aberto (quem chega do Início vem para editar um em concreto). */
   initialOpen?: number;
-  /** Com `false`, a lista fica sem as setas de subir e descer: a ordem não se mexe no painel. */
+  /** Com `false`, a ordem não se mexe no painel: a lista fica sem a pega de arrastar e sem as setas. */
   sortable?: boolean;
   children: (itemPath: string, item: T, index: number) => ReactNode;
 };
 
-/** Lista de coisas com vários campos (marcas, redes, periféricos): acrescentar, tirar e trocar a ordem. */
+// Píxeis a partir dos quais um clique no cartão passa a contar como arrastar.
+const DRAG_START_PX = 6;
+
+/** O que se sabe de um cartão a ser arrastado: de onde saiu, para onde vai e onde estavam todos. */
+type Drag = { id: number; from: number; to: number; startY: number; tops: number[]; heights: number[]; gap: number; cards: HTMLElement[]; moved: boolean };
+
+const shift = <V,>(list: V[], from: number, to: number) => {
+  const copy = [...list];
+  const [moved] = copy.splice(from, 1);
+  copy.splice(to, 0, moved);
+  return copy;
+};
+
+/**
+ * Lista de coisas com vários campos (marcas, redes, periféricos): acrescentar, tirar e trocar a ordem.
+ * Os cartões (listas com resumo) trocam de ordem a arrastar; as linhas simples, com as setas.
+ */
 export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confirmRemove, initialOpen, sortable = true, children }: RepeaterProps<T>) {
   const { draft, set, errors } = useForm();
   const items = (getAt(draft, path) as T[] | undefined) ?? [];
@@ -327,6 +387,12 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
   const nextKey = useRef(items.length);
   const [open, setOpen] = useState<number | null>(initialOpen ?? null);
   const keyAt = (i: number) => keys[i] ?? -1 - i;
+  const listRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<Drag | null>(null);
+  // O clique que o browser dispara ao largar um cartão arrastado não o abre nem fecha.
+  const skipClick = useRef(false);
+  // O cartão cuja pega fica com o foco depois de mudar de sítio pelo teclado.
+  const refocus = useRef<number | null>(null);
   const error = errors[path];
   const failing = (i: number) => Object.keys(errors).some((key) => key.startsWith(`${path}.${i}.`));
 
@@ -345,26 +411,106 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
     );
     setKeys(items.map((_, j) => keyAt(j)).filter((_, j) => j !== i));
   };
-  const move = (i: number, by: -1 | 1) => {
-    const j = i + by;
-    if (j < 0 || j >= items.length) return;
-    const swap = <V,>(list: V[]) => {
-      const copy = [...list];
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-      return copy;
-    };
-    set(path, swap(items));
-    setKeys(swap(items.map((_, k) => keyAt(k))));
+  const moveTo = (from: number, to: number) => {
+    if (to < 0 || to >= items.length || to === from) return;
+    set(path, shift(items, from, to));
+    setKeys(
+      shift(
+        items.map((_, k) => keyAt(k)),
+        from,
+        to,
+      ),
+    );
   };
 
-  const tools = (i: number) => (
+  // Ao mudar de sítio, o cartão pode perder o foco (o browser tira-o a um elemento que é movido).
+  useEffect(() => {
+    if (refocus.current === null) return;
+    listRef.current?.querySelector<HTMLElement>(`:scope > [data-key="${refocus.current}"] .rep-grip`)?.focus();
+    refocus.current = null;
+  });
+
+  /* Arrastar um cartão: com o rato pega-se em qualquer ponto do cabeçalho; com o dedo só na pega,
+     para o resto do cartão continuar a fazer scroll. Enquanto se arrasta mexe-se só no estilo dos
+     cartões; a lista muda uma vez, ao largar. */
+  const dragStart = (event: React.PointerEvent<HTMLDivElement>, i: number) => {
+    const target = event.target as Element;
+    if (event.pointerType === 'mouse' ? event.button !== 0 || target.closest('.tools') : !target.closest('.rep-grip')) return;
+    const cards = Array.from(listRef.current?.querySelectorAll<HTMLElement>(':scope > .rep-item') ?? []);
+    if (cards.length < 2) return;
+    const boxes = cards.map((card) => card.getBoundingClientRect());
+    dragRef.current = {
+      id: event.pointerId,
+      from: i,
+      to: i,
+      startY: event.clientY,
+      tops: boxes.map((box) => box.top),
+      heights: boxes.map((box) => box.height),
+      gap: boxes[1].top - boxes[0].bottom,
+      cards,
+      moved: false,
+    };
+  };
+  const dragMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || event.pointerId !== drag.id) return;
+    const dy = event.clientY - drag.startY;
+    if (!drag.moved) {
+      if (Math.abs(dy) < DRAG_START_PX) return;
+      drag.moved = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      if (listRef.current) listRef.current.dataset.sorting = 'true';
+      drag.cards[drag.from].dataset.dragging = 'true';
+    }
+    const { from, tops, heights, cards } = drag;
+    const last = cards.length - 1;
+    // O cartão não sai da lista: pára no topo do primeiro e no fundo do último.
+    const y = Math.min(tops[last] + heights[last] - tops[from] - heights[from], Math.max(tops[0] - tops[from], dy));
+    cards[from].style.translate = `0 ${y}px`;
+    // Troca de lugar com um vizinho quando a borda da frente passa o meio dele (a de cima ao
+    // subir, a de baixo ao descer): assim chega-se ao primeiro e ao último lugar da lista.
+    const top = tops[from] + y;
+    const bottom = top + heights[from];
+    let to = from;
+    cards.forEach((_, j) => {
+      const middle = tops[j] + heights[j] / 2;
+      if (j < from && top < middle) to = Math.min(to, j);
+      if (j > from && bottom > middle) to = Math.max(to, j);
+    });
+    drag.to = to;
+    const step = heights[from] + drag.gap;
+    cards.forEach((card, j) => {
+      if (j === from) return;
+      const offset = j >= to && j < from ? step : j > from && j <= to ? -step : 0;
+      card.style.translate = offset ? `0 ${offset}px` : '';
+    });
+  };
+  const dragEnd = (event: React.PointerEvent<HTMLDivElement>, drop: boolean) => {
+    const drag = dragRef.current;
+    if (!drag || event.pointerId !== drag.id) return;
+    dragRef.current = null;
+    if (!drag.moved) return;
+    // Primeiro saem as transições, depois os desvios: os cartões ficam logo no sítio novo, sem voltar atrás.
+    if (listRef.current) delete listRef.current.dataset.sorting;
+    for (const card of drag.cards) {
+      card.style.translate = '';
+      delete card.dataset.dragging;
+    }
+    skipClick.current = true;
+    window.setTimeout(() => {
+      skipClick.current = false;
+    }, 80);
+    if (drop) moveTo(drag.from, drag.to);
+  };
+
+  const tools = (i: number, arrows: boolean) => (
     <div className="tools">
-      {sortable ? (
+      {arrows ? (
         <>
-          <Tool label="Subir" disabled={i === 0} onClick={() => move(i, -1)}>
+          <Tool label="Subir" disabled={i === 0} onClick={() => moveTo(i, i - 1)}>
             <Up />
           </Tool>
-          <Tool label="Descer" disabled={i === items.length - 1} onClick={() => move(i, 1)}>
+          <Tool label="Descer" disabled={i === items.length - 1} onClick={() => moveTo(i, i + 1)}>
             <Down />
           </Tool>
         </>
@@ -376,7 +522,7 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
   );
 
   return (
-    <div className="repeater" data-invalid={error ? true : undefined}>
+    <div ref={listRef} className="repeater" data-invalid={error ? true : undefined}>
       {items.map((item, i) => {
         const key = keyAt(i);
         const itemPath = `${path}.${i}`;
@@ -384,7 +530,7 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
           return (
             <div key={key} className="rep-row">
               <div className="rep-fields">{children(itemPath, item, i)}</div>
-              {tools(i)}
+              {tools(i, sortable)}
             </div>
           );
         }
@@ -393,8 +539,37 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
         // Um item com erros fica aberto, para se ver o que falta.
         const expanded = open === key || bad;
         return (
-          <div key={key} className="rep-item" data-open={expanded} data-invalid={bad ? true : undefined}>
-            <div className="rep-head">
+          <div key={key} className="rep-item" data-key={key} data-open={expanded} data-invalid={bad ? true : undefined}>
+            <div
+              className="rep-head"
+              onPointerDown={sortable ? (event) => dragStart(event, i) : undefined}
+              onPointerMove={sortable ? dragMove : undefined}
+              onPointerUp={sortable ? (event) => dragEnd(event, true) : undefined}
+              onPointerCancel={sortable ? (event) => dragEnd(event, false) : undefined}
+              onClickCapture={(event) => {
+                if (!skipClick.current) return;
+                skipClick.current = false;
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+            >
+              {sortable ? (
+                <button
+                  type="button"
+                  className="rep-grip"
+                  title="Arrastar para mudar a ordem"
+                  aria-label={`Mudar a ordem de ${info.title}: arrasta, ou usa as setas para cima e para baixo`}
+                  onKeyDown={(event) => {
+                    const to = event.key === 'ArrowUp' ? i - 1 : event.key === 'ArrowDown' ? i + 1 : null;
+                    if (to === null) return;
+                    event.preventDefault();
+                    refocus.current = key;
+                    moveTo(i, to);
+                  }}
+                >
+                  <Grip />
+                </button>
+              ) : null}
               <button type="button" className="rep-toggle" aria-expanded={expanded} onClick={() => setOpen(open === key ? null : key)}>
                 {info.media ? <span className="rep-media">{info.media}</span> : null}
                 <span className="rep-title">
@@ -404,7 +579,7 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
                 {bad ? <span className="rep-flag">por corrigir</span> : null}
                 <Chevron />
               </button>
-              {tools(i)}
+              {tools(i, false)}
             </div>
             {expanded ? <div className="rep-body">{children(itemPath, item, i)}</div> : null}
           </div>

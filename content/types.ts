@@ -69,6 +69,29 @@ export type Brand = {
   note?: string;
 };
 
+/** Um giveaway: um cartão na secção dos giveaways, com o prémio e como participar. */
+export type Giveaway = {
+  /** O prémio, em poucas palavras: "Teclado Keychron Q1 Pro". */
+  title: string;
+  /** Uma ou duas frases: o que é, para quem, quando sai o vencedor. */
+  about: string;
+  /** Como participar, passo a passo. */
+  steps: string[];
+  /** Onde se participa (o formulário, o tweet, o Discord…). Sem link, o cartão fica sem botão. */
+  url?: string;
+  /** Texto do botão: "Participar". */
+  cta: string;
+  /** Imagem do prémio, em /public ou carregada no painel. */
+  image?: string;
+  /** Tamanho real da imagem (px). */
+  imageSize?: { width: number; height: number };
+  /**
+   * Último dia para participar (AAAA-MM-DD, pelo relógio de Lisboa). No dia seguinte o cartão
+   * sai do site sozinho. Sem data, fica até ser tirado.
+   */
+  endsAt?: string;
+};
+
 /** Um clip (melhor momento). Com as chaves da Twitch vêm da API; sem elas, de `clips.items`. */
 export type Clip = {
   id: string;
@@ -185,16 +208,27 @@ export type SiteConfig = {
     brands: Brand[];
     mailSubject: string;
   };
+  /**
+   * Giveaways: a secção só aparece com `active` ligado e pelo menos um giveaway por terminar.
+   * O link no menu aparece e desaparece com ela.
+   */
+  giveaways: {
+    title: Title;
+    intro: string;
+    active: boolean;
+    items: Giveaway[];
+  };
   socialsSection: { title: Title; note: string };
 };
 
 /**
  * A parte do site que se muda no painel (/admin), sem mexer no código: as redes, os periféricos,
- * o PC e as marcas das parcerias. O resto (nome, handle, cores, imagem do hero e todos os textos
+ * o PC, as marcas das parcerias e os giveaways. O resto (nome, handle, cores, imagem do hero e todos os textos
  * e títulos) vem só de `content/site.config.ts`.
  * O que o painel guarda substitui estes campos; enquanto não houver nada guardado, valem os da configuração.
  */
 export type EditableContent = Pick<SiteConfig, 'socials' | 'discord'> & {
   setup: Pick<SiteConfig['setup'], 'gear' | 'pc'>;
   partners: Pick<SiteConfig['partners'], 'brands'>;
+  giveaways: Pick<SiteConfig['giveaways'], 'active' | 'items'>;
 };

@@ -10,7 +10,7 @@ import type { Issue } from '@/lib/content/validate';
 import { Dashboard, type Overview, type Section } from './Dashboard';
 import { Card, type FormApi, FormProvider, getAt, setAt } from './form';
 import { ArrowIcon, LogoutIcon, NavGlyph, type NavIcon } from './icons';
-import { emptyBrand, PartnersSection, SetupSection, SocialsSection } from './sections';
+import { emptyBrand, GiveawaysSection, PartnersSection, SetupSection, SocialsSection } from './sections';
 
 type EditorProps = {
   name: string;
@@ -30,6 +30,7 @@ type EditorProps = {
 const TABS: readonly { id: string; label: string; icon: NavIcon; hint: string; paths: readonly string[] }[] = [
   { id: 'inicio', label: 'Início', icon: 'home', hint: 'O site num relance e atalhos para o que mexes mais.', paths: [] },
   { id: 'parcerias', label: 'Parcerias', icon: 'partners', hint: 'As marcas e os códigos de cada parceria.', paths: ['partners'] },
+  { id: 'giveaways', label: 'Giveaways', icon: 'giveaways', hint: 'Os giveaways a decorrer e se a secção aparece no site.', paths: ['giveaways'] },
   { id: 'redes', label: 'Redes', icon: 'socials', hint: 'Os links e os seguidores de cada rede.', paths: ['socials', 'discord'] },
   { id: 'setup', label: 'Setup', icon: 'setup', hint: 'Os periféricos e o PC.', paths: ['setup'] },
   { id: 'definicoes', label: 'Definições', icon: 'settings', hint: 'Como o painel funciona e como voltar ao site de origem.', paths: [] },
@@ -76,6 +77,9 @@ const FIELD_NAMES: Record<string, string> = {
   pc: 'O PC',
   funStats: 'Estatísticas',
   socials: 'Redes',
+  items: 'Giveaways',
+  steps: 'Como participar',
+  endsAt: 'Último dia',
 };
 
 /** "partners.brands.1.url" → "Marcas › Zumub › Link". */
@@ -85,7 +89,8 @@ function describe(path: string, draft: EditableContent) {
   parts.forEach((part, i) => {
     if (/^\d+$/.test(part)) {
       const item = getAt(draft, parts.slice(0, i + 1).join('.'));
-      const named = typeof item === 'object' && item !== null ? ((item as { name?: string; label?: string }).name ?? (item as { label?: string }).label) : null;
+      const entry = typeof item === 'object' && item !== null ? (item as { name?: string; label?: string; title?: string }) : null;
+      const named = entry ? (entry.name ?? entry.label ?? entry.title) : null;
       words.push(named || `n.º ${Number(part) + 1}`);
     } else if (FIELD_NAMES[part] && (i > 0 || parts.length === 1)) {
       words.push(FIELD_NAMES[part]);
@@ -101,6 +106,7 @@ function tidy(content: EditableContent): EditableContent {
     ...content,
     setup: { ...content.setup, gear: content.setup.gear.map((gear) => ({ ...gear, tags: lines(gear.tags) })) },
     partners: { ...content.partners, brands: content.partners.brands.map((brand) => ({ ...brand, perks: lines(brand.perks) })) },
+    giveaways: { ...content.giveaways, items: content.giveaways.items.map((item) => ({ ...item, steps: lines(item.steps) })) },
   };
 }
 
@@ -341,6 +347,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
           <div key={`${version}:${view.tab}:${view.open ?? ''}`} className="admin-sections">
             {tab.id === 'inicio' ? <Dashboard name={name} overview={overview} dirty={dirty} savedAt={savedAt} go={go} /> : null}
             {tab.id === 'parcerias' ? <PartnersSection open={view.open} /> : null}
+            {tab.id === 'giveaways' ? <GiveawaysSection open={view.open} /> : null}
             {tab.id === 'redes' ? <SocialsSection auto={auto} open={view.open} /> : null}
             {tab.id === 'setup' ? <SetupSection /> : null}
             {tab.id === 'definicoes' ? (
@@ -348,6 +355,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                 <Card title="Como funciona">
                   <ul className="admin-help">
                     <li>Muda o que quiseres nas secções e carrega em «Guardar e publicar». O site fica atualizado nesse momento.</li>
+                    <li>Para mudar a ordem das parcerias, dos giveaways ou das redes, arrasta o cartão pela pega do lado esquerdo.</li>
                     <li>Enquanto não guardares, nada muda no site. «Descartar» volta ao que estava guardado.</li>
                     <li>O estado do direto, os clips e os seguidores da Twitch vêm sozinhos da Twitch: não se mexem aqui.</li>
                     <li>O nome, as cores, a imagem do topo, os textos e os títulos não estão no painel: para esses, fala com quem trata do site.</li>

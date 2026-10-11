@@ -59,7 +59,7 @@ export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
   };
 
   return (
-    <header ref={ref} className="nav">
+    <header ref={ref} className="nav" data-links={links.length}>
       <nav aria-label="Principal" className="nav-pill">
         <a href="#topo" className="nav-brand" aria-label={`${name}, voltar ao início`}>
           <span className="nav-name truncate">{name}</span>

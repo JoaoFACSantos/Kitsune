@@ -1,4 +1,4 @@
-import type { Brand, EditableContent, Gear, GearIcon, Social, SocialId, Spec } from '@/content/types';
+import type { Brand, EditableContent, Gear, GearIcon, Giveaway, Social, SocialId, Spec } from '@/content/types';
 import { GEAR_ICONS, IMAGE_PATH, MAX, SOCIAL_IDS, SOCIAL_LABELS } from './editable';
 
 // Validação do conteúdo do painel. Tudo o que chega do browser passa por aqui antes de ser
@@ -171,6 +171,35 @@ function brand(bag: Bag, value: unknown, path: string): Brand {
   };
 }
 
+/** Um dia do calendário ("2026-10-31"), ou nada. */
+function day(value: unknown): string | undefined {
+  const raw = typeof value === 'string' ? value.trim() : '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return undefined;
+  // 31 de fevereiro passa no formato: a data tem de dar a volta e sair igual.
+  const date = new Date(`${raw}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw ? undefined : raw;
+}
+
+function giveaway(bag: Bag, value: unknown, path: string): Giveaway {
+  const v = record(value);
+  const size = record(v.imageSize);
+  const picture = image(bag, v.image, `${path}.image`, false);
+  const url = link(bag, v.url, `${path}.url`, false);
+  const steps = list(bag, v.steps, `${path}.steps`, MAX.giveawaySteps, (entry, p) => text(bag, entry, p, 140));
+  unique(bag, steps, `${path}.steps`, (step) => step, '');
+  const endsAt = day(v.endsAt);
+  if (!endsAt && typeof v.endsAt === 'string' && v.endsAt.trim()) bag.push({ path: `${path}.endsAt`, message: 'Data inválida: escolhe-a outra vez.' });
+  return {
+    title: text(bag, v.title, `${path}.title`, 60),
+    about: text(bag, v.about, `${path}.about`, 300, false),
+    steps,
+    ...(url ? { url } : {}),
+    cta: text(bag, v.cta, `${path}.cta`, 40, false) || 'Participar',
+    ...(picture ? { image: picture, imageSize: { width: dimension(size.width), height: dimension(size.height) } } : {}),
+    ...(endsAt ? { endsAt } : {}),
+  };
+}
+
 /** O código de um link de convite do Discord ("https://discord.gg/abc" → "abc"). */
 const inviteCode = (url: string | undefined) => /(?:discord\.gg\/|discord(?:app)?\.com\/invite\/)([\w-]{2,40})/i.exec(url ?? '')?.[1];
 
@@ -195,6 +224,7 @@ export function validateContent(input: unknown, base: EditableContent, platform:
   const discord = part('discord');
   const setup = part('setup');
   const partners = part('partners');
+  const giveaways = part('giveaways');
 
   const socials = list(bag, top('socials'), 'socials', MAX.socials, (entry, p) => social(bag, entry, p), 1);
   unique(bag, socials, 'socials', (s) => s.id, 'id');
@@ -210,6 +240,9 @@ export function validateContent(input: unknown, base: EditableContent, platform:
   const brands = list(bag, partners.brands, 'partners.brands', MAX.brands, (entry, p) => brand(bag, entry, p));
   unique(bag, brands, 'partners.brands', (b) => b.name, 'name');
 
+  const giveawayList = list(bag, giveaways.items, 'giveaways.items', MAX.giveaways, (entry, p) => giveaway(bag, entry, p));
+  unique(bag, giveawayList, 'giveaways.items', (g) => g.title, 'title');
+
   const content: EditableContent = {
     socials,
     discord: {
@@ -219,6 +252,7 @@ export function validateContent(input: unknown, base: EditableContent, platform:
     },
     setup: { gear: gearList, pc },
     partners: { brands },
+    giveaways: { active: giveaways.active === true, items: giveawayList },
   };
 
   return { content, issues: bag };
@@ -231,6 +265,9 @@ export function uploadsIn(content: EditableContent): Set<string> {
     for (const src of [b.image, b.thumb]) {
       if (src?.startsWith('/uploads/')) names.add(src.slice('/uploads/'.length));
     }
+  }
+  for (const g of content.giveaways.items) {
+    if (g.image?.startsWith('/uploads/')) names.add(g.image.slice('/uploads/'.length));
   }
   return names;
 }

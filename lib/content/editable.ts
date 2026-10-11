@@ -10,6 +10,7 @@ export function pickEditable(site: SiteConfig): EditableContent {
     discord: site.discord,
     setup: { gear: site.setup.gear, pc: site.setup.pc },
     partners: { brands: site.partners.brands },
+    giveaways: { active: site.giveaways.active, items: site.giveaways.items },
   };
 }
 
@@ -21,6 +22,7 @@ export function applyContent(site: SiteConfig, content: EditableContent): SiteCo
     discord: content.discord,
     setup: { ...site.setup, ...content.setup },
     partners: { ...site.partners, ...content.partners },
+    giveaways: { ...site.giveaways, ...content.giveaways },
   };
 }
 
@@ -57,6 +59,8 @@ export const MAX = {
   pc: 12,
   brands: 24,
   brandPerks: 6,
+  giveaways: 6,
+  giveawaySteps: 6,
 } as const;
 
 /** Imagens que o conteúdo pode usar: as do projeto (/partners, /media) e as carregadas no painel (/uploads). */

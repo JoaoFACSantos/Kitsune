@@ -28,7 +28,8 @@ export const site: SiteConfig = {
     mint: '#8EE3C8',
     peach: '#FFB199',
     ink: '#2A0F2F',
-    bg: '#FFF4F8',
+    // Rosa a sério e não quase branco: os cartões do tema claro são este fundo aclarado.
+    bg: '#FBD9E7',
     darkBg: '#140A18',
     darkInk: '#FBEAF3',
   },
@@ -305,6 +306,14 @@ export const site: SiteConfig = {
       },
     ],
     mailSubject: 'Parceria com a Kitsune',
+  },
+
+  // Os giveaways escrevem-se no painel (/admin > Giveaways). Aqui ficam só os textos da secção.
+  giveaways: {
+    title: 'giveaways *abertos*',
+    intro: 'Participa enquanto dá. Boa sorte!',
+    active: false,
+    items: [],
   },
 
   socialsSection: { title: 'segue-me *aqui*', note: 'prometo que vale a pena' },

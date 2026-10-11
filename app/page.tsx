@@ -1,5 +1,6 @@
 import { Clips } from '@/components/Clips';
 import { Footer } from '@/components/Footer';
+import { Giveaways } from '@/components/Giveaways';
 import { Hero } from '@/components/Hero';
 import { Nav } from '@/components/Nav';
 import { Partners } from '@/components/Partners';
@@ -9,6 +10,7 @@ import { ScrollFx } from '@/components/ScrollFx';
 import { Setup } from '@/components/Setup';
 import { Socials } from '@/components/Socials';
 import { ToTopArrow } from '@/components/ToTopArrow';
+import { isOpen, today } from '@/lib/content/giveaways';
 import { getSite } from '@/lib/content/site';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
 
@@ -22,6 +24,9 @@ export default async function Home() {
   // O número da API, quando existe, substitui o que está escrito na configuração.
   const socials = site.socials.map((s) => ({ ...s, followers: followers[s.id] ?? s.followers }));
   const watchUrl = site.socials.find((s) => s.id === site.platform)?.url ?? '#';
+  // Giveaways: só com a secção ligada no painel, e só os que ainda não terminaram.
+  const day = today();
+  const giveaways = site.giveaways.active ? site.giveaways.items.filter((item) => isOpen(item, day)) : [];
 
   // JSON-LD: Person com todas as redes em sameAs.
   const jsonLd = {
@@ -44,6 +49,7 @@ export default async function Home() {
         watchUrl={watchUrl}
         themeColors={{ light: site.theme.bg, dark: site.theme.darkBg }}
         links={[
+          ...(giveaways.length ? [{ id: 'giveaways', label: 'Giveaways' }] : []),
           { id: 'clips', label: 'Clips' },
           { id: 'setup', label: 'Setup' },
           { id: 'parcerias', label: 'Parcerias' },
@@ -73,6 +79,7 @@ export default async function Home() {
           handle={site.handle}
         />
         <Ribbon words={site.hero.ribbon} />
+        {giveaways.length ? <Giveaways title={site.giveaways.title} intro={site.giveaways.intro} items={giveaways} today={day} /> : null}
         <Clips title={site.clips.title} intro={site.clips.intro} moreUrl={site.clips.moreUrl} clips={clips} />
         <Setup
           title={site.setup.title}
@@ -96,7 +103,7 @@ export default async function Home() {
           discordMembers={discord.members}
         />
       </main>
-      <Footer name={site.name} email={site.email} />
+      <Footer name={site.name} />
       <ToTopArrow />
       <ScrollFx />
     </LiveProvider>

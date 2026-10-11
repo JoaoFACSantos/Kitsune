@@ -1,13 +1,15 @@
 'use client';
 
-import type { Brand, Gear, Social, SocialId, Spec } from '@/content/types';
+import type { Brand, Gear, Giveaway, Social, SocialId, Spec } from '@/content/types';
 import { GearGlyph, SocialIcon } from '@/components/icons';
 import { GEAR_ICONS, GEAR_LABELS, MAX, SOCIAL_IDS, SOCIAL_LABELS } from '@/lib/content/editable';
+import { formatDay, isOpen, today } from '@/lib/content/giveaways';
 import { formatCompact } from '@/lib/format';
-import { Card, Check, ColorField, NumberField, Repeater, Row, SelectField, StringList, TextArea, TextField, useForm } from './form';
+import { Card, Check, ColorField, DateField, NumberField, Repeater, Row, SelectField, StringList, TextArea, TextField, Toggle, useForm } from './form';
+import { NavGlyph } from './icons';
 import { ImageField } from './ImageField';
 
-// As três secções do painel. Os limites (max) são os mesmos da validação do servidor.
+// As secções do painel. Os limites (max) são os mesmos da validação do servidor.
 
 /* ---------- Parcerias ---------- */
 
@@ -100,7 +102,7 @@ function BrandFields({ path, brand }: { path: string; brand: Brand }) {
 export function PartnersSection({ open }: { open?: number }) {
   return (
     <>
-      <Card title="Marcas" hint="A ordem aqui é a ordem na fila do site. Clica numa para a abrir.">
+      <Card title="Marcas" hint="A ordem aqui é a ordem na fila do site: arrasta um cartão para o mudar de sítio. Clica numa para a abrir.">
         <Repeater<Brand>
           path="partners.brands"
           initialOpen={open}
@@ -124,7 +126,104 @@ export function PartnersSection({ open }: { open?: number }) {
           {(path, brand) => <BrandFields path={path} brand={brand} />}
         </Repeater>
       </Card>
+    </>
+  );
+}
 
+/* ---------- Giveaways ---------- */
+
+export const emptyGiveaway = (): Giveaway => ({ title: '', about: '', steps: [], cta: 'Participar' });
+
+function GiveawayFields({ path, day }: { path: string; day: string }) {
+  return (
+    <>
+      <ImageField
+        path={`${path}.image`}
+        sizePath={`${path}.imageSize`}
+        label="Imagem do prémio (opcional)"
+        hint="Aparece inteira, sem cortes. JPG, PNG ou WebP, até 8 MB."
+        optional
+      />
+      <TextField path={`${path}.title`} label="O prémio" max={60} placeholder="Teclado Keychron Q1 Pro" hint="É o título do cartão." />
+      <TextArea path={`${path}.about`} label="Sobre o giveaway (opcional)" max={300} hint="Uma ou duas frases: para quem é, quando sai o vencedor." />
+      <StringList
+        path={`${path}.steps`}
+        label="Como participar"
+        max={MAX.giveawaySteps}
+        itemMax={140}
+        addLabel="Adicionar passo"
+        placeholder="Segue o canal na Twitch"
+        hint="Um passo por linha. No site aparecem numerados."
+      />
+      <Row>
+        <TextField
+          path={`${path}.url`}
+          type="url"
+          label="Link para participar (opcional)"
+          placeholder="https://"
+          optional
+          hint="O formulário, o tweet ou o Discord. Sem link, o cartão fica sem botão."
+        />
+        <TextField path={`${path}.cta`} label="Texto do botão" max={40} placeholder="Participar" />
+      </Row>
+      <DateField
+        path={`${path}.endsAt`}
+        label="Último dia para participar (opcional)"
+        min={day}
+        hint="No dia seguinte, o giveaway sai do site sozinho. Sem data, fica até o apagares."
+      />
+    </>
+  );
+}
+
+export function GiveawaysSection({ open }: { open?: number }) {
+  const { draft } = useForm();
+  const day = today();
+  const { active, items } = draft.giveaways;
+  const running = items.filter((item) => isOpen(item, day)).length;
+  return (
+    <>
+      <Card title="No site" hint="A secção fica logo a seguir ao topo do site, com um link no menu.">
+        <Toggle
+          path="giveaways.active"
+          label="Mostrar a secção de giveaways"
+          hint="Desligada, a secção e o link do menu saem do site. Os giveaways continuam aqui guardados."
+        />
+        <p className="field-hint">
+          {!active
+            ? 'Agora: a secção não aparece no site.'
+            : running
+              ? `Agora: a secção aparece no site, com ${running} ${running === 1 ? 'giveaway' : 'giveaways'} a decorrer.`
+              : 'Agora: a secção está ligada, mas não aparece no site porque não há nenhum giveaway a decorrer.'}
+        </p>
+      </Card>
+
+      <Card title="Giveaways" hint="A ordem aqui é a ordem dos cartões no site: arrasta um para o mudar de sítio. Clica num para o abrir.">
+        <Repeater<Giveaway>
+          path="giveaways.items"
+          initialOpen={open}
+          max={MAX.giveaways}
+          addLabel="Novo giveaway"
+          make={emptyGiveaway}
+          confirmRemove={(item) => `Apagar o giveaway${item.title ? ` «${item.title}»` : ''}? Só fica apagado no site depois de guardares.`}
+          summary={(item) => ({
+            title: item.title || 'Novo giveaway',
+            subtitle: !item.endsAt ? 'Sem data de fim' : isOpen(item, day) ? `Até ${formatDay(item.endsAt)}` : `Terminou a ${formatDay(item.endsAt)}: já não aparece no site`,
+            media: item.image ? (
+              <span className="thumb">
+                {/* eslint-disable-next-line @next/next/no-img-element -- miniatura no painel, sem otimização */}
+                <img src={item.image} alt="" />
+              </span>
+            ) : (
+              <span className="thumb thumb-icon thumb-glyph">
+                <NavGlyph icon="giveaways" />
+              </span>
+            ),
+          })}
+        >
+          {(path) => <GiveawayFields path={path} day={day} />}
+        </Repeater>
+      </Card>
     </>
   );
 }
@@ -179,7 +278,7 @@ export function SocialsSection({ auto, open }: { auto: Partial<Record<SocialId, 
   const free = SOCIAL_IDS.filter((id) => !taken.includes(id));
   return (
     <>
-      <Card title="As tuas redes" hint="A ordem aqui é a ordem dos cartões no site.">
+      <Card title="As tuas redes" hint="A ordem aqui é a ordem dos cartões no site: arrasta um para o mudar de sítio.">
         <Repeater<Social>
           path="socials"
           initialOpen={open}
@@ -202,7 +301,6 @@ export function SocialsSection({ auto, open }: { auto: Partial<Record<SocialId, 
           {(path, social) => <SocialFields path={path} social={social} taken={taken} auto={auto} />}
         </Repeater>
       </Card>
-
     </>
   );
 }

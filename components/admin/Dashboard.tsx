@@ -4,6 +4,7 @@ import type { Clip, SocialId } from '@/content/types';
 import { SocialIcon, StickerArt } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
 import { useLive } from '@/components/providers/Live';
+import { isOpen, today } from '@/lib/content/giveaways';
 import { formatCompact, formatDate, formatInt } from '@/lib/format';
 import { useForm } from './form';
 import { ArrowIcon, CheckIcon, InfoIcon, PlusIcon, WarnIcon } from './icons';
@@ -16,7 +17,7 @@ export type Overview = {
   clips: Clip[];
 };
 
-export type Section = 'parcerias' | 'redes' | 'setup';
+export type Section = 'parcerias' | 'giveaways' | 'redes' | 'setup';
 
 type DashboardProps = {
   name: string;
@@ -103,6 +104,23 @@ export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps
       level: 'info',
       text: `${and.format(manual.map((n) => n.label))} ${manual.length === 1 ? 'tem os seguidores escritos' : 'têm os seguidores escritos'} à mão. Atualiza-os de vez em quando.`,
       action: { label: 'Atualizar', run: () => go('redes') },
+    });
+  }
+  // Giveaways: o que está escrito no painel e o que o site mostra podem não bater certo.
+  const day = today();
+  const { active, items: giveaways } = draft.giveaways;
+  const running = giveaways.filter((item) => isOpen(item, day)).length;
+  if (active && !running) {
+    reviews.push({
+      level: 'warn',
+      text: 'A secção de giveaways está ligada, mas não há nenhum a decorrer: não aparece no site.',
+      action: { label: 'Ver', run: () => go('giveaways') },
+    });
+  } else if (!active && running) {
+    reviews.push({
+      level: 'info',
+      text: `Tens ${running} ${running === 1 ? 'giveaway escrito' : 'giveaways escritos'}, mas a secção está desligada: não ${running === 1 ? 'aparece' : 'aparecem'} no site.`,
+      action: { label: 'Ligar', run: () => go('giveaways') },
     });
   }
   if (!brands.length) reviews.push({ level: 'info', text: 'Ainda não há parcerias no site.', action: { label: 'Criar', run: () => go('parcerias', 'new') } });

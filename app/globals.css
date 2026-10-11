@@ -16,22 +16,25 @@
   /* Tinta escura fixa: texto sobre cores claras (fitas, cartões coloridos, stickers). */
   --dark: var(--ink-light, #2a0f2f);
 
-  /* Tema claro (escolhido no switch do nav). As cores base vêm da configuração: --bg-light, --ink-light. */
-  --bg: var(--bg-light, #fff4f8);
+  /* Tema claro (escolhido no switch do nav). As cores base vêm da configuração: --bg-light, --ink-light.
+     Nada é branco puro: os cartões, o menu e as etiquetas são o fundo aclarado, para a página ficar
+     toda no mesmo rosa. O rosa do texto pequeno escurece um pouco, para se ler bem sobre ele. */
+  --bg: var(--bg-light, #fbd9e7);
   --ink: var(--dark);
-  --ink-soft: color-mix(in oklab, var(--ink) 72%, var(--bg));
-  --line: color-mix(in oklab, var(--ink) 12%, transparent);
-  --surface: rgb(255 255 255 / 0.8);
-  --surface-strong: #fff;
-  --surface-border: rgb(255 255 255 / 0.95);
-  --nav-bg: rgb(255 255 255 / 0.72);
-  --hover-soft: color-mix(in oklab, var(--pink) 16%, white);
+  --ink-soft: color-mix(in oklab, var(--ink) 76%, var(--bg));
+  --line: color-mix(in oklab, var(--ink) 14%, transparent);
+  --paper: color-mix(in oklab, var(--bg) 42%, white);
+  --surface: color-mix(in oklab, var(--paper) 78%, transparent);
+  --surface-strong: color-mix(in oklab, var(--bg) 28%, white);
+  --surface-border: rgb(255 255 255 / 0.6);
+  --nav-bg: color-mix(in oklab, var(--paper) 74%, transparent);
+  --hover-soft: color-mix(in oklab, var(--pink) 26%, var(--paper));
   --glider: var(--dark);
   --toast-bg: var(--dark);
-  --chip-bg: color-mix(in oklab, var(--pink) 10%, white);
-  --chip-fg: color-mix(in oklab, var(--pink-deep) 82%, var(--dark));
-  --link: var(--pink-deep);
-  --focus: var(--pink-deep);
+  --chip-bg: color-mix(in oklab, var(--pink) 20%, var(--paper));
+  --chip-fg: color-mix(in oklab, var(--pink-deep) 66%, var(--dark));
+  --link: color-mix(in oklab, var(--pink-deep) 84%, var(--dark));
+  --focus: var(--link);
   --dots: color-mix(in oklab, var(--dark) 11%, transparent);
   --blob-alpha: 50%;
   --grain-opacity: 0.5;
@@ -472,6 +475,13 @@
   @media (min-width: 860px) {
     .nav-links {
       display: flex;
+    }
+  }
+
+  /* Com cinco links (há giveaways), a pílula só os leva todos em ecrãs mais largos. */
+  @media (max-width: 1039px) {
+    .nav[data-links="5"] .nav-links {
+      display: none;
     }
   }
 
@@ -2631,6 +2641,158 @@
     transition: transform 0.5s var(--spring);
   }
 
+  /* ---------- Giveaways ---------- */
+
+  .giveaways {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 18px;
+  }
+
+  .giveaway {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 34px;
+  }
+
+  /* A imagem do prémio aparece inteira, sobre a cor das etiquetas. */
+  .giveaway-art {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--chip-bg);
+  }
+
+  .giveaway-art img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Sem imagem do prémio: um presente desenhado, nas cores do cartão das parcerias. */
+  .giveaway-art[data-empty] {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--pink-deep) 0%, #b0158a 55%, var(--violet) 100%);
+    color: #fff;
+  }
+
+  .giveaway-art[data-empty] svg {
+    width: clamp(84px, 32%, 150px);
+    height: auto;
+    rotate: -8deg;
+  }
+
+  .giveaway-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: clamp(22px, 3vw, 34px);
+  }
+
+  .giveaway-when {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 18px;
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .giveaway-when svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .giveaway-when span {
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  .giveaway-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.6vw, 34px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .giveaway-about {
+    color: var(--ink-soft);
+  }
+
+  .giveaway-steps {
+    display: grid;
+    align-self: stretch;
+    gap: 10px;
+    counter-reset: step;
+  }
+
+  .giveaway-steps li {
+    position: relative;
+    min-height: 26px;
+    padding-left: 38px;
+    font-weight: 600;
+    counter-increment: step;
+  }
+
+  .giveaway-steps li::before {
+    content: counter(step);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--link);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  /* O botão fica no fundo do cartão: com vários lado a lado, alinham todos. */
+  .giveaway-cta {
+    margin-top: auto;
+  }
+
+  /* Um só giveaway: o cartão deita-se, com a imagem ao lado do texto. */
+  @media (min-width: 900px) {
+    .giveaways[data-count="1"] .giveaway {
+      flex-direction: row;
+    }
+
+    .giveaways[data-count="1"] .giveaway-art {
+      flex: none;
+      width: min(46%, 520px);
+      min-height: 340px;
+      aspect-ratio: auto;
+    }
+
+    .giveaways[data-count="1"] .giveaway-body {
+      justify-content: center;
+    }
+
+    .giveaways[data-count="1"] .giveaway-cta {
+      margin-top: 6px;
+    }
+
+    .giveaways[data-count="1"] .giveaway-body {
+      padding: clamp(28px, 4vw, 52px);
+    }
+  }
+
   /* ---------- Redes ---------- */
 
   /* Flex em vez de grelha: a última linha estica e nunca fica com um buraco. */
@@ -2808,6 +2970,7 @@
   .collab.fx-in,
   .collab.fx-in .stat-pill,
   .socials.fx-in > li,
+  .giveaways.fx-in > li,
   .hero.fx-out :is(.sticker, .hero-greeting) {
     will-change: transform, opacity;
   }
@@ -2891,6 +3054,13 @@
   .collab[data-scroll] .stat-pill {
     --e: clamp(0, (var(--in, 1) - var(--i, 0) * 0.14) / 0.6, 1);
     translate: calc((1 - var(--e)) * 80px) 0;
+    opacity: var(--e);
+  }
+
+  /* Giveaways: os cartões sobem, um a seguir ao outro. */
+  .giveaways[data-scroll] > li {
+    --e: clamp(0, (var(--in, 1) - var(--i, 0) * 0.12) / 0.6, 1);
+    translate: 0 calc((1 - var(--e)) * 70px);
     opacity: var(--e);
   }
 
