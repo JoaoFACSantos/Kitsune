@@ -1,10 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Platform } from '@/content/types';
 import { HeroLoop } from '@/components/HeroLoop';
-import { HeroTurn } from '@/components/HeroTurn';
 import { HeartShape, PlayIcon, StickerArt, type StickerKind } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
 import { LiveTv } from '@/components/LiveTv';
@@ -22,9 +21,6 @@ type HeroProps = {
   tagline: string;
   photo: string;
   photoWatching?: string;
-  photoWatchingFocus?: string;
-  photoTurn?: string;
-  pet?: { run: string; sit: string };
   photoAlt: string;
   photoSize: { width: number; height: number };
   photoFit?: 'popout' | 'cover';
@@ -82,9 +78,6 @@ export function Hero({
   tagline,
   photo,
   photoWatching,
-  photoWatchingFocus,
-  photoTurn,
-  pet,
   photoAlt,
   photoSize,
   photoFit = 'popout',
@@ -110,16 +103,8 @@ export function Hero({
   const embed = live && host ? liveEmbedUrl(platform, handle, host) : null;
   const playing = embed !== null;
   const playLabel = status.live ? `Ver o direto: ${status.title}` : '';
-  // Com a televisão ligada, a ilustração passa para a versão em que se viram para ela. Um recorte
-  // ('popout') troca de imagem; uma imagem com fundo ('cover') recebe a outra por cima, a esbater.
-  const watchingOver = photoFit === 'cover' && Boolean(photoWatching);
-  const photoSrc = playing && photoWatching && !watchingOver ? photoWatching : photo;
-  // Com vídeo dela a virar-se: a imagem virada só fica depois de ele acabar (ou de não poder tocar).
-  const turnOn = watchingOver && Boolean(photoTurn);
-  const [turned, setTurned] = useState(false);
-  const onTurned = useCallback(() => setTurned(true), []);
-  // A mascote só entra com a televisão (ecrãs largos, ver .pet no CSS).
-  const petOn = Boolean(pet) && playing;
+  // Com a televisão ligada, a ilustração troca para a versão em que se viram para ela.
+  const photoSrc = playing && photoWatching ? photoWatching : photo;
   const letters = Array.from(name.toUpperCase());
 
   /** Um coração a voar: em rajada (clique) ou a subir como as reações de um direto. */
@@ -317,16 +302,7 @@ export function Hero({
         className="stage"
         data-live={live}
         data-playing={playing}
-        data-pet={pet ? true : undefined}
-        data-turn={turnOn ? true : undefined}
       >
-        {/* Em direto, os desenhos da mascote vêm logo: ao clicar no play já estão prontos. */}
-        {live && pet ? (
-          <>
-            <link rel="preload" as="image" href={pet.run} />
-            <link rel="preload" as="image" href={pet.sit} />
-          </>
-        ) : null}
         <div className="absolute inset-0 intro-zoom">
           <div className="stage-float">
             <div className="card3d">
@@ -358,34 +334,8 @@ export function Hero({
                   style={{ '--photo-scale': photoScale, '--photo-y': photoOffsetY, '--photo-focus': photoFocus } as React.CSSProperties}
                   draggable={false}
                 />
-                {/* A mesma arte em vídeo, por cima da imagem (ver HeroLoop). Com a televisão ligada sai: fica a outra imagem. */}
-                {photoVideo && photoFit === 'cover' && !(playing && photoWatching) ? <HeroLoop src={photoVideo} focus={photoFocus} className="photo photo-loop" /> : null}
-                {/* Ela virada para a televisão: só se carrega em direto e aparece quando a televisão liga. */}
-                {watchingOver && live && photoWatching ? (
-                  <Image
-                    src={photoWatching}
-                    alt=""
-                    width={photoSize.width}
-                    height={photoSize.height}
-                    sizes="(min-width: 768px) 520px, 95vw"
-                    className="photo photo-watching"
-                    data-show={playing && (turned || !turnOn)}
-                    data-after-turn={turnOn ? true : undefined}
-                    style={{ '--photo-focus': photoWatchingFocus ?? photoFocus } as React.CSSProperties}
-                    draggable={false}
-                  />
-                ) : null}
-                {/* Ela a virar-se, em vídeo, por cima de tudo: quando acaba, fica a imagem virada por baixo. */}
-                {turnOn && live && photoTurn ? (
-                  <HeroTurn
-                    src={photoTurn}
-                    playing={playing}
-                    focusFrom={photoFocus}
-                    focusTo={photoWatchingFocus ?? photoFocus}
-                    onDone={onTurned}
-                    className="photo photo-turn"
-                  />
-                ) : null}
+                {/* A mesma arte em vídeo, por cima da imagem (ver HeroLoop). */}
+                {photoVideo && photoFit === 'cover' && photoSrc === photo ? <HeroLoop src={photoVideo} focus={photoFocus} className="photo photo-loop" /> : null}
               </div>
               <p className="window-note hand">{note}</p>
               <div className="window-bar">
@@ -414,11 +364,7 @@ export function Hero({
                       type="button"
                       className="live-play hidden lg:grid"
                       aria-label={playLabel}
-                      onClick={() => {
-                        // Cada vez que a televisão liga, o vídeo dela a virar-se toca de novo.
-                        setTurned(false);
-                        setHost(window.location.hostname);
-                      }}
+                      onClick={() => setHost(window.location.hostname)}
                     >
                       <PlayIcon />
                     </button>
@@ -426,24 +372,6 @@ export function Hero({
                 </>
               ) : null}
               {embed ? <LiveTv name={name} src={embed} onClose={() => setHost(null)} /> : null}
-              {/* A mascote: salta do colo, passa à frente da televisão enquanto ela liga (antes de o
-                  direto aparecer: a Twitch pausa um player com alguma coisa por cima) e senta-se ao lado. */}
-              {petOn && pet ? (
-                <span
-                  aria-hidden
-                  className="pet"
-                  onAnimationEnd={(event) => {
-                    if (event.animationName === 'pet-travel') event.currentTarget.dataset.landed = 'true';
-                  }}
-                >
-                  <span className="pet-hop">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- desenho pequeno com transparência, sem otimização */}
-                    <img className="pet-run" src={pet.run} alt="" draggable={false} />
-                    {/* eslint-disable-next-line @next/next/no-img-element -- desenho pequeno com transparência, sem otimização */}
-                    <img className="pet-sit" src={pet.sit} alt="" draggable={false} />
-                  </span>
-                </span>
-              ) : null}
             </div>
           </div>
         </div>

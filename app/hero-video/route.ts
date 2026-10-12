@@ -1,15 +1,14 @@
 import { env } from 'cloudflare:workers';
 import { site } from '@/content/site.config';
 
-// Os vídeos do hero, servidos pelo Worker e não como ficheiros estáticos: o que toca em loop
-// (hero.photoVideo) e, com ?clip=turn, o dela a virar-se para a televisão (hero.photoTurn). Os ficheiros
+// O vídeo do hero (hero.photoVideo), servido pelo Worker e não como ficheiro estático: os ficheiros
 // estáticos da Cloudflare ignoram os pedidos parciais (Range), e o Safari (iPhone incluído) só toca
 // vídeo de um servidor que lhes responda com o bocado pedido (206).
 
 const fail = (status: number, headers?: HeadersInit) => new Response(null, { status, headers });
 
 export async function GET(request: Request) {
-  const path = new URL(request.url).searchParams.get('clip') === 'turn' ? site.hero.photoTurn : site.hero.photoVideo;
+  const path = site.hero.photoVideo;
   if (!path) return fail(404);
   const url = new URL(path, request.url);
   let file = await env.ASSETS.fetch(url);

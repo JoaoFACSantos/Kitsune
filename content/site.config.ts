@@ -48,11 +48,6 @@ export const site: SiteConfig = {
     // A mesma arte com vida (ela a pestanejar, a raposa também): um vídeo em loop por cima da imagem.
     // Foi feito a partir desta imagem; se a trocares, troca-o também ou tira esta linha.
     photoVideo: '/media/kitsune-loop.mp4',
-    // Com o direto a passar na televisão: ela de perfil, virada para a televisão, já sem a raposa ao colo...
-    photoWatching: '/media/kitsune-watching.jpg',
-    photoWatchingFocus: '58% 40%',
-    // ...porque a raposa saltou do colo, passou à frente da televisão e sentou-se ao lado dela.
-    pet: { run: '/media/fox-run.webp', sit: '/media/fox-sit.webp' },
     // A mesma arte a continuar para a direita, desfocada: é o fundo por trás da televisão.
     photoBackdrop: '/media/kitsune-wide.jpg',
     photoScale: 1.22,
