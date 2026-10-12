@@ -132,7 +132,7 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/admin` | O painel da streamer (com password) |
 | `/api/visit` | Conta uma visita (a página pede-o ao abrir) |
 | `/uploads/…` | As imagens enviadas no painel |
-| `/hero-video` | O vídeo do hero (`hero.photoVideo`), com resposta a pedidos parciais, que o Safari exige |
+| `/hero-video` | O vídeo do hero (`hero.photoVideo`), com resposta a pedidos parciais, que o Safari exige. A página pede-o com um `?v=` que muda quando o ficheiro muda, para o browser não mostrar o que tem guardado |
 | `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |
 | `/sitemap.xml`, `/robots.txt`, `/icon` | SEO e ícones |
 

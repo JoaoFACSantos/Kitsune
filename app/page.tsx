@@ -76,8 +76,9 @@ export default async function Home() {
           photoSize={site.hero.photoSize}
           photoFit={site.hero.photoFit}
           photoFocus={site.hero.photoFocus}
-          // O vídeo sai por /hero-video e não direto de /public (ver app/hero-video/route.ts).
-          photoVideo={site.hero.photoVideo ? '/hero-video' : undefined}
+          // O vídeo sai por /hero-video e não direto de /public (ver app/hero-video/route.ts). O "v"
+          // muda quando o vídeo muda, para o browser não ficar com o antigo que tem guardado.
+          photoVideo={site.hero.photoVideo ? `/hero-video?v=${__HERO_VIDEO_VERSION__}` : undefined}
           photoBackdrop={site.hero.photoBackdrop}
           photoScale={site.hero.photoScale}
           photoOffsetY={site.hero.photoOffsetY}

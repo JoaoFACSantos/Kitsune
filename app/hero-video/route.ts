@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const headers = {
     'Content-Type': 'video/mp4',
     'Accept-Ranges': 'bytes',
-    // Um dia no browser: se o vídeo for trocado, quem já o viu fica com o novo no dia seguinte.
+    // Um dia no browser. Se o vídeo for trocado, a página pede-o por outro endereço (o "v" muda).
     'Cache-Control': 'public, max-age=86400',
     'X-Content-Type-Options': 'nosniff',
   };
