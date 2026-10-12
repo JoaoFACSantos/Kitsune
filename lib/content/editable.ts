@@ -11,6 +11,7 @@ export function pickEditable(site: SiteConfig): EditableContent {
     setup: { gear: site.setup.gear, pc: site.setup.pc },
     partners: { brands: site.partners.brands },
     giveaways: { active: site.giveaways.active, items: site.giveaways.items },
+    maintenance: { active: site.maintenance.active },
   };
 }
 
@@ -23,6 +24,7 @@ export function applyContent(site: SiteConfig, content: EditableContent): SiteCo
     setup: { ...site.setup, ...content.setup },
     partners: { ...site.partners, ...content.partners },
     giveaways: { ...site.giveaways, ...content.giveaways },
+    maintenance: { ...site.maintenance, ...content.maintenance },
   };
 }
 

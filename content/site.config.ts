@@ -316,5 +316,11 @@ export const site: SiteConfig = {
     items: [],
   },
 
+  // O interruptor está no painel (/admin > Definições). Aqui fica só o que o aviso diz.
+  maintenance: {
+    active: false,
+    title: 'em *manutenção*',
+  },
+
   socialsSection: { title: 'segue-me *aqui*', note: 'prometo que vale a pena' },
 };

@@ -2641,6 +2641,17 @@
     transition: transform 0.5s var(--spring);
   }
 
+  /* ---------- Manutenção ---------- */
+
+  /* O aviso que fica no lugar do site: só o título, ao centro do ecrã. */
+  .maintenance {
+    display: grid;
+    min-height: 100svh;
+    place-items: center;
+    padding: 48px var(--margin);
+    text-align: center;
+  }
+
   /* ---------- Giveaways ---------- */
 
   .giveaways {

@@ -9,7 +9,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { VISIT_SKIP_KEY } from '@/components/VisitBeacon';
 import type { Issue } from '@/lib/content/validate';
 import { Dashboard, type Overview, type Section } from './Dashboard';
-import { Card, type FormApi, FormProvider, getAt, setAt } from './form';
+import { Card, type FormApi, FormProvider, getAt, setAt, Toggle } from './form';
 import { ArrowIcon, LogoutIcon, NavGlyph, type NavIcon } from './icons';
 import { emptyBrand, GiveawaysSection, PartnersSection, SetupSection, SocialsSection } from './sections';
 
@@ -34,7 +34,7 @@ const TABS: readonly { id: string; label: string; icon: NavIcon; hint: string; p
   { id: 'giveaways', label: 'Giveaways', icon: 'giveaways', hint: 'Os giveaways a decorrer e se a secção aparece no site.', paths: ['giveaways'] },
   { id: 'redes', label: 'Redes', icon: 'socials', hint: 'Os links e os seguidores de cada rede.', paths: ['socials', 'discord'] },
   { id: 'setup', label: 'Setup', icon: 'setup', hint: 'Os periféricos e o PC.', paths: ['setup'] },
-  { id: 'definicoes', label: 'Definições', icon: 'settings', hint: 'Como o painel funciona e como voltar ao site de origem.', paths: [] },
+  { id: 'definicoes', label: 'Definições', icon: 'settings', hint: 'Pôr o site em manutenção, como o painel funciona e como voltar ao site de origem.', paths: ['maintenance'] },
 ];
 
 type Status = { kind: 'idle' } | { kind: 'saved' } | { kind: 'error'; text: string };
@@ -362,6 +362,18 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
             {tab.id === 'setup' ? <SetupSection /> : null}
             {tab.id === 'definicoes' ? (
               <>
+                <Card title="Manutenção" hint="Para quando o site não deve estar à vista: em vez da página, as pessoas veem só «em manutenção».">
+                  <Toggle
+                    path="maintenance.active"
+                    label="Pôr o site em manutenção"
+                    hint="Só muda quando guardares. O painel continua a funcionar: é aqui que voltas a desligar."
+                  />
+                  <p className="field-hint">
+                    {draft.maintenance.active
+                      ? 'Agora: ligada. Quem abrir o site vê só o aviso de manutenção.'
+                      : 'Agora: desligada. O site aparece normalmente.'}
+                  </p>
+                </Card>
                 <Card title="Como funciona">
                   <ul className="admin-help">
                     <li>Muda o que quiseres nas secções e carrega em «Guardar e publicar». O site fica atualizado nesse momento.</li>

@@ -225,6 +225,7 @@ export function validateContent(input: unknown, base: EditableContent, platform:
   const setup = part('setup');
   const partners = part('partners');
   const giveaways = part('giveaways');
+  const maintenance = part('maintenance');
 
   const socials = list(bag, top('socials'), 'socials', MAX.socials, (entry, p) => social(bag, entry, p), 1);
   unique(bag, socials, 'socials', (s) => s.id, 'id');
@@ -253,6 +254,7 @@ export function validateContent(input: unknown, base: EditableContent, platform:
     setup: { gear: gearList, pc },
     partners: { brands },
     giveaways: { active: giveaways.active === true, items: giveawayList },
+    maintenance: { active: maintenance.active === true },
   };
 
   return { content, issues: bag };

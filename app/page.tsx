@@ -2,6 +2,7 @@ import { Clips } from '@/components/Clips';
 import { Footer } from '@/components/Footer';
 import { Giveaways } from '@/components/Giveaways';
 import { Hero } from '@/components/Hero';
+import { Maintenance } from '@/components/Maintenance';
 import { Nav } from '@/components/Nav';
 import { Partners } from '@/components/Partners';
 import { LiveProvider } from '@/components/providers/Live';
@@ -20,6 +21,12 @@ import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
 export const revalidate = 60;
 
 export default async function Home() {
+  // Em manutenção (ligada no painel): só o aviso, sem ir buscar mais nada.
+  const config = await getSite();
+  if (config.maintenance.active) {
+    return <Maintenance title={config.maintenance.title} />;
+  }
+
   // A configuração com o que foi mudado no painel.
   const [site, live, discord, clips, followers] = await Promise.all([getSite(), getLiveStatus(), getDiscord(), getClips(), getFollowers()]);
   // O número da API, quando existe, substitui o que está escrito na configuração.

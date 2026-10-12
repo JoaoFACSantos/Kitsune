@@ -87,6 +87,9 @@ export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps
   const discord = networks.find((n) => n.id === 'discord');
 
   const reviews: Review[] = [];
+  if (draft.maintenance.active) {
+    reviews.push({ level: 'warn', text: 'O site está em manutenção: quem o abre vê só o aviso. Desliga-se em Definições.' });
+  }
   const bare = brands.map((brand, index) => ({ brand, index })).filter(({ brand }) => brand.perks.length === 0);
   if (bare.length) {
     reviews.push({

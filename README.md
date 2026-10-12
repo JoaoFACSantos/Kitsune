@@ -98,6 +98,10 @@ npx cf d1 query <id-da-base-de-dados> --sql "INSERT OR REPLACE INTO content (id,
 
 Um Worker não tem disco: para pôr o site num alojamento sem D1, é preciso trocar [`lib/content/store.ts`](lib/content/store.ts) e [`lib/db.ts`](lib/db.ts) (o resto do site só usa as funções que esses ficheiros exportam).
 
+### Manutenção
+
+Em Definições há um interruptor "Pôr o site em manutenção". Ligado (e guardado), a página inicial mostra só «em manutenção» ([`components/Maintenance.tsx`](components/Maintenance.tsx)); o painel continua a funcionar em `/admin`, para se poder desligar. O que o aviso diz está em `maintenance.title`, em [`content/site.config.ts`](content/site.config.ts). Enquanto dura, a página pede aos motores de busca que não a guardem e as visitas não se contam.
+
 ### Visitas
 
 O Início do painel mostra quantas pessoas abriram o site: hoje, nos últimos 7 e 30 dias e desde o início, com um gráfico dos últimos 30 dias. A contagem é do próprio site ([`lib/visits.ts`](lib/visits.ts)), sem serviços de fora e sem cookies:

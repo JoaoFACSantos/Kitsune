@@ -219,11 +219,16 @@ export type SiteConfig = {
     items: Giveaway[];
   };
   socialsSection: { title: Title; note: string };
+  /**
+   * Manutenção: com `active` ligado, a página inicial mostra só o aviso (`title`), ao centro do ecrã.
+   * O painel (/admin) continua a funcionar: é lá, em Definições, que se liga e desliga.
+   */
+  maintenance: { active: boolean; title: Title };
 };
 
 /**
  * A parte do site que se muda no painel (/admin), sem mexer no código: as redes, os periféricos,
- * o PC, as marcas das parcerias e os giveaways. O resto (nome, handle, cores, imagem do hero e todos os textos
+ * o PC, as marcas das parcerias, os giveaways e o interruptor da manutenção. O resto (nome, handle, cores, imagem do hero e todos os textos
  * e títulos) vem só de `content/site.config.ts`.
  * O que o painel guarda substitui estes campos; enquanto não houver nada guardado, valem os da configuração.
  */
@@ -231,4 +236,5 @@ export type EditableContent = Pick<SiteConfig, 'socials' | 'discord'> & {
   setup: Pick<SiteConfig['setup'], 'gear' | 'pc'>;
   partners: Pick<SiteConfig['partners'], 'brands'>;
   giveaways: Pick<SiteConfig['giveaways'], 'active' | 'items'>;
+  maintenance: Pick<SiteConfig['maintenance'], 'active'>;
 };

@@ -1,7 +1,7 @@
 import { cn, splitEmphasis } from '@/lib/format';
 
 /** Título com uma palavra em letra manuscrita ("o meu *setup*"). */
-export function Title({ text, id, className, as: Tag = 'h2' }: { text: string; id?: string; className?: string; as?: 'h2' | 'h3' }) {
+export function Title({ text, id, className, as: Tag = 'h2' }: { text: string; id?: string; className?: string; as?: 'h1' | 'h2' | 'h3' }) {
   const { before, em, after } = splitEmphasis(text);
   return (
     <Tag id={id} className={cn('title', className)} data-scroll="in" data-scroll-on=".hand, .squiggle path">
