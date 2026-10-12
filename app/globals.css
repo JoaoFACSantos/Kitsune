@@ -19,21 +19,21 @@
   /* Tema claro (escolhido no switch do nav). As cores base vêm da configuração: --bg-light, --ink-light.
      Nada é branco puro: os cartões, o menu e as etiquetas são o fundo aclarado, para a página ficar
      toda no mesmo rosa. O rosa do texto pequeno escurece um pouco, para se ler bem sobre ele. */
-  --bg: var(--bg-light, #fbd9e7);
+  --bg: var(--bg-light, #f6bfd8);
   --ink: var(--dark);
   --ink-soft: color-mix(in oklab, var(--ink) 76%, var(--bg));
   --line: color-mix(in oklab, var(--ink) 14%, transparent);
-  --paper: color-mix(in oklab, var(--bg) 42%, white);
+  --paper: color-mix(in oklab, var(--bg) 50%, white);
   --surface: color-mix(in oklab, var(--paper) 78%, transparent);
-  --surface-strong: color-mix(in oklab, var(--bg) 28%, white);
+  --surface-strong: color-mix(in oklab, var(--bg) 34%, white);
   --surface-border: rgb(255 255 255 / 0.6);
   --nav-bg: color-mix(in oklab, var(--paper) 74%, transparent);
   --hover-soft: color-mix(in oklab, var(--pink) 26%, var(--paper));
   --glider: var(--dark);
   --toast-bg: var(--dark);
   --chip-bg: color-mix(in oklab, var(--pink) 20%, var(--paper));
-  --chip-fg: color-mix(in oklab, var(--pink-deep) 66%, var(--dark));
-  --link: color-mix(in oklab, var(--pink-deep) 84%, var(--dark));
+  --chip-fg: color-mix(in oklab, var(--pink-deep) 56%, var(--dark));
+  --link: color-mix(in oklab, var(--pink-deep) 68%, var(--dark));
   --focus: var(--link);
   --dots: color-mix(in oklab, var(--dark) 11%, transparent);
   --blob-alpha: 50%;

@@ -29,7 +29,7 @@ export const site: SiteConfig = {
     peach: '#FFB199',
     ink: '#2A0F2F',
     // Rosa a sério e não quase branco: os cartões do tema claro são este fundo aclarado.
-    bg: '#FBD9E7',
+    bg: '#F6BFD8',
     darkBg: '#140A18',
     darkInk: '#FBEAF3',
   },
