@@ -2933,9 +2933,9 @@
     .links {
       grid-template-rows: auto auto auto;
       align-content: center;
-      gap: clamp(12px, 3svh, 34px);
+      gap: clamp(10px, 2.2svh, 30px);
       width: min(100%, 860px);
-      padding-block: clamp(12px, 4svh, 56px);
+      padding-block: clamp(12px, 3svh, 48px);
     }
 
     .links-head {
@@ -2943,8 +2943,8 @@
     }
 
     .links-photo {
-      width: clamp(120px, 20svh, 220px);
-      height: clamp(120px, 20svh, 220px);
+      width: clamp(130px, 24svh, 260px);
+      height: clamp(130px, 24svh, 260px);
       border-width: 6px;
     }
 
@@ -2955,6 +2955,20 @@
 
     .links-role {
       font-size: 18px;
+    }
+
+    /* A etiqueta do direto e o botão do site, um pouco maiores do que no telemóvel. */
+    .links-live .live-pill {
+      gap: 10px;
+      height: 44px;
+      padding: 0 20px;
+      font-size: 14px;
+    }
+
+    .links-foot .btn {
+      height: clamp(48px, 7.6svh, 62px);
+      padding: 0 36px;
+      font-size: 17px;
     }
 
     .links-list {
@@ -2970,7 +2984,7 @@
     .links .social {
       height: auto;
       gap: 16px;
-      padding: clamp(8px, 2.2svh, 20px) 22px;
+      padding: clamp(8px, 1.8svh, 20px) 22px;
       border-radius: 30px;
     }
 
