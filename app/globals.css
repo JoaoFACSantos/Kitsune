@@ -3009,7 +3009,10 @@
     stroke-dashoffset: calc(1 - var(--in, 1));
   }
 
-  /* Hero a sair: as letras do nome abrem em leque, a moldura encolhe e os stickers voam para fora. */
+  /* Hero a sair: as letras do nome abrem em leque, a moldura encolhe e os stickers voam para fora.
+     O hero tem `data-scroll-direct`: o ScrollFx lê estas regras com --out a 0, a 0,1 e a 1 e
+     escreve o valor a meio caminho em cada frame, sem passar pela variável (é o que deixa o scroll
+     leve aqui). Por isso têm de crescer em linha reta com --out; a opacidade pode parar no 0. */
   .hero .letter {
     translate: calc(var(--out, 0) * var(--o, 0) * 2.6vw) calc(var(--out, 0) * (-6vh - var(--a, 0) * 5vh));
     rotate: calc(var(--out, 0) * var(--o, 0) * 7deg);

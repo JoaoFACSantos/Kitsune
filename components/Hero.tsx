@@ -274,6 +274,7 @@ export function Hero({
       className="hero"
       data-scroll="out"
       data-scroll-on=".hero-greeting, .letter, .stage, .sticker"
+      data-scroll-direct=""
       style={{ '--chars': letters.length } as React.CSSProperties}
     >
       <p className="hero-greeting hand intro-rise" style={{ '--delay': '0.25s' } as React.CSSProperties}>
