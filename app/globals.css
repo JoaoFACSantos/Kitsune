@@ -1919,6 +1919,11 @@
     scroll-snap-align: start;
   }
 
+  /* A caixa que anda com o scroll (ver "Clips", nas animações ligadas ao scroll). */
+  .clip-drift {
+    height: 100%;
+  }
+
   @media (min-width: 640px) {
     .clips {
       grid-auto-flow: row;
@@ -3066,15 +3071,15 @@
 
   /* Clips: os cartões passam a velocidades diferentes (só na grelha; no telemóvel é um carrossel). */
   @media (min-width: 640px) {
-    .clip-cell {
+    .clip-drift {
       translate: 0 calc((0.5 - var(--p, 0.5)) * 56px);
     }
 
-    .clip-cell:nth-child(even) {
+    .clip-cell:nth-child(even) .clip-drift {
       translate: 0 calc((0.5 - var(--p, 0.5)) * -44px);
     }
 
-    .clips.fx-p .clip-cell {
+    .clips.fx-p .clip-drift {
       will-change: transform;
     }
   }
@@ -3158,11 +3163,9 @@
   }
 
   /* A barra e a raposa andam com scale e translate (e não height e top), que não mexem
-     no layout: mudam a cada frame de scroll. */
-  .scroll-fox::before {
-    /* Um pseudo-elemento não pode estar em `data-scroll-on`: vai buscar o valor ao pai. */
-    --page: inherit;
-    content: "";
+     no layout: mudam a cada frame de scroll. A barra é um elemento, e não um ::before, para
+     poder estar em `data-scroll-on`. */
+  .scroll-fox-bar {
     position: absolute;
     inset: 0;
     border-radius: 3px;

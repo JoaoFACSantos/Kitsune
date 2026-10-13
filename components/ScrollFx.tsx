@@ -240,11 +240,18 @@ export function ScrollFx() {
         // pela variável, como os outros.
         reread = () => {
           if (!entered || !alive) return;
-          if (segments === 1) return start();
+          // Fora do ecrã de vez (a raposa, em ecrãs estreitos): não vale a pena ler nada, e a
+          // variável num elemento que não se vê não custa.
+          const shown = el.getClientRects().length > 0;
+          if (segments === 1 && shown) return start();
           if (writer) {
             candidate.clear();
             writer = null;
             render();
+          }
+          if (!shown) {
+            waiting++;
+            return;
           }
           const turn = ++waiting;
           let began = false;
@@ -325,7 +332,9 @@ export function ScrollFx() {
 
   // A raposa que corre ao lado da página e marca onde vais (só em ecrãs largos).
   return (
-    <div ref={root} aria-hidden className="scroll-fox" data-scroll="page" data-scroll-on=".scroll-fox-runner">
+    // 240 pontos: a cabeça dela abana muitas vezes ao longo da página (ver .scroll-fox-runner).
+    <div ref={root} aria-hidden className="scroll-fox" data-scroll="page" data-scroll-on=".scroll-fox-bar, .scroll-fox-runner" data-scroll-direct="240">
+      <span className="scroll-fox-bar" />
       <span className="scroll-fox-runner">
         <StickerArt kind="fox" className="h-full w-full" />
       </span>

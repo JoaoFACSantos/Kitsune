@@ -73,7 +73,7 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
           </a>
         </div>
 
-        <ul className="clips mt-10 md:mt-14" aria-label="Clips" data-scroll="through" data-scroll-on=".clip-cell" data-scroll-direct="">
+        <ul className="clips mt-10 md:mt-14" aria-label="Clips" data-scroll="through" data-scroll-on=".clip-drift" data-scroll-direct="">
           {clips.map((clip, i) => {
             const cover = COVERS[i % COVERS.length];
             const style = { '--r': `${TILT[i % TILT.length]}deg` } as React.CSSProperties;
@@ -102,15 +102,19 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
             const { embedUrl } = clip;
             return (
               <li key={clip.id} className="clip-cell">
-                {embedUrl ? (
-                  <button type="button" className="clip glass" style={style} onClick={() => open(clip, embedUrl)}>
-                    {card}
-                  </button>
-                ) : (
-                  <a href={clip.url} target="_blank" rel="noopener noreferrer" className="clip glass" style={style}>
-                    {card}
-                  </a>
-                )}
+                {/* Quem anda com o scroll é esta caixa, e não a célula: o GSAP, ao animar a entrada da
+                    célula, toma conta do translate dela e anulava esse movimento. */}
+                <div className="clip-drift">
+                  {embedUrl ? (
+                    <button type="button" className="clip glass" style={style} onClick={() => open(clip, embedUrl)}>
+                      {card}
+                    </button>
+                  ) : (
+                    <a href={clip.url} target="_blank" rel="noopener noreferrer" className="clip glass" style={style}>
+                      {card}
+                    </a>
+                  )}
+                </div>
               </li>
             );
           })}
