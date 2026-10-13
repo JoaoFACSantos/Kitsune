@@ -268,6 +268,14 @@ export function validateContent(input: unknown, base: EditableContent, platform:
   unique(bag, rules, 'giveaways.rules', (r) => r.title, 'title');
   const winners = list(bag, giveaways.winners, 'giveaways.winners', MAX.winners, (entry, p) => winner(bag, entry, p));
 
+  // A hora de abrir só existe com a manutenção ligada. Fica sempre no mesmo formato (ISO, em UTC).
+  let opensAt: string | undefined;
+  if (maintenance.active === true && maintenance.opensAt !== undefined) {
+    const time = typeof maintenance.opensAt === 'string' && maintenance.opensAt.length <= 40 ? Date.parse(maintenance.opensAt) : Number.NaN;
+    if (Number.isNaN(time)) bag.push({ path: 'maintenance.opensAt', message: 'Escolhe um dia e uma hora, ou deixa em branco.' });
+    else opensAt = new Date(time).toISOString();
+  }
+
   const content: EditableContent = {
     socials,
     discord: {
@@ -278,7 +286,7 @@ export function validateContent(input: unknown, base: EditableContent, platform:
     setup: { gear: gearList, pc },
     partners: { brands },
     giveaways: { active: giveaways.active === true, items: giveawayList, rules, winners },
-    maintenance: { active: maintenance.active === true },
+    maintenance: { active: maintenance.active === true, ...(opensAt ? { opensAt } : {}) },
   };
 
   return { content, issues: bag };

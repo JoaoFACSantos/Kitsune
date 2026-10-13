@@ -244,7 +244,18 @@ export type SiteConfig = {
    * Manutenção: com `active` ligado, a página inicial mostra só o aviso (`title`), ao centro do ecrã.
    * O painel (/admin) continua a funcionar: é lá, em Definições, que se liga e desliga.
    */
-  maintenance: { active: boolean; title: Title };
+  maintenance: {
+    active: boolean;
+    title: Title;
+    /**
+     * Quando o site abre sozinho: um instante em ISO ("2026-10-13T16:10:00.000Z"), marcado no painel.
+     * Até lá, o aviso é a página de abertura, com uma contagem decrescente; a essa hora a
+     * manutenção acaba sem ninguém mexer (ver lib/content/opening.ts).
+     */
+    opensAt?: string;
+    /** O que a página de abertura diz enquanto conta. */
+    opening: { title: Title; text: string };
+  };
 };
 
 /**
@@ -257,5 +268,5 @@ export type EditableContent = Pick<SiteConfig, 'socials' | 'discord'> & {
   setup: Pick<SiteConfig['setup'], 'gear' | 'pc'>;
   partners: Pick<SiteConfig['partners'], 'brands'>;
   giveaways: Pick<SiteConfig['giveaways'], 'active' | 'items' | 'rules' | 'winners'>;
-  maintenance: Pick<SiteConfig['maintenance'], 'active'>;
+  maintenance: Pick<SiteConfig['maintenance'], 'active' | 'opensAt'>;
 };

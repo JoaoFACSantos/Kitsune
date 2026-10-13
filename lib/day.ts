@@ -10,6 +10,14 @@ const WEEKDAY = new Intl.DateTimeFormat('pt-PT', { timeZone: 'UTC', weekday: 'lo
 const DAY_MS = 86_400_000;
 const at = (day: string) => new Date(`${day}T00:00:00Z`);
 
+const TIME = new Intl.DateTimeFormat('pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' });
+
+/** O dia em que um instante calha em Lisboa, "AAAA-MM-DD". */
+export const dayOf = (date: Date) => LISBON.format(date);
+
+/** A hora de um instante em Lisboa, "17:10". */
+export const formatTime = (date: Date) => TIME.format(date);
+
 /** O dia de hoje em Lisboa, "AAAA-MM-DD". */
 export const today = () => LISBON.format(new Date());
 

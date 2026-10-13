@@ -133,6 +133,12 @@ Não há uma segunda versão dos cartões para manter: o painel ([`components/ad
 
 Em Definições há um interruptor "Pôr o site em manutenção". Ligado (e guardado), a página inicial mostra só «em manutenção» ([`components/Maintenance.tsx`](components/Maintenance.tsx)); o painel continua a funcionar em `/admin`, para se poder desligar, e a [pré-visualização](#pré-visualização) continua a mostrar o site inteiro a quem tem sessão. O que o aviso diz está em `maintenance.title`, em [`content/site.config.ts`](content/site.config.ts). Enquanto dura, a página pede aos motores de busca que não a guardem e as visitas não se contam.
 
+### Página de abertura
+
+Com a manutenção ligada, o painel deixa marcar um dia e uma hora para o site abrir sozinho (Definições > Abrir sozinho a). Até lá, em vez do aviso, quem abre o site vê a página de abertura: uma contagem decrescente ([`components/Maintenance.tsx`](components/Maintenance.tsx) e [`components/Countdown.tsx`](components/Countdown.tsx)). O título e a frase estão em `maintenance.opening`, em [`content/site.config.ts`](content/site.config.ts).
+
+À hora marcada ninguém precisa de fazer nada. Quando a contagem chega a zero, a página pergunta ao servidor se já pode abrir (`POST /api/abrir`); passada a hora, a manutenção fica desligada na base de dados, as páginas são geradas de novo e a página recarrega já com o site ([`lib/content/opening.ts`](lib/content/opening.ts)). Mesmo sem ninguém à espera, quem lê o conteúdo vê o site aberto desde a hora certa ([`lib/content/site.ts`](lib/content/site.ts)). A hora guarda-se como um instante em UTC e mostra-se pelo relógio de Lisboa; se o relógio de quem espera estiver adiantado, o servidor acerta-lhe a contagem.
+
 ### Visitas
 
 O Início do painel mostra quantas pessoas abriram o site: hoje, nos últimos 7 e 30 dias e desde o início, com um gráfico dos últimos 30 dias. A contagem é do próprio site ([`lib/visits.ts`](lib/visits.ts)), sem serviços de fora e sem cookies:
@@ -163,6 +169,7 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/admin` | O painel da streamer (com password) |
 | `/admin/ver`, `/admin/ver/links`, … | A pré-visualização: o site com o que está no painel, só para quem tem sessão |
 | `/api/visit` | Conta uma visita (a página pede-o ao abrir) |
+| `/api/abrir` | A página de abertura pergunta aqui se o site já abriu; passada a hora marcada, abre-o |
 | `/links` | A página de links, para a bio das redes |
 | `/<link-curto>` | O link curto de uma parceria: conta o clique e leva à marca |
 | `/api/click` | Conta um clique no botão de uma parceria, no site |

@@ -10,6 +10,16 @@ import { validateContent } from './validate';
 export const defaultContent = (): EditableContent => pickEditable(defaults);
 
 /**
+ * Com hora marcada para abrir e essa hora já passada, a manutenção acabou sozinha: o conteúdo
+ * lê-se logo com ela desligada, no site e no painel, mesmo antes de alguém o gravar assim
+ * (quem o grava é lib/content/opening.ts, ou a próxima gravação no painel).
+ */
+function settle(content: EditableContent): EditableContent {
+  const { active, opensAt } = content.maintenance;
+  return active && opensAt && Date.parse(opensAt) <= Date.now() ? { ...content, maintenance: { active: false } } : content;
+}
+
+/**
  * O conteúdo que o painel edita: o guardado ou, se ainda não houver nada guardado, o de origem.
  * O que vem do disco passa sempre pela validação: um ficheiro mexido à mão ou de uma versão
  * antiga do site não o parte.
@@ -18,7 +28,7 @@ export const getContent = cache(async (): Promise<{ content: EditableContent; sa
   const stored = await readStored();
   if (!stored) return { content: defaultContent(), savedAt: null };
   const { content } = validateContent(stored.content, defaultContent(), defaults.platform);
-  return { content, savedAt: stored.savedAt };
+  return { content: settle(content), savedAt: stored.savedAt };
 });
 
 /** A configuração do site com o que foi mudado no painel. É isto que as páginas devem ler. */
@@ -36,7 +46,7 @@ export type Preview = {
 /** O que a pré-visualização do painel mostra (ver app/admin/ver). Só para quem tem sessão no painel. */
 export async function getPreview(): Promise<Preview> {
   const [{ content: saved }, stored] = await Promise.all([getContent(), readDraft()]);
-  const draft = stored === null ? saved : validateContent(stored, defaultContent(), defaults.platform).content;
+  const draft = stored === null ? saved : settle(validateContent(stored, defaultContent(), defaults.platform).content);
   return {
     site: applyContent(defaults, draft),
     // Os dois passaram pela mesma validação: iguais, dão o mesmo texto.

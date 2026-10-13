@@ -96,7 +96,9 @@ export function Dashboard({ name, overview, dirty, savedAt, go, preview }: Dashb
   if (draft.maintenance.active) {
     reviews.push({
       level: 'warn',
-      text: 'O site está em manutenção: quem o abre vê só o aviso. Tu vês o site inteiro na pré-visualização. Desliga-se em Definições.',
+      text: draft.maintenance.opensAt
+        ? 'O site está fechado, com hora marcada para abrir: quem o abre vê a contagem decrescente. Tu vês o site inteiro na pré-visualização. A hora muda-se em Definições.'
+        : 'O site está em manutenção: quem o abre vê só o aviso. Tu vês o site inteiro na pré-visualização. Desliga-se em Definições.',
       action: { label: 'Pré-visualizar', run: preview },
     });
   }

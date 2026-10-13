@@ -10,6 +10,6 @@ export default async function Home() {
   // A configuração com o que foi mudado no painel.
   const site = await getSite();
   // Em manutenção (ligada no painel): só o aviso, sem ir buscar mais nada.
-  if (site.maintenance.active) return <Maintenance title={site.maintenance.title} />;
+  if (site.maintenance.active) return <Maintenance site={site} />;
   return <HomeView site={site} />;
 }

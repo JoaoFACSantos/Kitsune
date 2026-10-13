@@ -2665,6 +2665,76 @@
     text-align: center;
   }
 
+  /* A página de abertura: o aviso com uma contagem decrescente até à hora em que o site abre
+     (components/Maintenance.tsx e Countdown.tsx). */
+  .maintenance.opening {
+    align-content: center;
+    gap: 22px;
+  }
+
+  .maintenance.opening .lead {
+    max-width: 30em;
+  }
+
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: clamp(8px, 2vw, 18px);
+    width: min(100%, 620px);
+    margin-top: 6px;
+  }
+
+  .countdown-unit {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 0;
+    padding: clamp(16px, 3vw, 28px) 6px clamp(12px, 2vw, 20px);
+    border-radius: clamp(22px, 4vw, 34px);
+  }
+
+  .countdown-unit strong {
+    color: var(--pink);
+    font-family: var(--font-display);
+    font-size: clamp(30px, 8.5vw, 84px);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .countdown-unit small {
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .countdown-status {
+    min-height: 1.6em;
+    color: var(--link);
+    font-weight: 800;
+  }
+
+  /* Cada algarismo dá um saltinho quando muda. */
+  @media (prefers-reduced-motion: no-preference) {
+    .countdown-unit strong {
+      animation: countdown-tick 0.35s var(--spring);
+    }
+
+    .countdown[data-opening] .countdown-unit strong {
+      animation: live-pulse 1s ease-in-out infinite;
+    }
+  }
+
+  @keyframes countdown-tick {
+    from {
+      scale: 1.12;
+      opacity: 0.6;
+    }
+  }
+
   /* ---------- Pré-visualização do painel (/admin/ver) ---------- */
 
   /* A etiqueta que diz que isto é a pré-visualização: em baixo à esquerda, por cima da página. */

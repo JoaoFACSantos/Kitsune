@@ -236,6 +236,35 @@ export function DateField({ path, label, hint, min }: FieldProps & { path: strin
   );
 }
 
+/** "2026-10-13T17:10", pelo relógio de quem está a usar o painel: é o formato que o campo de dia e hora pede. */
+function localStamp(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  const two = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}T${two(date.getHours())}:${two(date.getMinutes())}`;
+}
+
+/** Um dia e uma hora, pelo relógio de quem usa o painel. Guarda o instante em ISO; vazio, o campo fica sem valor. */
+export function DateTimeField({ path, label, hint }: FieldProps & { path: string }) {
+  const id = useId();
+  const { value, set, error } = useField<string>(path);
+  return (
+    <Field id={id} label={label} hint={hint} error={error}>
+      <input
+        id={id}
+        type="datetime-local"
+        className="input"
+        value={value ? localStamp(value) : ''}
+        aria-invalid={error ? true : undefined}
+        onChange={(event) => {
+          const date = new Date(event.target.value);
+          set(event.target.value && !Number.isNaN(date.getTime()) ? date.toISOString() : undefined);
+        }}
+      />
+    </Field>
+  );
+}
+
 export function ColorField({ path, label, hint }: FieldProps & { path: string }) {
   const id = useId();
   const { value, set, error } = useField<string>(path);

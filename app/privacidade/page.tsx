@@ -16,6 +16,6 @@ export const revalidate = 3600;
 
 export default async function PrivacyPage() {
   const site = await getSite();
-  if (site.maintenance.active) return <Maintenance title={site.maintenance.title} />;
+  if (site.maintenance.active) return <Maintenance site={site} />;
   return <PrivacyView site={site} />;
 }

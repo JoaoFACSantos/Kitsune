@@ -343,6 +343,11 @@ export const site: SiteConfig = {
   maintenance: {
     active: false,
     title: 'em *manutenção*',
+    // A página de abertura: fica no lugar do aviso quando há hora marcada para o site abrir.
+    opening: {
+      title: 'quase a *abrir*',
+      text: 'Quando a contagem chegar a zero, o site abre sozinho: não precisas de atualizar a página.',
+    },
   },
 
   socialsSection: { title: 'segue-me *aqui*', note: 'prometo que vale a pena' },

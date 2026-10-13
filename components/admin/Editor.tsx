@@ -11,7 +11,7 @@ import { VISIT_SKIP_KEY } from '@/components/VisitBeacon';
 import type { Issue } from '@/lib/content/validate';
 import { PREVIEW_PATH } from '@/lib/preview';
 import { Dashboard, type Overview, type Section } from './Dashboard';
-import { Card, type FormApi, FormProvider, getAt, setAt, Toggle } from './form';
+import { Card, DateTimeField, type FormApi, FormProvider, getAt, setAt, Toggle } from './form';
 import { ArrowIcon, EyeIcon, LogoutIcon, NavGlyph, type NavIcon } from './icons';
 import { emptyBrand, GiveawaysSection, PartnersSection, SetupSection, SocialsSection } from './sections';
 
@@ -84,6 +84,7 @@ const FIELD_NAMES: Record<string, string> = {
   items: 'Giveaways',
   steps: 'Como participar',
   endsAt: 'Último dia',
+  opensAt: 'Abrir sozinho a',
 };
 
 /** "partners.brands.1.url" → "Marcas › Zumub › Link". */
@@ -425,9 +426,18 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                     label="Pôr o site em manutenção"
                     hint="Só muda quando guardares. O painel continua a funcionar: é aqui que voltas a desligar. Em manutenção, tu continuas a ver o site inteiro em «Pré-visualizar»."
                   />
+                  {draft.maintenance.active ? (
+                    <DateTimeField
+                      path="maintenance.opensAt"
+                      label="Abrir sozinho a (opcional)"
+                      hint="Com dia e hora marcados, quem abre o site vê uma contagem decrescente; à hora certa o site abre sozinho e a manutenção desliga-se. Em branco, fica fechado até desligares."
+                    />
+                  ) : null}
                   <p className="field-hint">
                     {draft.maintenance.active
-                      ? 'Agora: ligada. Quem abrir o site vê só o aviso de manutenção.'
+                      ? draft.maintenance.opensAt
+                        ? 'Agora: ligada, com hora para abrir. Quem abrir o site vê a contagem decrescente. Se a hora já passou, o site abre logo que guardares.'
+                        : 'Agora: ligada. Quem abrir o site vê só o aviso de manutenção.'
                       : 'Agora: desligada. O site aparece normalmente.'}
                   </p>
                 </Card>

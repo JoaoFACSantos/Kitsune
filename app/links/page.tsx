@@ -18,6 +18,6 @@ export const revalidate = 60;
 
 export default async function LinksPage() {
   const site = await getSite();
-  if (site.maintenance.active) return <Maintenance title={site.maintenance.title} />;
+  if (site.maintenance.active) return <Maintenance site={site} />;
   return <LinksView site={site} />;
 }
