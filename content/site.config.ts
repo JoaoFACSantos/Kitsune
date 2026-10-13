@@ -39,6 +39,8 @@ export const site: SiteConfig = {
     // A arte dela, com fundo: enche a moldura ('cover'). Para um recorte sem fundo (PNG ou SVG, até à cintura),
     // usa photoFit: 'popout' e a cabeça sai por cima da moldura; /media/kitsune.svg é um desenho desses
     // (com "#watch" em photoWatching, as duas viram-se para a televisão).
+    // Os ícones do site (o do separador do browser) são um recorte desta imagem: se a trocares,
+    // corre "node scripts/icons.mjs" para os fazer de novo.
     photo: '/media/kitsune.jpg',
     photoAlt: 'Kitsune, de cabelo ruivo comprido, encostada a uma raposa que pisca o olho',
     photoSize: { width: 1254, height: 1254 },

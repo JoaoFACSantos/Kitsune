@@ -33,6 +33,15 @@ export async function generateMetadata(): Promise<Metadata> {
     description: site.description,
     applicationName: site.name,
     alternates: { canonical: '/' },
+    // O ícone do site é a arte do topo, cortada às duas caras. São ficheiros em /public, feitos
+    // por scripts/icons.mjs: saem sem passar pelo Worker.
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '48x48' },
+        { url: '/icon.png', type: 'image/png', sizes: '96x96' },
+      ],
+      apple: [{ url: '/apple-icon.png', type: 'image/png', sizes: '180x180' }],
+    },
     openGraph: { type: 'profile', locale: 'pt_PT', url: '/', siteName: site.name, title, description: site.description },
     twitter: { card: 'summary_large_image', title, description: site.description, creator: socials.find((s) => s.id === 'x')?.handle },
     robots: { index: true, follow: true },

@@ -180,7 +180,8 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/uploads/…` | As imagens enviadas no painel |
 | `/hero-video` | O vídeo do hero (`hero.photoVideo`), com resposta a pedidos parciais, que o Safari exige. A página pede-o com um `?v=` que muda quando o ficheiro muda, para o browser não mostrar o que tem guardado |
 | `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |
-| `/sitemap.xml`, `/robots.txt`, `/icon` | SEO e ícones |
+| `/sitemap.xml`, `/robots.txt` | SEO |
+| `/icon.png`, `/apple-icon.png`, `/favicon.ico` | Os ícones do site: a arte do topo, cortada às duas caras. São ficheiros em `/public`, feitos por [`scripts/icons.mjs`](scripts/icons.mjs) (corre-o outra vez se a arte mudar) e declarados em [`app/layout.tsx`](app/layout.tsx) |
 
 ## Acessibilidade e motion
 
