@@ -45,7 +45,14 @@ export async function openIfDue(): Promise<OpeningState> {
   if (due > now) return { open: false, opensAt: row.opensAt, now };
 
   const { meta } = await db().prepare(OPEN).bind(row.opensAt).run();
-  // O site inteiro volta a ser gerado no próximo pedido, como quando se guarda no painel.
-  if (meta.changes) revalidatePath('/', 'layout');
+  if (meta.changes) {
+    try {
+      // O site inteiro volta a ser gerado no próximo pedido, como quando se guarda no painel.
+      revalidatePath('/', 'layout');
+    } catch (error) {
+      // O site já está aberto na base de dados: as páginas em cache acertam-se sozinhas, cada uma no seu prazo.
+      console.error('[abertura] não consegui mandar gerar as páginas de novo', error);
+    }
+  }
   return { open: true, opensAt: null, now };
 }
