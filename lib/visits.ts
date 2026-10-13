@@ -27,8 +27,12 @@ export type VisitStats = {
   since: string | null;
 };
 
-// Robôs que correm JavaScript (os outros nem chegam a pedir a contagem).
-const BOTS = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|monitor|uptime|scan|fetch|curl|wget|python|axios|node/i;
+// Robôs e programas: os que correm JavaScript (os outros nem chegam a pedir a contagem das
+// visitas) e os que abrem um link só para lhe tirar a pré-visualização (nos cliques).
+const BOTS = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|monitor|uptime|scan|fetch|curl|wget|python|axios|node|facebookexternalhit|^whatsapp\//i;
+
+/** O pedido não vem de uma pessoa: não conta como visita nem como clique. */
+export const isBot = (agent: string) => !agent || BOTS.test(agent);
 
 const SALT = "SELECT value FROM settings WHERE key = 'visit_salt'";
 // O segredo não muda: lido uma vez, fica na memória da instância.
@@ -46,7 +50,7 @@ async function visitSalt() {
 /** Conta uma visita. Devolve false se o pedido não é de uma pessoa (um robô, por exemplo). */
 export async function recordVisit(request: Request): Promise<boolean> {
   const agent = request.headers.get('user-agent') ?? '';
-  if (!agent || BOTS.test(agent)) return false;
+  if (isBot(agent)) return false;
   const ip = (request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for')?.split(',')[0] ?? 'local').trim();
   const day = today();
   const person = createHash('sha256')

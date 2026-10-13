@@ -1,5 +1,5 @@
-import type { Brand, EditableContent, Gear, GearIcon, Giveaway, Social, SocialId, Spec } from '@/content/types';
-import { GEAR_ICONS, IMAGE_PATH, MAX, SOCIAL_IDS, SOCIAL_LABELS } from './editable';
+import type { Brand, EditableContent, Gear, GearIcon, Giveaway, Rule, Social, SocialId, Spec, Winner } from '@/content/types';
+import { brandSlug, GEAR_ICONS, IMAGE_PATH, MAX, RESERVED_SLUGS, SLUG, slugify, SOCIAL_IDS, SOCIAL_LABELS } from './editable';
 
 // Validação do conteúdo do painel. Tudo o que chega do browser passa por aqui antes de ser
 // guardado, e o que se lê do disco também: o resultado tem sempre a forma certa, com os textos
@@ -151,6 +151,9 @@ function brand(bag: Bag, value: unknown, path: string): Brand {
   const thumb = image(bag, v.thumb, `${path}.thumb`, false);
   const focus = position(v.focus);
   const note = text(bag, v.note, `${path}.note`, 300, false);
+  // O link curto escreve-se à vontade ("Zumub 10"): fica só o que cabe num endereço.
+  const slug = slugify(text(bag, v.slug, `${path}.slug`, 40, false));
+  if (slug && !SLUG.test(slug)) bag.push({ path: `${path}.slug`, message: 'De 2 a 24 letras minúsculas, números ou hífenes.' });
   const perks = list(bag, v.perks, `${path}.perks`, MAX.brandPerks, (entry, p) => text(bag, entry, p, 140));
   unique(bag, perks, `${path}.perks`, (perk) => perk, '');
   return {
@@ -168,7 +171,13 @@ function brand(bag: Bag, value: unknown, path: string): Brand {
     ...(focus ? { focus } : {}),
     color: color(v.color),
     ...(note ? { note } : {}),
+    ...(slug ? { slug } : {}),
   };
+}
+
+function rule(bag: Bag, value: unknown, path: string): Rule {
+  const v = record(value);
+  return { title: text(bag, v.title, `${path}.title`, 60), text: text(bag, v.text, `${path}.text`, 500) };
 }
 
 /** Um dia do calendário ("2026-10-31"), ou nada. */
@@ -198,6 +207,13 @@ function giveaway(bag: Bag, value: unknown, path: string): Giveaway {
     ...(picture ? { image: picture, imageSize: { width: dimension(size.width), height: dimension(size.height) } } : {}),
     ...(endsAt ? { endsAt } : {}),
   };
+}
+
+function winner(bag: Bag, value: unknown, path: string): Winner {
+  const v = record(value);
+  const date = day(v.date);
+  if (!date && typeof v.date === 'string' && v.date.trim()) bag.push({ path: `${path}.date`, message: 'Data inválida: escolhe-a outra vez.' });
+  return { name: text(bag, v.name, `${path}.name`, 40), prize: text(bag, v.prize, `${path}.prize`, 60), ...(date ? { date } : {}) };
 }
 
 /** O código de um link de convite do Discord ("https://discord.gg/abc" → "abc"). */
@@ -240,9 +256,17 @@ export function validateContent(input: unknown, base: EditableContent, platform:
 
   const brands = list(bag, partners.brands, 'partners.brands', MAX.brands, (entry, p) => brand(bag, entry, p));
   unique(bag, brands, 'partners.brands', (b) => b.name, 'name');
+  // Os links curtos (o escrito ou o que sai do nome) não se podem repetir nem tapar páginas do site.
+  unique(bag, brands, 'partners.brands', brandSlug, 'slug');
+  brands.forEach((b, i) => {
+    if (RESERVED_SLUGS.has(brandSlug(b))) bag.push({ path: `partners.brands.${i}.slug`, message: 'Esse endereço já é de uma página do site: escolhe outro.' });
+  });
 
   const giveawayList = list(bag, giveaways.items, 'giveaways.items', MAX.giveaways, (entry, p) => giveaway(bag, entry, p));
   unique(bag, giveawayList, 'giveaways.items', (g) => g.title, 'title');
+  const rules = list(bag, giveaways.rules, 'giveaways.rules', MAX.rules, (entry, p) => rule(bag, entry, p));
+  unique(bag, rules, 'giveaways.rules', (r) => r.title, 'title');
+  const winners = list(bag, giveaways.winners, 'giveaways.winners', MAX.winners, (entry, p) => winner(bag, entry, p));
 
   const content: EditableContent = {
     socials,
@@ -253,7 +277,7 @@ export function validateContent(input: unknown, base: EditableContent, platform:
     },
     setup: { gear: gearList, pc },
     partners: { brands },
-    giveaways: { active: giveaways.active === true, items: giveawayList },
+    giveaways: { active: giveaways.active === true, items: giveawayList, rules, winners },
     maintenance: { active: maintenance.active === true },
   };
 

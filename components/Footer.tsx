@@ -1,10 +1,17 @@
+import Link from 'next/link';
 import { BackToTop } from './BackToTop';
 
 // Quem fez o site.
 const DEVELOPER = { name: 'FAC', url: 'https://joaofacsantos.github.io/fac-dev/' };
 
+type FooterProps = {
+  name: string;
+  /** As outras páginas do site (a de links, a privacidade, o regulamento). */
+  links?: { href: string; label: string }[];
+};
+
 /** Rodapé: nome enorme em contorno que se enche de cor no hover. */
-export function Footer({ name }: { name: string }) {
+export function Footer({ name, links = [] }: FooterProps) {
   // O ano lê-se aqui dentro e não no topo do ficheiro: num Worker, fora de um pedido, o relógio
   // está parado em 1970.
   const year = new Date().getFullYear();
@@ -25,6 +32,15 @@ export function Footer({ name }: { name: string }) {
             {DEVELOPER.name}
           </a>
         </p>
+        {links.length ? (
+          <nav aria-label="Mais páginas" className="footer-links">
+            {links.map((link) => (
+              <Link key={link.href} href={link.href} prefetch={false}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
         <BackToTop />
       </div>
     </footer>

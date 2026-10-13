@@ -112,7 +112,14 @@ export default async function Home() {
           discordMembers={discord.members}
         />
       </main>
-      <Footer name={site.name} />
+      <Footer
+        name={site.name}
+        links={[
+          { href: '/links', label: 'Links' },
+          ...(site.giveaways.active ? [{ href: '/regulamento', label: 'Regulamento dos giveaways' }] : []),
+          { href: '/privacidade', label: 'Privacidade' },
+        ]}
+      />
       <ToTopArrow />
       <ScrollFx />
       <VisitBeacon />

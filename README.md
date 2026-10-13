@@ -67,6 +67,24 @@ A secção dos giveaways fica a seguir às parcerias e só existe quando faz fal
 
 Os giveaways escrevem-se no painel. Em [`content/site.config.ts`](content/site.config.ts) ficam só o título e a frase da secção (`giveaways.title` e `giveaways.intro`).
 
+### Regulamento e vencedores
+
+A página `/regulamento` tem as regras que valem para todos os giveaways e a lista de quem já ganhou. As duas escrevem-se no painel (Giveaways > Regulamento e Vencedores); há um link para ela por baixo dos cartões e no rodapé. As regras de origem, em `giveaways.rules`, são um ponto de partida: quem faz os giveaways tem de as ler e acertar (idade mínima, país, prazos) antes de abrir o site. Dos vencedores publica-se só o nome de utilizador, e só com o acordo da pessoa.
+
+## Página de links (/links)
+
+Uma página estreita, pensada para o telemóvel, para pôr na bio das redes: a fotografia e o nome, o estado do direto, as redes com os seguidores, as parcerias com os códigos (com botão de copiar) e os giveaways a decorrer. Não tem nada para configurar: lê o mesmo conteúdo do site, por isso muda sozinha quando se guarda alguma coisa no painel.
+
+## Links curtos e cliques
+
+Cada parceria tem um link curto, `o-site/<nome>` (`o-site/zumub`), que leva direto ao link da marca: é fácil de dizer em direto e de pôr numa descrição. O nome escreve-se no painel, em cada parceria ("Link curto"); em branco, sai do nome da marca (`brandSlug`, em [`lib/content/editable.ts`](lib/content/editable.ts)). Não pode repetir-se nem ser o de uma página do site (`RESERVED_SLUGS`). Um endereço que não seja de nenhuma parceria dá a página de "não encontrado".
+
+O site conta os cliques em cada parceria, por dia e por origem: pelo link curto, pelo botão do cartão no site e pela página de links. Fica só o total, nada sobre quem clicou ([`lib/clicks.ts`](lib/clicks.ts)); robôs e pré-visualizações de links não contam. O Início do painel mostra os últimos 30 dias, marca a marca. Se o link curto de uma parceria mudar, a contagem dela recomeça.
+
+## Privacidade (/privacidade)
+
+Diz, em linguagem de gente, o que o site guarda sobre quem o visita: a contagem de visitas e de cliques, os links de afiliada, os players, o alojamento. O texto está em [`app/privacidade/page.tsx`](app/privacidade/page.tsx) e tem de acompanhar o código: quem mexer na contagem, nos players ou no alojamento tem de o acertar. Não substitui o conselho de quem perceba de proteção de dados.
+
 ## Painel (/admin)
 
 Em `/admin` a streamer muda o conteúdo do site sozinha: as marcas das parcerias (com envio de imagens), os giveaways, as redes e os seguidores, os periféricos e o PC. A ordem das marcas, dos giveaways e das redes muda-se a arrastar os cartões (com o teclado: foco na pega e setas para cima e para baixo). Ao guardar, o site fica atualizado nesse momento.
@@ -87,6 +105,7 @@ O painel guarda tudo numa base de dados D1 da Cloudflare (o binding `DB`, em [`c
 | `uploads` | As imagens enviadas, já convertidas em WebP e sem metadados |
 | `settings`, `login_failures` | A chave das sessões do painel e as tentativas de entrada falhadas |
 | `visits`, `visitors` | As visitas e as pessoas de cada dia (ver [Visitas](#visitas)) |
+| `clicks` | Os cliques nas parcerias, por dia, marca e origem (ver [Links curtos e cliques](#links-curtos-e-cliques)) |
 
 As imagens enviadas são reescritas pelo serviço de imagens da Cloudflare (o binding `IMAGES`), que no plano grátis dá 5000 transformações por mês.
 
@@ -131,6 +150,10 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/api/live` | Estado do direto (cache de 60 s) |
 | `/admin` | O painel da streamer (com password) |
 | `/api/visit` | Conta uma visita (a página pede-o ao abrir) |
+| `/links` | A página de links, para a bio das redes |
+| `/<link-curto>` | O link curto de uma parceria: conta o clique e leva à marca |
+| `/api/click` | Conta um clique no botão de uma parceria, no site |
+| `/regulamento`, `/privacidade` | O regulamento dos giveaways (com os vencedores) e a página de privacidade |
 | `/uploads/…` | As imagens enviadas no painel |
 | `/hero-video` | O vídeo do hero (`hero.photoVideo`), com resposta a pedidos parciais, que o Safari exige. A página pede-o com um `?v=` que muda quando o ficheiro muda, para o browser não mostrar o que tem guardado |
 | `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |

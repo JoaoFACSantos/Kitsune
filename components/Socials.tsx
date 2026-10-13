@@ -1,26 +1,13 @@
 'use client';
 
 import { useRef } from 'react';
-import type { Social, SocialId } from '@/content/types';
+import type { Social } from '@/content/types';
 import { SocialIcon } from '@/components/icons';
 import { Title } from '@/components/Title';
 import { formatCompact } from '@/lib/format';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { isBelowFold, MEDIA } from '@/lib/motion';
-
-// Cores das plataformas, escurecidas onde era preciso para texto branco com contraste AA.
-const COLORS: Record<SocialId, string> = {
-  twitch: '#9146FF',
-  youtube: '#E6002E',
-  tiktok: '#111111',
-  instagram: 'linear-gradient(135deg, #833AB4, #C13584 55%, #E1306C)',
-  x: '#111111',
-  discord: '#5865F2',
-  kick: '#1B7A2B',
-};
-
-// Como cada rede chama a quem a segue.
-const COUNT_LABEL: Partial<Record<SocialId, string>> = { discord: 'membros', youtube: 'subscritores' };
+import { COUNT_LABEL, SOCIAL_COLORS } from '@/lib/social-style';
 
 type SocialsProps = { title: string; note: string; socials: Social[]; discordMembers: number };
 
@@ -76,7 +63,7 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social glass"
-                  style={{ '--c': COLORS[s.id] } as React.CSSProperties}
+                  style={{ '--c': SOCIAL_COLORS[s.id] } as React.CSSProperties}
                   onPointerEnter={setOrigin}
                 >
                   <span aria-hidden className="social-fill" />

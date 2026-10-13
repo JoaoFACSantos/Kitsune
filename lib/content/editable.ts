@@ -10,7 +10,7 @@ export function pickEditable(site: SiteConfig): EditableContent {
     discord: site.discord,
     setup: { gear: site.setup.gear, pc: site.setup.pc },
     partners: { brands: site.partners.brands },
-    giveaways: { active: site.giveaways.active, items: site.giveaways.items },
+    giveaways: { active: site.giveaways.active, items: site.giveaways.items, rules: site.giveaways.rules, winners: site.giveaways.winners },
     maintenance: { active: site.maintenance.active },
   };
 }
@@ -63,7 +63,54 @@ export const MAX = {
   brandPerks: 6,
   giveaways: 6,
   giveawaySteps: 6,
+  rules: 14,
+  winners: 30,
 } as const;
+
+/** "GTZ Esports" → "gtz-esports": minúsculas, sem acentos, com hífenes no lugar do resto. */
+export const slugify = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 24)
+    .replace(/-+$/, '');
+
+/** O link curto de uma parceria (o-site/<isto>): o que foi escrito no painel ou, sem isso, o nome. */
+export const brandSlug = (brand: { slug?: string; name: string }) => slugify(brand.slug ?? '') || slugify(brand.name);
+
+/** Um link curto bem formado: letras minúsculas, números e hífenes, de 2 a 24 caracteres. */
+export const SLUG = /^[a-z0-9](?:[a-z0-9-]{0,22}[a-z0-9])$/;
+
+/** Endereços que já são do site (ou podem vir a ser): um link curto não lhes pode passar à frente. */
+export const RESERVED_SLUGS = new Set([
+  'admin',
+  'api',
+  'links',
+  'regulamento',
+  'privacidade',
+  'uploads',
+  'hero-video',
+  'media',
+  'partners',
+  'icon',
+  'apple-icon',
+  'opengraph-image',
+  'favicon',
+  'robots',
+  'sitemap',
+  'marcas',
+  'contacto',
+  'horario',
+  'sobre',
+  'clips',
+  'setup',
+  'parcerias',
+  'giveaways',
+  'redes',
+]);
 
 /** Imagens que o conteúdo pode usar: as do projeto (/partners, /media) e as carregadas no painel (/uploads). */
 export const IMAGE_PATH = /^\/(?:partners|media|uploads)\/[\w.-]{1,80}\.(?:jpe?g|png|webp|avif)$/;

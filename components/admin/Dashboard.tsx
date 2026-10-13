@@ -6,7 +6,9 @@ import { LivePill } from '@/components/LivePill';
 import { useLive } from '@/components/providers/Live';
 import { isOpen, today } from '@/lib/content/giveaways';
 import { formatCompact, formatDate, formatInt } from '@/lib/format';
+import type { ClickStats } from '@/lib/clicks';
 import type { VisitStats } from '@/lib/visits';
+import { Clicks } from './Clicks';
 import { useForm } from './form';
 import { ArrowIcon, CheckIcon, InfoIcon, PlusIcon, WarnIcon } from './icons';
 import { Visits } from './Visits';
@@ -19,6 +21,8 @@ export type Overview = {
   clips: Clip[];
   /** Pessoas e visitas ao site, por dia e no total. */
   visits: VisitStats;
+  /** Cliques nas parcerias, por marca e por origem. */
+  clicks: ClickStats;
 };
 
 export type Section = 'parcerias' | 'giveaways' | 'redes' | 'setup';
@@ -192,6 +196,8 @@ export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps
       </div>
 
       <Visits stats={overview.visits} />
+
+      <Clicks stats={overview.clicks} />
 
       <div className="dash-grid">
         <section className="admin-card glass">

@@ -209,6 +209,7 @@ export const site: SiteConfig = {
     brands: [
       {
         name: 'GTZ Esports',
+        slug: 'gtz',
         category: 'Esports · merch oficial',
         perk: '10% de desconto',
         about:
@@ -242,6 +243,7 @@ export const site: SiteConfig = {
       },
       {
         name: 'PirateSwap',
+        slug: 'pirateswap',
         category: 'Skins de CS2',
         perk: '+35% de bónus',
         about: 'Plataforma para trocar ou vender skins de CS2 na hora.',
@@ -258,6 +260,7 @@ export const site: SiteConfig = {
       },
       {
         name: 'CSGO-Skins',
+        slug: 'csgo-skins',
         category: 'Caixas de skins de CS2',
         perk: 'código KITSUNE',
         about: 'Site de abertura de caixas de skins de CS2.',
@@ -293,6 +296,7 @@ export const site: SiteConfig = {
       },
       {
         name: 'Beyond Industries',
+        slug: 'beyond',
         category: 'Estúdio criativo',
         perk: 'produção e design',
         about: 'Estúdio de produção, edição e design vocacionado para a criação de conteúdo digital.',
@@ -314,6 +318,25 @@ export const site: SiteConfig = {
     intro: 'Participa enquanto dá. Boa sorte!',
     active: false,
     items: [],
+    // O regulamento e os vencedores também se mudam no painel. Estas regras são um ponto de partida:
+    // quem faz os giveaways tem de as ler e acertar (idade, país, prazos) antes de abrir o site.
+    rules: [
+      { title: 'Quem pode participar', text: 'Pessoas com 18 anos ou mais, a viver em Portugal. Uma participação por pessoa.' },
+      { title: 'Como participar', text: 'Cada giveaway diz os passos no seu cartão. Só contam as participações feitas até ao fim do último dia indicado.' },
+      { title: 'Como se escolhe quem ganha', text: 'Por sorteio entre todas as participações válidas, feito em direto ou com uma ferramenta de sorteio.' },
+      {
+        title: 'Como se sabe quem ganhou',
+        text: 'O nome sai em direto e fica nesta página. Quem ganha é contactado pela rede onde participou e tem 7 dias para responder. Sem resposta, sorteia-se outra pessoa.',
+      },
+      {
+        title: 'O prémio',
+        text: 'É o que está descrito no cartão e não se troca por dinheiro. O envio é oferecido, só para moradas em Portugal, até 30 dias depois de a morada estar confirmada.',
+      },
+      { title: 'Dados pessoais', text: 'O nome de utilizador de quem ganha é publicado. A morada serve só para enviar o prémio e é apagada a seguir.' },
+      { title: 'Participações que não contam', text: 'Contas falsas, várias contas da mesma pessoa e qualquer tentativa de fazer batota ficam de fora.' },
+      { title: 'As plataformas', text: 'Os giveaways não são patrocinados, apoiados nem geridos pela Twitch, pelo Instagram, pelo TikTok, pelo X nem pelo Discord.' },
+    ],
+    winners: [],
   },
 
   // O interruptor está no painel (/admin > Definições). Aqui fica só o que o aviso diz.

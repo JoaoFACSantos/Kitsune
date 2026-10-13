@@ -6,8 +6,10 @@ import type { Brand, FunStat } from '@/content/types';
 import { Magnetic } from '@/components/Magnetic';
 import { setScrollLocked } from '@/components/providers/SmoothScroll';
 import { Title } from '@/components/Title';
+import { brandSlug } from '@/lib/content/editable';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { FOLLOW, MEDIA } from '@/lib/motion';
+import { countClick } from '@/lib/track';
 
 type PartnersProps = {
   title: string;
@@ -433,6 +435,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
                   rel="noopener noreferrer sponsored"
                   className="btn btn-primary"
                   onClick={() => {
+                    countClick(brandSlug(active));
                     // Se o link não leva o código, vai copiado: é só colar no checkout.
                     if (active.code && !active.codeInLink) void copyCode(active.code);
                   }}

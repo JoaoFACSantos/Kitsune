@@ -67,6 +67,11 @@ export type Brand = {
   color: string;
   /** Aviso em letra pequena: idade mínima, risco, países onde não funciona. */
   note?: string;
+  /**
+   * Link curto: o-site/<slug> leva à marca e conta o clique (ver app/[slug]/route.ts).
+   * Sem isto, sai do nome ("GTZ Esports" dá "gtz-esports").
+   */
+  slug?: string;
 };
 
 /** Um giveaway: um cartão na secção dos giveaways, com o prémio e como participar. */
@@ -90,6 +95,18 @@ export type Giveaway = {
    * sai do site sozinho. Sem data, fica até ser tirado.
    */
   endsAt?: string;
+};
+
+/** Uma regra do regulamento dos giveaways (/regulamento): um título curto e o que ela diz. */
+export type Rule = { title: string; text: string };
+
+/** Quem ganhou um giveaway que já acabou. Só o nome de utilizador, e só com o acordo da pessoa. */
+export type Winner = {
+  name: string;
+  /** O que ganhou. */
+  prize: string;
+  /** O dia em que saiu (AAAA-MM-DD). */
+  date?: string;
 };
 
 /** Um clip (melhor momento). Com as chaves da Twitch vêm da API; sem elas, de `clips.items`. */
@@ -217,6 +234,10 @@ export type SiteConfig = {
     intro: string;
     active: boolean;
     items: Giveaway[];
+    /** O regulamento (/regulamento), regra a regra. Vale para todos os giveaways. */
+    rules: Rule[];
+    /** Quem já ganhou, do mais recente para o mais antigo. */
+    winners: Winner[];
   };
   socialsSection: { title: Title; note: string };
   /**
@@ -228,13 +249,13 @@ export type SiteConfig = {
 
 /**
  * A parte do site que se muda no painel (/admin), sem mexer no código: as redes, os periféricos,
- * o PC, as marcas das parcerias, os giveaways e o interruptor da manutenção. O resto (nome, handle, cores, imagem do hero e todos os textos
+ * o PC, as marcas das parcerias, os giveaways (com o regulamento e os vencedores) e o interruptor da manutenção. O resto (nome, handle, cores, imagem do hero e todos os textos
  * e títulos) vem só de `content/site.config.ts`.
  * O que o painel guarda substitui estes campos; enquanto não houver nada guardado, valem os da configuração.
  */
 export type EditableContent = Pick<SiteConfig, 'socials' | 'discord'> & {
   setup: Pick<SiteConfig['setup'], 'gear' | 'pc'>;
   partners: Pick<SiteConfig['partners'], 'brands'>;
-  giveaways: Pick<SiteConfig['giveaways'], 'active' | 'items'>;
+  giveaways: Pick<SiteConfig['giveaways'], 'active' | 'items' | 'rules' | 'winners'>;
   maintenance: Pick<SiteConfig['maintenance'], 'active'>;
 };

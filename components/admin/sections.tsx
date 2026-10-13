@@ -1,8 +1,9 @@
 'use client';
 
-import type { Brand, Gear, Giveaway, Social, SocialId, Spec } from '@/content/types';
+import { useState, useSyncExternalStore } from 'react';
+import type { Brand, Gear, Giveaway, Rule, Social, SocialId, Spec, Winner } from '@/content/types';
 import { GearGlyph, SocialIcon } from '@/components/icons';
-import { GEAR_ICONS, GEAR_LABELS, MAX, SOCIAL_IDS, SOCIAL_LABELS } from '@/lib/content/editable';
+import { brandSlug, GEAR_ICONS, GEAR_LABELS, MAX, slugify, SOCIAL_IDS, SOCIAL_LABELS } from '@/lib/content/editable';
 import { formatDay, isOpen, today } from '@/lib/content/giveaways';
 import { formatCompact } from '@/lib/format';
 import { Card, Check, ColorField, DateField, NumberField, Repeater, Row, SelectField, StringList, TextArea, TextField, Toggle, useForm } from './form';
@@ -25,6 +26,38 @@ export const emptyBrand = (): Brand => ({
   imageSize: { width: 1, height: 1 },
   color: '#140a18',
 });
+
+const noop = () => () => {};
+
+/** O link curto por extenso, com o endereço do site, pronto a copiar. */
+function ShortLink({ slug }: { slug: string }) {
+  // O endereço do site é o do próprio painel: só se sabe no browser.
+  const host = useSyncExternalStore(
+    noop,
+    () => window.location.host,
+    () => '',
+  );
+  const [copied, setCopied] = useState(false);
+  if (!slug || !host) return null;
+  const address = `${host}/${slug}`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(`https://${address}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      // Sem acesso à área de transferência: o endereço está escrito, copia-se à mão.
+    }
+  };
+  return (
+    <p className="short-link">
+      <strong>{address}</strong>
+      <button type="button" className="review-action" onClick={copy}>
+        {copied ? 'Copiado' : 'Copiar'}
+      </button>
+    </p>
+  );
+}
 
 function BrandFields({ path, brand }: { path: string; brand: Brand }) {
   return (
@@ -77,6 +110,15 @@ function BrandFields({ path, brand }: { path: string; brand: Brand }) {
           hint="Se não levar, o código fica copiado quando a pessoa abre o site, pronto a colar no checkout."
         />
       ) : null}
+      <TextField
+        path={`${path}.slug`}
+        label="Link curto (opcional)"
+        max={24}
+        placeholder={slugify(brand.name) || 'zumub'}
+        optional
+        hint="Um endereço do teu site que leva direto à marca: fácil de dizer em direto e de pôr numa descrição. O Início do painel mostra quantas vezes foi aberto. Em branco, sai do nome da marca. Se o mudares, a contagem recomeça."
+      />
+      <ShortLink slug={brandSlug(brand)} />
       <TextArea
         path={`${path}.note`}
         label="Aviso em letra pequena (opcional)"
@@ -133,6 +175,8 @@ export function PartnersSection({ open }: { open?: number }) {
 /* ---------- Giveaways ---------- */
 
 export const emptyGiveaway = (): Giveaway => ({ title: '', about: '', steps: [], cta: 'Participar' });
+const emptyRule = (): Rule => ({ title: '', text: '' });
+const emptyWinner = (): Winner => ({ name: '', prize: '' });
 
 function GiveawayFields({ path, day }: { path: string; day: string }) {
   return (
@@ -222,6 +266,35 @@ export function GiveawaysSection({ open }: { open?: number }) {
           })}
         >
           {(path) => <GiveawayFields path={path} day={day} />}
+        </Repeater>
+      </Card>
+
+      <Card
+        title="Regulamento"
+        hint="As regras que valem para todos os giveaways. Ficam na página /regulamento, com um link por baixo dos cartões. Lê-as e acerta-as ao teu caso: a idade, o país, os prazos."
+      >
+        <Repeater<Rule> path="giveaways.rules" max={MAX.rules} addLabel="Adicionar regra" make={emptyRule}>
+          {(path) => (
+            <>
+              <TextField path={`${path}.title`} label="Regra" max={60} placeholder="Quem pode participar" />
+              <TextArea path={`${path}.text`} label="O que diz" max={500} rows={2} />
+            </>
+          )}
+        </Repeater>
+      </Card>
+
+      <Card
+        title="Vencedores"
+        hint="Quem já ganhou, do mais recente para o mais antigo. Aparecem na página /regulamento. Só o nome de utilizador, e só se a pessoa concordar em aparecer."
+      >
+        <Repeater<Winner> path="giveaways.winners" max={MAX.winners} addLabel="Adicionar vencedor" make={emptyWinner}>
+          {(path) => (
+            <>
+              <TextField path={`${path}.name`} label="Nome de utilizador" max={40} placeholder="@fulana" />
+              <TextField path={`${path}.prize`} label="O que ganhou" max={60} placeholder="Teclado Keychron Q1 Pro" />
+              <DateField path={`${path}.date`} label="Dia (opcional)" />
+            </>
+          )}
         </Repeater>
       </Card>
     </>

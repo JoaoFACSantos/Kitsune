@@ -10,6 +10,7 @@ import { env } from 'cloudflare:workers';
 //   login_failures   tentativas falhadas de entrada no painel
 //   visits           visitas e pessoas por dia (ver lib/visits.ts)
 //   visitors         as pessoas que já contaram hoje (apagam-se no dia seguinte)
+//   clicks           cliques nas parcerias por dia, marca e origem (ver lib/clicks.ts)
 //
 // As tabelas criam-se sozinhas na primeira gravação: não há migrações para correr.
 
@@ -21,6 +22,7 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS login_failures (key TEXT PRIMARY KEY, count INTEGER NOT NULL, until INTEGER NOT NULL)',
   'CREATE TABLE IF NOT EXISTS visits (day TEXT PRIMARY KEY, views INTEGER NOT NULL, visitors INTEGER NOT NULL)',
   'CREATE TABLE IF NOT EXISTS visitors (day TEXT NOT NULL, hash TEXT NOT NULL, PRIMARY KEY (day, hash)) WITHOUT ROWID',
+  'CREATE TABLE IF NOT EXISTS clicks (day TEXT NOT NULL, slug TEXT NOT NULL, source TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY (day, slug, source)) WITHOUT ROWID',
 ];
 
 export const db = () => env.DB;

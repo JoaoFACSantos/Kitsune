@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Giveaway } from '@/content/types';
 import { Title } from '@/components/Title';
 import { countdown, formatDay } from '@/lib/content/giveaways';
@@ -85,6 +86,11 @@ export function Giveaways({ title, intro, items, today }: GiveawaysProps) {
             </li>
           ))}
         </ul>
+        <p className="giveaways-foot">
+          <Link href="/regulamento" prefetch={false}>
+            Regulamento dos giveaways
+          </Link>
+        </p>
       </div>
     </section>
   );

@@ -713,6 +713,14 @@ html .admin button.image-pick * {
   transition: filter var(--dur-fade);
 }
 
+/* Uma nota curta ao lado do nome de uma linha (o link curto de uma parceria). */
+.bar-note {
+  margin-left: 8px;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
 .bar-value {
   font-size: 14px;
   font-weight: 800;
@@ -1139,6 +1147,20 @@ html .admin button.image-pick * {
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* O link curto de uma parceria por extenso, com o botão de copiar. */
+.short-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: -6px 0 0;
+  font-size: 15px;
+}
+
+.short-link strong {
+  overflow-wrap: anywhere;
 }
 
 .field-hint {

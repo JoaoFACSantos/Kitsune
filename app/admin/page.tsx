@@ -4,6 +4,7 @@ import { Login } from '@/components/admin/Login';
 import { LiveProvider } from '@/components/providers/Live';
 import { site } from '@/content/site.config';
 import { adminStatus, isAdmin, MIN_PASSWORD } from '@/lib/admin/auth';
+import { getClicks } from '@/lib/clicks';
 import { getContent } from '@/lib/content/site';
 import { getClips, getDiscord, getFollowers, getLiveStatus } from '@/lib/data';
 import { getVisits } from '@/lib/visits';
@@ -46,13 +47,14 @@ export default async function AdminPage() {
   }
 
   // O conteúdo a editar e, para o resumo do Início, os mesmos números que o site mostra.
-  const [{ content, savedAt }, live, followers, discord, clips, visits] = await Promise.all([
+  const [{ content, savedAt }, live, followers, discord, clips, visits, clicks] = await Promise.all([
     getContent(),
     getLiveStatus(),
     getFollowers(),
     getDiscord(),
     getClips(),
     getVisits(),
+    getClicks(),
   ]);
 
   return (
@@ -67,7 +69,7 @@ export default async function AdminPage() {
             twitch: site.platform === 'twitch' && Boolean(process.env.TWITCH_CLIENT_ID && process.env.TWITCH_CLIENT_SECRET),
             youtube: Boolean(process.env.YOUTUBE_API_KEY && process.env.YOUTUBE_CHANNEL_ID),
           }}
-          overview={{ followers, discordMembers: discord.members, clips, visits }}
+          overview={{ followers, discordMembers: discord.members, clips, visits, clicks }}
           themeColors={{ light: site.theme.bg, dark: site.theme.darkBg }}
         />
       </LiveProvider>
