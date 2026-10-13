@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import { useRef, useState } from 'react';
 import type { Brand, FunStat } from '@/content/types';
 import { Magnetic } from '@/components/Magnetic';
+import { BrandTile, PartnerDetails } from '@/components/PartnerCard';
 import { setScrollLocked } from '@/components/providers/SmoothScroll';
 import { Title } from '@/components/Title';
 import { brandSlug } from '@/lib/content/editable';
@@ -314,14 +314,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
                     // detail a 0: o clique veio do teclado (Enter ou espaço).
                     onClick={(event) => openBrand(brand, event.currentTarget, event.detail === 0)}
                   >
-                    <span className="brand-thumb" style={{ background: brand.color }}>
-                      <Image src={brand.thumb ?? brand.image} alt="" fill sizes="96px" draggable={false} style={{ objectPosition: brand.focus }} />
-                    </span>
-                    <span className="brand-text">
-                      <span className="brand-name">{brand.name}</span>
-                      <span className="brand-category">{brand.category}</span>
-                      <span className="brand-perk">{brand.perk}</span>
-                    </span>
+                    <BrandTile brand={brand} />
                   </button>
                 </li>
               ))}
@@ -391,68 +384,17 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
-            <div className="partner-art" style={{ background: active.color }}>
-              {/* O banner nunca é cortado (as marcas põem texto até à margem); o que sobrar à volta
-                  leva o próprio banner, desfocado. O "contain" vai aqui e não no CSS: o Image com
-                  `fill` escreve o object-fit no próprio elemento. */}
-              <span aria-hidden className="partner-art-fill" style={{ backgroundImage: `url("${active.image}")` }} />
-              <Image
-                src={active.image}
-                alt={`Imagem da parceria com a ${active.name}`}
-                fill
-                sizes="(min-width: 760px) 470px, 100vw"
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-            <div className="partner-body" data-lenis-prevent>
-              <p className="chip self-start">{active.category}</p>
-              <h3 id="partner-name" className="partner-name">
-                {active.name}
-              </h3>
-              <p className="partner-about">{active.about}</p>
-              {active.perks.length ? (
-                <ul className="partner-perks" aria-label="Vantagens">
-                  {active.perks.map((perk) => (
-                    <li key={perk}>{perk}</li>
-                  ))}
-                </ul>
-              ) : null}
-              {active.code ? (
-                <div className="partner-code">
-                  <span className="flex min-w-0 flex-col">
-                    <span className="text-xs font-bold uppercase tracking-wider text-ink-soft">Código</span>
-                    <strong className="truncate">{active.code}</strong>
-                  </span>
-                  <button type="button" className="btn btn-ghost btn-sm ml-auto" onClick={() => copyCode(active.code ?? '')}>
-                    {codeCopied ? 'Copiado ♡' : 'Copiar'}
-                  </button>
-                </div>
-              ) : null}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <a
-                  href={active.url}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  className="btn btn-primary"
-                  onClick={() => {
-                    countClick(brandSlug(active));
-                    // Se o link não leva o código, vai copiado: é só colar no checkout.
-                    if (active.code && !active.codeInLink) void copyCode(active.code);
-                  }}
-                >
-                  {active.cta}
-                  <span aria-hidden className="arrow">
-                    ↗
-                  </span>
-                </a>
-                {active.code ? (
-                  <p className="text-sm font-semibold text-ink-soft">
-                    {active.codeInLink ? 'O link já leva o código.' : 'O código fica copiado: cola-o no checkout.'}
-                  </p>
-                ) : null}
-              </div>
-              {active.note ? <p className="partner-note">{active.note}</p> : null}
-            </div>
+            <PartnerDetails
+              brand={active}
+              nameId="partner-name"
+              codeCopied={codeCopied}
+              onCopyCode={() => copyCode(active.code ?? '')}
+              onVisit={() => {
+                countClick(brandSlug(active));
+                // Se o link não leva o código, vai copiado: é só colar no checkout.
+                if (active.code && !active.codeInLink) void copyCode(active.code);
+              }}
+            />
           </div>
         ) : null}
       </dialog>

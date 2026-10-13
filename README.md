@@ -123,6 +123,12 @@ O botão «Pré-visualizar» abre o site num separador novo com o que está no p
 
 Como funciona: o painel valida o conteúdo como ao guardar e deixa-o como rascunho na tabela `settings` (uma linha só; guardar ou repor apaga-a). As páginas da pré-visualização vivem em `/admin/ver` ([`app/admin/ver`](app/admin/ver/[[...path]]/page.tsx)): `/admin/ver` é a página inicial, `/admin/ver/links` a de links, e o mesmo para o regulamento e a privacidade. Ficam dentro de `/admin` para levarem o cookie da sessão; sem sessão, mandam para a entrada. São as mesmas páginas do site, desenhadas pelos componentes de [`components/views`](components/views), com os links internos a apontar para dentro da pré-visualização. Lá não se contam visitas nem cliques, e os motores de busca não a veem.
 
+### O cartão ao vivo
+
+Com uma parceria ou um giveaway aberto no painel, o cartão aparece ao lado dos campos tal como fica no site e muda enquanto se escreve (em ecrãs estreitos fica por baixo dos campos). Numa parceria são dois: o cartão pequeno da fila e o cartão aberto, como num telemóvel. É só para ver: não se clica.
+
+Não há uma segunda versão dos cartões para manter: o painel ([`components/admin/Live.tsx`](components/admin/Live.tsx)) desenha-os com os componentes do site, [`components/PartnerCard.tsx`](components/PartnerCard.tsx) e `GiveawayCard` (em [`components/Giveaways.tsx`](components/Giveaways.tsx)), e com o mesmo CSS. A única diferença está em [`app/admin/admin.css`](app/admin/admin.css): o cartão aberto de uma parceria fica sempre na forma de ecrã estreito, que no site depende da largura da janela. Quem mudar essas regras em `globals.css` tem de acertar as do painel.
+
 ### Manutenção
 
 Em Definições há um interruptor "Pôr o site em manutenção". Ligado (e guardado), a página inicial mostra só «em manutenção» ([`components/Maintenance.tsx`](components/Maintenance.tsx)); o painel continua a funcionar em `/admin`, para se poder desligar, e a [pré-visualização](#pré-visualização) continua a mostrar o site inteiro a quem tem sessão. O que o aviso diz está em `maintenance.title`, em [`content/site.config.ts`](content/site.config.ts). Enquanto dura, a página pede aos motores de busca que não a guardem e as visitas não se contam.

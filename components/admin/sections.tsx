@@ -9,6 +9,7 @@ import { formatCompact } from '@/lib/format';
 import { Card, Check, ColorField, DateField, NumberField, Repeater, Row, SelectField, StringList, TextArea, TextField, Toggle, useForm } from './form';
 import { NavGlyph } from './icons';
 import { ImageField } from './ImageField';
+import { BrandLive, GiveawayLive, WithLive } from './Live';
 
 // As secções do painel. Os limites (max) são os mesmos da validação do servidor.
 
@@ -165,7 +166,11 @@ export function PartnersSection({ open }: { open?: number }) {
             ),
           })}
         >
-          {(path, brand) => <BrandFields path={path} brand={brand} />}
+          {(path, brand) => (
+            <WithLive card={<BrandLive brand={brand} />}>
+              <BrandFields path={path} brand={brand} />
+            </WithLive>
+          )}
         </Repeater>
       </Card>
     </>
@@ -265,7 +270,11 @@ export function GiveawaysSection({ open }: { open?: number }) {
             ),
           })}
         >
-          {(path) => <GiveawayFields path={path} day={day} />}
+          {(path, item) => (
+            <WithLive card={<GiveawayLive item={item} day={day} active={active} />}>
+              <GiveawayFields path={path} day={day} />
+            </WithLive>
+          )}
         </Repeater>
       </Card>
 

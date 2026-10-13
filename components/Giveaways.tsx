@@ -26,6 +26,57 @@ function Gift({ strokeWidth = 2.2 }: { strokeWidth?: number }) {
   );
 }
 
+/**
+ * O cartão de um giveaway: o prémio, os passos para participar e o prazo. O painel também o usa
+ * (components/admin/Live.tsx), para o mostrar ao lado dos campos enquanto se escreve.
+ */
+export function GiveawayCard({ item, today }: { item: Giveaway; today: string }) {
+  return (
+    <article className="giveaway glass">
+      {/* Sem imagem do prémio, fica um presente desenhado: os cartões têm todos a mesma forma. */}
+      {item.image && item.imageSize ? (
+        <div className="giveaway-art">
+          <Image src={item.image} alt="" width={item.imageSize.width} height={item.imageSize.height} sizes="(min-width: 900px) 520px, 100vw" />
+        </div>
+      ) : (
+        <div className="giveaway-art" data-empty>
+          <Gift strokeWidth={1.5} />
+        </div>
+      )}
+      <div className="giveaway-body">
+        <p className="giveaway-when">
+          <Gift />
+          {item.endsAt ? (
+            <>
+              <strong>{countdown(item.endsAt, today)}</strong>
+              <span>até {formatDay(item.endsAt)}</span>
+            </>
+          ) : (
+            <strong>a decorrer</strong>
+          )}
+        </p>
+        <h3 className="giveaway-title">{item.title}</h3>
+        {item.about ? <p className="giveaway-about">{item.about}</p> : null}
+        {item.steps.length ? (
+          <ol className="giveaway-steps" aria-label="Como participar">
+            {item.steps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        ) : null}
+        {item.url ? (
+          <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary giveaway-cta">
+            {item.cta}
+            <span aria-hidden className="arrow">
+              ↗
+            </span>
+          </a>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
 /** Giveaways a decorrer: um cartão por prémio, com os passos para participar e o prazo. */
 export function Giveaways({ title, intro, items, today, rulesHref = '/regulamento' }: GiveawaysProps) {
   return (
@@ -37,54 +88,7 @@ export function Giveaways({ title, intro, items, today, rulesHref = '/regulament
         <ul className="giveaways mt-10 md:mt-14" data-count={Math.min(items.length, 3)} data-scroll="in" data-scroll-on=":scope > li" data-scroll-direct="24">
           {items.map((item, i) => (
             <li key={item.title} style={{ '--i': i } as React.CSSProperties}>
-              <article className="giveaway glass">
-                {/* Sem imagem do prémio, fica um presente desenhado: os cartões têm todos a mesma forma. */}
-                {item.image && item.imageSize ? (
-                  <div className="giveaway-art">
-                    <Image
-                      src={item.image}
-                      alt=""
-                      width={item.imageSize.width}
-                      height={item.imageSize.height}
-                      sizes="(min-width: 900px) 520px, 100vw"
-                    />
-                  </div>
-                ) : (
-                  <div className="giveaway-art" data-empty>
-                    <Gift strokeWidth={1.5} />
-                  </div>
-                )}
-                <div className="giveaway-body">
-                  <p className="giveaway-when">
-                    <Gift />
-                    {item.endsAt ? (
-                      <>
-                        <strong>{countdown(item.endsAt, today)}</strong>
-                        <span>até {formatDay(item.endsAt)}</span>
-                      </>
-                    ) : (
-                      <strong>a decorrer</strong>
-                    )}
-                  </p>
-                  <h3 className="giveaway-title">{item.title}</h3>
-                  {item.about ? <p className="giveaway-about">{item.about}</p> : null}
-                  {item.steps.length ? (
-                    <ol className="giveaway-steps" aria-label="Como participar">
-                      {item.steps.map((step) => (
-                        <li key={step}>{step}</li>
-                      ))}
-                    </ol>
-                  ) : null}
-                  {item.url ? (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary giveaway-cta">
-                      {item.cta}
-                      <span aria-hidden className="arrow">
-                        ↗
-                      </span>
-                    </a>
-                  ) : null}
-                </div>
-              </article>
+              <GiveawayCard item={item} today={today} />
             </li>
           ))}
         </ul>
