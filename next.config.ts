@@ -1,19 +1,34 @@
 import type { NextConfig } from 'next';
 
+// Em todas as respostas: o browser passa a vir sempre por HTTPS (um ano), não adivinha tipos de
+// ficheiro, não mostra o site dentro de páginas de outros (cliques enganados) e não lhe dá
+// câmara, microfone nem localização.
+const everywhere = [
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+];
+
+// O painel, mais apertado: não aparece dentro de página nenhuma, nem deixa rasto em links.
+const admin = [
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+  { key: 'Referrer-Policy', value: 'same-origin' },
+];
+
 const nextConfig: NextConfig = {
   devIndicators: false,
   async headers() {
+    // "/:path*" não apanha a raiz nem "/admin/:path*" apanha "/admin": vão à parte. Quando duas
+    // regras dão o mesmo cabeçalho vale a última, por isso o painel vem depois.
     return [
-      {
-        // O painel não pode ser mostrado dentro de outra página (cliques enganados) nem deixar rasto em links.
-        source: '/admin/:path*',
-        headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
-          { key: 'Referrer-Policy', value: 'same-origin' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-        ],
-      },
+      { source: '/', headers: everywhere },
+      { source: '/:path*', headers: everywhere },
+      { source: '/admin', headers: admin },
+      { source: '/admin/:path*', headers: admin },
     ];
   },
   images: {

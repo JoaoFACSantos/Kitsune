@@ -76,12 +76,12 @@ export function checkPassword(attempt: string) {
   return secret !== null && same(attempt, secret);
 }
 
-/** Na Cloudflare é sempre HTTPS; só em desenvolvimento, no próprio computador, é que não. */
+/** Em produção é sempre HTTPS (o proxy.ts manda para lá quem vem por HTTP); só no próprio computador é que não. */
 async function isHttps() {
   const h = await headers();
   const proto = h.get('x-forwarded-proto')?.split(',')[0]?.trim();
   if (proto) return proto === 'https';
-  return !/^(?:localhost|127.0.0.1|[::1])(?::d+)?$/.test(h.get('host') ?? '');
+  return !/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(h.get('host') ?? '');
 }
 
 export async function createSession() {
