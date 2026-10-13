@@ -5,6 +5,11 @@ import { site } from '@/content/site.config';
 // estáticos da Cloudflare ignoram os pedidos parciais (Range), e o Safari (iPhone incluído) só toca
 // vídeo de um servidor que lhes responda com o bocado pedido (206).
 
+// Sempre pelo Worker, sem a cache da Cloudflare à frente: num endereço que ela ainda não viu, a
+// cache tira o Range do pedido e o primeiro visitante recebia o ficheiro inteiro (200) em vez do
+// bocado que pediu (206). O browser guarda o vídeo na mesma, pelo Cache-Control lá em baixo.
+export const dynamic = 'force-dynamic';
+
 const fail = (status: number, headers?: HeadersInit) => new Response(null, { status, headers });
 
 export async function GET(request: Request) {
