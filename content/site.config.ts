@@ -254,7 +254,7 @@ export const site: SiteConfig = {
         imageSize: { width: 320, height: 574 },
         focus: '50% 0%',
         color: '#4a1fb8',
-        note: 'Joga com responsabilidade.',
+        note: '+18 · Joga com responsabilidade.',
       },
       {
         name: 'CSGO-Skins',
@@ -270,7 +270,7 @@ export const site: SiteConfig = {
         imageSize: { width: 320, height: 600 },
         focus: '50% 14%',
         color: '#101c4a',
-        note: 'Joga com responsabilidade.',
+        note: '+18 · Joga com responsabilidade.',
       },
       {
         name: 'BingX',
@@ -289,7 +289,7 @@ export const site: SiteConfig = {
         imageSize: { width: 320, height: 536 },
         focus: '50% 100%',
         color: '#16171c',
-        note: 'Joga com responsabilidade.',
+        note: '+18 · Joga com responsabilidade.',
       },
       {
         name: 'Beyond Industries',
