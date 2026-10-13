@@ -47,6 +47,7 @@ export const site: SiteConfig = {
     photoFit: 'cover',
     // Mais para a esquerda, para a raposa caber inteira.
     photoFocus: '25% 50%',
+    avatar: '/media/kitsune-avatar.jpg',
     // A mesma arte com vida (ela a pestanejar, a raposa também): um vídeo em loop por cima da imagem.
     // Foi feito a partir desta imagem; se a trocares, troca-o também ou tira esta linha.
     photoVideo: '/media/kitsune-loop.mp4',
@@ -354,6 +355,7 @@ export const site: SiteConfig = {
 
   socialsSection: { title: 'segue-me *aqui*', note: 'prometo que vale a pena' },
 
-  // Por agora ficam as duas de fora do site. Para as pôr de volta, muda para true.
-  pages: { links: false, rules: false },
+  // A página de links existe, mas sem link no site: é para a bio das redes. O regulamento dos
+  // giveaways fica de fora por agora; para o pôr de volta, muda para true.
+  pages: { links: true, rules: false },
 };

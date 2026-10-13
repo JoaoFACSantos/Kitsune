@@ -177,6 +177,8 @@ export type SiteConfig = {
     photoFit?: 'popout' | 'cover';
     /** Com 'cover': o ponto da imagem que fica à vista quando é cortada (object-position). */
     photoFocus?: string;
+    /** A mesma arte em pequeno e quadrada, para a fotografia redonda da página de links (feita por scripts/icons.mjs). Sem ela, usa-se `photo`. */
+    avatar?: string;
     /**
      * Com 'cover': a mesma arte num vídeo curto, sem som, que começa e acaba no fotograma da imagem
      * (para repetir sem salto). Toca em loop por cima da imagem, que fica como reserva.
@@ -247,7 +249,7 @@ export type SiteConfig = {
    * (/admin/ver/links, /admin/ver/regulamento), para a rever antes de a pôr de volta.
    */
   pages: {
-    /** A página de links (/links). */
+    /** A página de links (/links). Não tem link no site: é para pôr na bio das redes. */
     links: boolean;
     /** O regulamento dos giveaways, com os vencedores (/regulamento). */
     rules: boolean;

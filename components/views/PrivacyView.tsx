@@ -32,8 +32,7 @@ export function PrivacyView({ site, base = '' }: ViewProps) {
       <section>
         <h2 className="doc-heading">Cliques nas parcerias</h2>
         <p>
-          Quando abres uma parceria (pelo botão do cartão, por um link curto{example ? ` como ${example}` : ''}
-          {site.pages.links ? ' ou pela página de links' : ''}), o site soma um ao total dessa
+          Quando abres uma parceria (pelo botão do cartão ou por um link curto{example ? ` como ${example}` : ''}), o site soma um ao total dessa
           marca nesse dia. Não fica registado quem clicou.
         </p>
       </section>

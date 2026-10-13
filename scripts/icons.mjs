@@ -1,8 +1,10 @@
 // Faz os ícones do site a partir da arte do topo (hero.photo): as duas caras, a dela e a da raposa.
 //   node scripts/icons.mjs
 // Escreve em /public: icon.png (o do separador do browser), apple-icon.png (ecrã inicial do
-// iPhone) e favicon.ico (para quem só procura esse nome). Se a arte mudar, acerta o recorte
-// aqui em baixo e corre isto outra vez. Os ícones estão declarados em app/layout.tsx.
+// iPhone) e favicon.ico (para quem só procura esse nome), e ainda media/kitsune-avatar.jpg, a
+// arte inteira em pequeno, para a fotografia redonda da página de links (hero.avatar). Se a
+// arte mudar, acerta o recorte aqui em baixo e corre isto outra vez. Os ícones estão declarados
+// em app/layout.tsx.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,4 +51,5 @@ function ico(images) {
 fs.writeFileSync(path.join(root, 'public/icon.png'), await rounded(96));
 fs.writeFileSync(path.join(root, 'public/apple-icon.png'), await square(180).flatten({ background: '#140a18' }).png({ compressionLevel: 9 }).toBuffer());
 fs.writeFileSync(path.join(root, 'public/favicon.ico'), ico([{ size: 32, data: await rounded(32) }, { size: 48, data: await rounded(48) }]));
-for (const name of ['icon.png', 'apple-icon.png', 'favicon.ico']) console.log(name, fs.statSync(path.join(root, 'public', name)).size, 'bytes');
+fs.writeFileSync(path.join(root, 'public/media/kitsune-avatar.jpg'), await sharp(SOURCE).resize(480, 480, { kernel: 'lanczos3' }).jpeg({ quality: 82, mozjpeg: true }).toBuffer());
+for (const name of ['icon.png', 'apple-icon.png', 'favicon.ico', 'media/kitsune-avatar.jpg']) console.log(name, fs.statSync(path.join(root, 'public', name)).size, 'bytes');

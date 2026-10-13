@@ -112,7 +112,6 @@ export async function HomeView({ site, base = '', preview = false }: ViewProps) 
       <Footer
         name={site.name}
         links={[
-          ...(site.pages.links ? [{ href: `${base}/links`, label: 'Links' }] : []),
           ...(site.pages.rules && site.giveaways.active ? [{ href: `${base}/regulamento`, label: 'Regulamento dos giveaways' }] : []),
           { href: `${base}/privacidade`, label: 'Privacidade' },
         ]}

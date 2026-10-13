@@ -73,17 +73,17 @@ A página `/regulamento` tem as regras que valem para todos os giveaways e a lis
 
 ## Páginas de fora
 
-A página de links e o regulamento dos giveaways podem sair do site sem se apagar nada: `pages.links` e `pages.rules`, em [`content/site.config.ts`](content/site.config.ts). Com `false`, a página dá "não encontrado", saem os links para ela (o rodapé, por baixo dos cartões dos giveaways, as outras páginas) e sai do sitemap. O que está escrito no painel fica guardado, e a página continua a ver-se na pré-visualização (`/admin/ver/links`, `/admin/ver/regulamento`). Neste momento estão as duas de fora.
+A página de links e o regulamento dos giveaways podem sair do site sem se apagar nada: `pages.links` e `pages.rules`, em [`content/site.config.ts`](content/site.config.ts). Com `false`, a página dá "não encontrado" e sai do sitemap; no caso do regulamento, saem também os links para ele (o rodapé, por baixo dos cartões dos giveaways, a página de privacidade). O que está escrito no painel fica guardado, e a página continua a ver-se na pré-visualização (`/admin/ver/links`, `/admin/ver/regulamento`). Neste momento o regulamento está de fora; a página de links existe, mas sem link no site (é para a bio das redes).
 
 ## Página de links (/links)
 
-Uma página estreita, pensada para o telemóvel, para pôr na bio das redes: a fotografia e o nome, o estado do direto, as redes com os seguidores, as parcerias com os códigos (com botão de copiar) e os giveaways a decorrer. Não tem nada para configurar: lê o mesmo conteúdo do site, por isso muda sozinha quando se guarda alguma coisa no painel.
+Uma página para pôr na bio das redes: a fotografia, o nome, o estado do direto (clica-se nele para ir ao canal), os cartões das redes com os seguidores e um botão para o site. Os cartões são os da secção "Redes" do site ([`components/SocialCard.tsx`](components/SocialCard.tsx)). Tem duas formas: no telemóvel, os cartões ficam uns por baixo dos outros e a página cabe inteira no ecrã, sem scroll (os cartões repartem a altura que sobra); no computador, a fotografia é maior e os cartões ficam dois a dois. Não tem nada para configurar: lê o mesmo conteúdo do site, por isso muda sozinha quando se guarda alguma coisa no painel. A fotografia é `hero.avatar`, a arte do topo em pequeno, feita por [`scripts/icons.mjs`](scripts/icons.mjs).
 
 ## Links curtos e cliques
 
 Cada parceria tem um link curto, `o-site/<nome>` (`o-site/zumub`), que leva direto ao link da marca: é fácil de dizer em direto e de pôr numa descrição. O nome escreve-se no painel, em cada parceria ("Link curto"); em branco, sai do nome da marca (`brandSlug`, em [`lib/content/editable.ts`](lib/content/editable.ts)). Não pode repetir-se nem ser o de uma página do site (`RESERVED_SLUGS`). Um endereço que não seja de nenhuma parceria dá a página de "não encontrado".
 
-O site conta os cliques em cada parceria, por dia e por origem: pelo link curto, pelo botão do cartão no site e pela página de links. Fica só o total, nada sobre quem clicou ([`lib/clicks.ts`](lib/clicks.ts)); robôs e pré-visualizações de links não contam. O Início do painel mostra os últimos 30 dias, marca a marca. Se o link curto de uma parceria mudar, a contagem dela recomeça.
+O site conta os cliques em cada parceria, por dia e por origem: pelo link curto e pelo botão do cartão no site. Fica só o total, nada sobre quem clicou ([`lib/clicks.ts`](lib/clicks.ts)); robôs e pré-visualizações de links não contam. O Início do painel mostra os últimos 30 dias, marca a marca. Se o link curto de uma parceria mudar, a contagem dela recomeça.
 
 ## Privacidade (/privacidade)
 

@@ -2,16 +2,15 @@
 
 import { useRef } from 'react';
 import type { Social } from '@/content/types';
-import { SocialIcon } from '@/components/icons';
+import { SocialCard } from '@/components/SocialCard';
 import { Title } from '@/components/Title';
 import { formatCompact } from '@/lib/format';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { isBelowFold, MEDIA } from '@/lib/motion';
-import { COUNT_LABEL, SOCIAL_COLORS } from '@/lib/social-style';
 
 type SocialsProps = { title: string; note: string; socials: Social[]; discordMembers: number };
 
-/** Redes: cartões que enchem com a cor da plataforma a partir do ponto de entrada do rato. */
+/** Redes: um cartão por rede (components/SocialCard.tsx), com os números a contar quando entram no ecrã. */
 export function Socials({ title, note, socials, discordMembers }: SocialsProps) {
   const root = useRef<HTMLElement>(null);
 
@@ -39,12 +38,6 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
     { scope: root },
   );
 
-  const setOrigin = (event: React.PointerEvent<HTMLAnchorElement>) => {
-    const r = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty('--x', `${event.clientX - r.left}px`);
-    event.currentTarget.style.setProperty('--y', `${event.clientY - r.top}px`);
-  };
-
   return (
     <section id="redes" ref={root} tabIndex={-1} aria-labelledby="redes-title" className="section">
       <div className="section-inner">
@@ -54,43 +47,11 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
         </div>
 
         <ul className="socials mt-10 md:mt-14" data-scroll="in" data-scroll-on=":scope > li" data-scroll-direct="24">
-          {socials.map((s, i) => {
-            const count = s.id === 'discord' ? discordMembers : s.followers;
-            return (
-              <li key={s.id} style={{ '--i': i } as React.CSSProperties}>
-                <a
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="social glass"
-                  style={{ '--c': SOCIAL_COLORS[s.id] } as React.CSSProperties}
-                  onPointerEnter={setOrigin}
-                >
-                  <span aria-hidden className="social-fill" />
-                  <span className="social-icon">
-                    <SocialIcon id={s.id} />
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="social-label">{s.label}</span>
-                    <span className="social-meta truncate text-sm font-semibold">{s.handle}</span>
-                  </span>
-                  {count ? (
-                    <span className="social-stat ml-auto text-right">
-                      <span className="social-count block tabular-nums" data-count={count}>
-                        {formatCompact(count)}
-                      </span>
-                      <span className="social-meta block text-xs font-bold uppercase tracking-wider">
-                        {COUNT_LABEL[s.id] ?? 'seguidores'}
-                      </span>
-                    </span>
-                  ) : null}
-                  <span aria-hidden className="social-arrow">
-                    ↗
-                  </span>
-                </a>
-              </li>
-            );
-          })}
+          {socials.map((s, i) => (
+            <li key={s.id} style={{ '--i': i } as React.CSSProperties}>
+              <SocialCard social={s} count={s.id === 'discord' ? discordMembers : s.followers} />
+            </li>
+          ))}
         </ul>
       </div>
     </section>
