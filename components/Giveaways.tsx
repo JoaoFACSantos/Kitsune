@@ -31,7 +31,7 @@ export function Giveaways({ title, intro, items, today }: GiveawaysProps) {
         <Title id="giveaways-title" text={title} />
         <p className="lead mt-5">{intro}</p>
 
-        <ul className="giveaways mt-10 md:mt-14" data-count={Math.min(items.length, 3)} data-scroll="in" data-scroll-on=":scope > li">
+        <ul className="giveaways mt-10 md:mt-14" data-count={Math.min(items.length, 3)} data-scroll="in" data-scroll-on=":scope > li" data-scroll-direct="24">
           {items.map((item, i) => (
             <li key={item.title} style={{ '--i': i } as React.CSSProperties}>
               <article className="giveaway glass">

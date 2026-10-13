@@ -66,7 +66,7 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
           <p className="hand -rotate-3 text-3xl text-link">{note}</p>
         </div>
 
-        <ul className="socials mt-10 md:mt-14" data-scroll="in" data-scroll-on=":scope > li">
+        <ul className="socials mt-10 md:mt-14" data-scroll="in" data-scroll-on=":scope > li" data-scroll-direct="24">
           {socials.map((s, i) => {
             const count = s.id === 'discord' ? discordMembers : s.followers;
             return (

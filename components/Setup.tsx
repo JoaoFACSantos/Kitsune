@@ -113,7 +113,7 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
 
         <div id="panel-gear" role="tabpanel" aria-labelledby="tab-gear" hidden={tab !== 'gear'} className="mt-12 md:mt-16">
           <div className="grid gap-5 lg:grid-cols-12">
-            <ul className="gear-grid lg:col-span-7" aria-label="Periféricos" data-scroll="through" data-scroll-on=".gear > svg">
+            <ul className="gear-grid lg:col-span-7" aria-label="Periféricos" data-scroll="through" data-scroll-on=".gear > svg" data-scroll-direct="24">
               {gear.map((g, i) => (
                 <li key={g.name} className="gear-cell" style={{ '--i': i } as React.CSSProperties}>
                   <button

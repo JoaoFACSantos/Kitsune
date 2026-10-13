@@ -25,27 +25,40 @@ import { MEDIA } from '@/lib/motion';
  * o CSS usa-a para dar camada própria (will-change) só ao que se está a mexer.
  *
  * Com `data-scroll-direct`, o ScrollFx deixa de escrever a variável a cada frame e escreve logo
- * o resultado (ver `direct`, mais abaixo). É para os efeitos com muitos elementos, como o hero.
+ * o resultado (ver "Escrita direta", mais abaixo). É para os efeitos com vários elementos.
  */
 
 // ---- Escrita direta ----
 // Mudar uma variável CSS num elemento obriga o browser a recalcular-lhe o estilo todo, regra a
 // regra; mudar `translate`, `rotate`, `scale` ou `opacity` no próprio elemento custa menos de
 // metade. No hero são 15 elementos por frame: com a variável, o scroll gastava ali perto de
-// 3 ms só em estilos, e um ecrã de 240 Hz dá 4 ms a cada frame (o resto da página gasta 1 ms).
+// 3 ms só em estilos, e um ecrã de 240 Hz dá 4 ms a cada frame.
 //
-// O CSS continua a mandar: lê-se o que ele dá com a variável a 0, a 0,1 e a 1, e a cada frame
-// escreve-se o valor a meio caminho. Só serve para o que cresce em linha reta com a variável (a
-// opacidade pode parar em 0 ou em 1); um elemento em que isso falhe fica na variável, como antes.
+// O CSS continua a mandar: lê-se o que ele dá para vários valores da variável e, a cada frame,
+// escreve-se o valor a meio caminho entre os dois mais próximos.
+//
+// - `data-scroll-direct` sem valor: para o que cresce em linha reta com a variável (a opacidade
+//   pode parar no 0 ou no 1). Lê-se a 0, a 0,1 e a 1; um elemento em que a linha reta falhe fica
+//   na variável, como antes.
+// - `data-scroll-direct="24"`: para o resto (ondas, entradas em fila). Lê-se em 25 pontos, de 0 a
+//   1, e vai-se em linha reta de um ponto ao seguinte. São muitas leituras: fazem-se com o
+//   browser parado.
+//
+// Quem marca um elemento garante que os alvos só usam a variável nestas quatro propriedades (ou
+// não a usam): a um alvo que não mexe em nenhuma delas, a variável deixa de ser escrita.
 
 const DIRECT = ['translate', 'rotate', 'scale', 'opacity'] as const;
 type DirectProp = (typeof DIRECT)[number];
-type Line = { prop: DirectProp; from: number[]; to: number[]; last: string };
+/** `values` são os números lidos do CSS em pontos igualmente espaçados da variável, de 0 a 1. */
+type Line = { prop: DirectProp; values: number[][]; last: string };
 type Item = { el: HTMLElement | SVGElement; direct: boolean; lines: Line[] };
 
 const STEP = 0.1;
+/** Quanto tempo seguido se gasta, no máximo, a ler o CSS por pontos (ms). */
+const SLICE_MS = 6;
 /** Quanto o valor a 0,1 se pode afastar da linha reta (px, graus, escala, opacidade). */
 const SLACK: Record<DirectProp, number> = { translate: 0.05, rotate: 0.01, scale: 0.001, opacity: 0.02 };
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /** Os números de um valor calculado ("12px -30px", "7deg", "0.84", "none"), ou null se não for desses. */
 function read(prop: DirectProp, value: string): number[] | null {
@@ -62,48 +75,84 @@ function write(prop: DirectProp, v: number[]) {
   if (prop === 'translate') return `${v[0].toFixed(2)}px ${v[1].toFixed(2)}px`;
   if (prop === 'rotate') return `${v[0].toFixed(3)}deg`;
   if (prop === 'scale') return `${v[0].toFixed(4)} ${v[1].toFixed(4)}`;
-  return Math.min(1, Math.max(0, v[0])).toFixed(3);
+  return clamp01(v[0]).toFixed(3);
 }
 
-function direct(targets: (HTMLElement | SVGElement)[], name: string) {
-  const items: Item[] = targets.map((el) => ({ el, direct: false, lines: [] }));
+/** Com uma transição nestas propriedades, o que se lê do CSS vem atrasado: não serve. */
+function inTransition(el: Element) {
+  const style = getComputedStyle(el);
+  const affected = style.transitionProperty.split(',').some((prop) => prop.trim() === 'all' || DIRECT.some((name) => name === prop.trim()));
+  return affected && style.transitionDuration.split(',').some((time) => Number.parseFloat(time) > 0);
+}
 
-  /** Lê do CSS de onde a onde vai cada propriedade de cada elemento. */
-  const sample = () => {
+/** `segments`: em quantos troços se parte o caminho da variável (1 = uma linha reta só). */
+function direct(targets: (HTMLElement | SVGElement)[], name: string, segments: number) {
+  const items: Item[] = targets.map((el) => ({ el, direct: false, lines: [] }));
+  const points = segments > 1 ? Array.from({ length: segments + 1 }, (_, k) => k / segments) : [0, STEP, 1];
+
+  // A leitura do CSS, por onde passa cada propriedade de cada elemento, faz-se ponto a ponto:
+  // `begin` prepara, cada `step` lê um ponto (e diz se ainda há mais) e `finish` fecha. Assim, a
+  // leitura por pontos pode ser feita aos bocados, sem prender o browser de uma vez.
+  let still: boolean[] = [];
+  let readings: (number[] | null)[][][] = [];
+
+  const begin = () => {
     // Tira o que aqui se escreveu, para se ler o que o CSS diz.
     for (const item of items) {
       for (const line of item.lines) item.el.style.removeProperty(line.prop);
+      item.direct = false;
       item.lines = [];
     }
-    const at = (value: number) => {
-      for (const { el } of items) el.style.setProperty(name, String(value));
-      return items.map(({ el }) => {
+    still = items.map(({ el }) => !inTransition(el));
+    readings = [];
+  };
+
+  const step = () => {
+    const value = points[readings.length];
+    for (const { el } of items) el.style.setProperty(name, String(value));
+    readings.push(
+      items.map(({ el }) => {
         const style = getComputedStyle(el);
         return DIRECT.map((prop) => read(prop, style.getPropertyValue(prop)));
-      });
-    };
-    const start = at(0);
-    const near = at(STEP);
-    const end = at(1);
+      }),
+    );
+    return readings.length < points.length;
+  };
+
+  const finish = () => {
     items.forEach((item, i) => {
-      item.direct = DIRECT.every((prop, j) => {
-        const from = start[i][j];
-        const mid = near[i][j];
-        let to = end[i][j];
-        if (!from || !mid || !to) return false;
-        // A opacidade pode bater no 0 ou no 1 a meio: a linha tira-se do início e corta-se ao escrever.
-        if (prop === 'opacity') {
-          const full = from[0] + (mid[0] - from[0]) / STEP;
-          if (Math.abs(Math.min(1, Math.max(0, full)) - to[0]) > SLACK.opacity) return false;
-          to = [full];
-        }
-        if (from.some((v, k) => Math.abs(mid[k] - (v + (to[k] - v) * STEP)) > SLACK[prop])) return false;
-        if (from.some((v, k) => Math.abs(to[k] - v) > SLACK[prop] / 10)) item.lines.push({ prop, from, to, last: '' });
-        return true;
-      });
+      item.direct =
+        still[i] &&
+        DIRECT.every((prop, j) => {
+          const series = readings.map((reading) => reading[i][j]);
+          if (series.some((numbers) => !numbers)) return false;
+          let values = series as number[][];
+          if (segments <= 1) {
+            const [from, mid] = values;
+            let to = values[2];
+            // A opacidade pode bater no 0 ou no 1 a meio: a linha tira-se do início e corta-se ao escrever.
+            if (prop === 'opacity') {
+              const full = from[0] + (mid[0] - from[0]) / STEP;
+              if (Math.abs(clamp01(full) - to[0]) > SLACK.opacity) return false;
+              to = [full];
+            }
+            if (from.some((v, k) => Math.abs(mid[k] - (v + (to[k] - v) * STEP)) > SLACK[prop])) return false;
+            values = [from, to];
+          }
+          const moves = values.some((numbers) => numbers.some((n, k) => Math.abs(n - values[0][k]) > SLACK[prop] / 10));
+          if (moves) item.lines.push({ prop, values, last: '' });
+          return true;
+        });
       if (item.direct) item.el.style.removeProperty(name);
       else item.lines = [];
     });
+  };
+
+  /** A leitura toda de seguida. */
+  const sample = () => {
+    begin();
+    while (step());
+    finish();
   };
 
   const apply = (value: number) => {
@@ -114,9 +163,14 @@ function direct(targets: (HTMLElement | SVGElement)[], name: string) {
         continue;
       }
       for (const line of item.lines) {
+        // Entre que dois pontos lidos está o valor, e a que distância do primeiro.
+        const at = clamp01(value) * (line.values.length - 1);
+        const k = Math.min(line.values.length - 2, Math.floor(at));
+        const from = line.values[k];
+        const to = line.values[k + 1];
         const next = write(
           line.prop,
-          line.from.map((v, k) => v + (line.to[k] - v) * value),
+          from.map((v, c) => v + (to[c] - v) * (at - k)),
         );
         if (next === line.last) continue;
         line.last = next;
@@ -135,7 +189,7 @@ function direct(targets: (HTMLElement | SVGElement)[], name: string) {
     }
   };
 
-  return { sample, apply, clear };
+  return { sample, begin, step, finish, apply, clear };
 }
 
 export function ScrollFx() {
@@ -170,22 +224,61 @@ export function ScrollFx() {
       };
       // Escrita direta (ver lá em cima). Só começa quando as animações de entrada acabam: enquanto
       // correm, o que se lê do CSS é o valor delas, e não o que a variável dá.
+      let reread = () => {};
       if (el.dataset.scrollDirect !== undefined) {
-        const candidate = direct(targets, name);
-        const entering = targets.flatMap((target) => target.getAnimations()).filter((animation) => Number.isFinite(Number(animation.effect?.getComputedTiming().endTime)));
-        Promise.allSettled(entering.map((animation) => animation.finished)).then(() => {
-          if (!alive) return;
+        const segments = Math.max(1, Math.round(Number(el.dataset.scrollDirect)) || 1);
+        const candidate = direct(targets, name, segments);
+        let entered = false;
+        let waiting = 0;
+        const start = () => {
           candidate.sample();
           writer = candidate;
           render();
+        };
+        // Uma linha reta são três leituras: fazem-se logo. Por pontos são dezenas: fazem-se com o
+        // browser parado e aos bocados (uns milissegundos de cada vez). Até acabarem, o efeito anda
+        // pela variável, como os outros.
+        reread = () => {
+          if (!entered || !alive) return;
+          if (segments === 1) return start();
+          if (writer) {
+            candidate.clear();
+            writer = null;
+            render();
+          }
+          const turn = ++waiting;
+          let began = false;
+          const later = () => {
+            if ('requestIdleCallback' in window) window.requestIdleCallback(run);
+            else setTimeout(run, 200);
+          };
+          const run = (deadline?: IdleDeadline) => {
+            if (!alive || turn !== waiting) return;
+            if (!began) candidate.begin();
+            began = true;
+            const until = performance.now() + Math.min(deadline?.timeRemaining() ?? SLICE_MS, SLICE_MS);
+            // Pelo menos um ponto por fatia, para a leitura andar sempre.
+            let more = candidate.step();
+            while (more && performance.now() < until) more = candidate.step();
+            if (more) {
+              // A leitura deixou a variável num valor de teste: repõe-se o do scroll até à próxima fatia.
+              render();
+              return later();
+            }
+            candidate.finish();
+            writer = candidate;
+            render();
+          };
+          later();
+        };
+        const entering = targets.flatMap((target) => target.getAnimations()).filter((animation) => Number.isFinite(Number(animation.effect?.getComputedTiming().endTime)));
+        Promise.allSettled(entering.map((animation) => animation.finished)).then(() => {
+          entered = true;
+          reread();
         });
         // O estado de um elemento pode mudar a regra que se lhe aplica (a moldura do hero fica
         // quieta com o direto a passar): lê-se o CSS outra vez.
-        const watcher = new MutationObserver(() => {
-          if (!writer) return;
-          writer.sample();
-          render();
-        });
+        const watcher = new MutationObserver(reread);
         for (const target of targets) watcher.observe(target, { attributes: true, attributeFilter: ['data-playing', 'data-live'] });
         cleanups.push(() => {
           watcher.disconnect();
@@ -209,7 +302,7 @@ export function ScrollFx() {
       };
       // Ao refrescar (o ecrã mudou de tamanho, as fontes chegaram), o CSS pode dar outros valores.
       const refresh = (self: ScrollTrigger) => {
-        writer?.sample();
+        reread();
         set(self);
       };
       ScrollTrigger.create({ ...vars, toggleClass: { targets: el, className: `fx${name.slice(1)}` }, onUpdate: set, onRefresh: refresh });

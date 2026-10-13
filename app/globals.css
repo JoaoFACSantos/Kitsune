@@ -2953,6 +2953,11 @@
    variáveis --in, --p, --out e --page; aqui decide-se o que cada elemento faz com elas.
    Usam translate / rotate / scale (e não transform) para não chocarem com o GSAP,
    os hovers e as animações de entrada. Os valores por omissão são o estado final.
+
+   Nas secções com `data-scroll-direct` (hero, clips, setup, parcerias, giveaways, redes e os
+   pontos do fundo), o ScrollFx lê estas regras para vários valores da variável e escreve o
+   resultado em cada frame, sem passar por ela: é o que mantém o scroll leve em ecrãs de 240 Hz.
+   Nessas, os alvos só podem usar a variável em translate, rotate, scale e opacity.
    ========================================================= */
 
 /* As variáveis não passam para os filhos. Se passassem, cada frame de scroll obrigava o browser
@@ -2980,6 +2985,14 @@
   syntax: "<number>";
   inherits: false;
   initial-value: 0;
+}
+
+/* O progresso de cada cartão numa entrada em fila (ver --e mais abaixo). Sem este registo era uma
+   variável comum, que passa para os filhos: cada frame recalculava o cartão inteiro por dentro. */
+@property --e {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
 }
 
 @layer components {
