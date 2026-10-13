@@ -151,7 +151,7 @@ export async function LinksView({ site, base = '', preview = false }: ViewProps)
           <Link href={`${base}/privacidade`} prefetch={false}>
             Privacidade
           </Link>
-          {site.giveaways.active ? (
+          {site.pages.rules && site.giveaways.active ? (
             <>
               <span aria-hidden> · </span>
               <Link href={`${base}/regulamento`} prefetch={false}>

@@ -71,6 +71,7 @@ export default async function AdminPage() {
           }}
           overview={{ followers, discordMembers: discord.members, clips, visits, clicks }}
           themeColors={{ light: site.theme.bg, dark: site.theme.darkBg }}
+          rulesPage={site.pages.rules}
         />
       </LiveProvider>
     </main>

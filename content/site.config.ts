@@ -353,4 +353,7 @@ export const site: SiteConfig = {
   },
 
   socialsSection: { title: 'segue-me *aqui*', note: 'prometo que vale a pena' },
+
+  // Por agora ficam as duas de fora do site. Para as pôr de volta, muda para true.
+  pages: { links: false, rules: false },
 };

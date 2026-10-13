@@ -241,6 +241,18 @@ export type SiteConfig = {
   };
   socialsSection: { title: Title; note: string };
   /**
+   * Páginas que se podem tirar do site sem as apagar. Com false, a página dá "não encontrado",
+   * saem os links para ela (rodapé, cartões dos giveaways, outras páginas) e sai do sitemap.
+   * O que está escrito no painel fica guardado, e a página continua a ver-se na pré-visualização
+   * (/admin/ver/links, /admin/ver/regulamento), para a rever antes de a pôr de volta.
+   */
+  pages: {
+    /** A página de links (/links). */
+    links: boolean;
+    /** O regulamento dos giveaways, com os vencedores (/regulamento). */
+    rules: boolean;
+  };
+  /**
    * Manutenção: com `active` ligado, a página inicial mostra só o aviso (`title`), ao centro do ecrã.
    * O painel (/admin) continua a funcionar: é lá, em Definições, que se liga e desliga.
    */

@@ -26,6 +26,8 @@ type EditorProps = {
   overview: Overview;
   /** Cor da barra do browser em cada tema (para o switch claro/escuro). */
   themeColors: { light: string; dark: string };
+  /** A página do regulamento está no site (pages.rules, na configuração). */
+  rulesPage: boolean;
 };
 
 // As secções do painel. `paths` são os campos do conteúdo que cada uma edita: é por eles que
@@ -116,7 +118,7 @@ function tidy(content: EditableContent): EditableContent {
 }
 
 /** O painel: a barra das secções, o conteúdo em rascunho e o botão de guardar sempre à mão. */
-export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview, themeColors }: EditorProps) {
+export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview, themeColors, rulesPage }: EditorProps) {
   // `saved` é o que está publicado; `draft` é o que está no ecrã. Diferentes: há coisas por guardar.
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
@@ -416,7 +418,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
           <div key={`${version}:${view.tab}:${view.open ?? ''}`} className="admin-sections">
             {tab.id === 'inicio' ? <Dashboard name={name} overview={overview} dirty={dirty} savedAt={savedAt} go={go} preview={preview} /> : null}
             {tab.id === 'parcerias' ? <PartnersSection open={view.open} /> : null}
-            {tab.id === 'giveaways' ? <GiveawaysSection open={view.open} /> : null}
+            {tab.id === 'giveaways' ? <GiveawaysSection open={view.open} rulesPage={rulesPage} /> : null}
             {tab.id === 'redes' ? <SocialsSection auto={auto} open={view.open} /> : null}
             {tab.id === 'setup' ? <SetupSection /> : null}
             {tab.id === 'definicoes' ? (

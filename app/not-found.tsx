@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FoxRun } from '@/components/FoxRun';
+import { site } from '@/content/site.config';
 import { Title } from '@/components/Title';
 
 // A página de "não encontrado": um endereço que não existe, ou um link curto que não é de
@@ -20,9 +21,11 @@ export default function NotFound() {
         <Link href="/" prefetch={false} className="btn btn-primary">
           Voltar ao site
         </Link>
-        <Link href="/links" prefetch={false} className="btn btn-ghost">
-          Ver os links
-        </Link>
+        {site.pages.links ? (
+          <Link href="/links" prefetch={false} className="btn btn-ghost">
+            Ver os links
+          </Link>
+        ) : null}
       </div>
       <FoxRun />
     </main>

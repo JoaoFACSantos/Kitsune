@@ -17,7 +17,7 @@ export function PrivacyView({ site, base = '' }: ViewProps) {
       title="a tua *privacidade*"
       lead="Este site não te segue, não tem publicidade e não pede conta. Guarda o mínimo para saber quanta gente o visita, e nada que diga quem és."
       updated="outubro de 2026"
-      also={site.giveaways.active ? [{ href: `${base}/regulamento`, label: 'Regulamento dos giveaways' }] : []}
+      also={site.pages.rules && site.giveaways.active ? [{ href: `${base}/regulamento`, label: 'Regulamento dos giveaways' }] : []}
       home={base || '/'}
     >
       <section>
@@ -32,7 +32,8 @@ export function PrivacyView({ site, base = '' }: ViewProps) {
       <section>
         <h2 className="doc-heading">Cliques nas parcerias</h2>
         <p>
-          Quando abres uma parceria (pelo botão do cartão, por um link curto{example ? ` como ${example}` : ''} ou pela página de links), o site soma um ao total dessa
+          Quando abres uma parceria (pelo botão do cartão, por um link curto{example ? ` como ${example}` : ''}
+          {site.pages.links ? ' ou pela página de links' : ''}), o site soma um ao total dessa
           marca nesse dia. Não fica registado quem clicou.
         </p>
       </section>

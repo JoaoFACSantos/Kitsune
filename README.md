@@ -71,6 +71,10 @@ Os giveaways escrevem-se no painel. Em [`content/site.config.ts`](content/site.c
 
 A página `/regulamento` tem as regras que valem para todos os giveaways e a lista de quem já ganhou. As duas escrevem-se no painel (Giveaways > Regulamento e Vencedores); há um link para ela por baixo dos cartões e no rodapé. As regras de origem, em `giveaways.rules`, são um ponto de partida: quem faz os giveaways tem de as ler e acertar (idade mínima, país, prazos) antes de abrir o site. Dos vencedores publica-se só o nome de utilizador, e só com o acordo da pessoa.
 
+## Páginas de fora
+
+A página de links e o regulamento dos giveaways podem sair do site sem se apagar nada: `pages.links` e `pages.rules`, em [`content/site.config.ts`](content/site.config.ts). Com `false`, a página dá "não encontrado", saem os links para ela (o rodapé, por baixo dos cartões dos giveaways, as outras páginas) e sai do sitemap. O que está escrito no painel fica guardado, e a página continua a ver-se na pré-visualização (`/admin/ver/links`, `/admin/ver/regulamento`). Neste momento estão as duas de fora.
+
 ## Página de links (/links)
 
 Uma página estreita, pensada para o telemóvel, para pôr na bio das redes: a fotografia e o nome, o estado do direto, as redes com os seguidores, as parcerias com os códigos (com botão de copiar) e os giveaways a decorrer. Não tem nada para configurar: lê o mesmo conteúdo do site, por isso muda sozinha quando se guarda alguma coisa no painel.

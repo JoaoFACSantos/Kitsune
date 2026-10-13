@@ -11,7 +11,7 @@ type GiveawaysProps = {
   items: Giveaway[];
   /** O dia de hoje em Lisboa, para a contagem ("faltam 5 dias"). */
   today: string;
-  /** Onde está o regulamento (na pré-visualização do painel fica noutro endereço). */
+  /** Onde está o regulamento (na pré-visualização do painel fica noutro endereço). Sem ele, a página está fora do site e o link não aparece. */
   rulesHref?: string;
 };
 
@@ -78,7 +78,7 @@ export function GiveawayCard({ item, today }: { item: Giveaway; today: string })
 }
 
 /** Giveaways a decorrer: um cartão por prémio, com os passos para participar e o prazo. */
-export function Giveaways({ title, intro, items, today, rulesHref = '/regulamento' }: GiveawaysProps) {
+export function Giveaways({ title, intro, items, today, rulesHref }: GiveawaysProps) {
   return (
     <section id="giveaways" tabIndex={-1} aria-labelledby="giveaways-title" className="section">
       <div className="section-inner">
@@ -92,11 +92,13 @@ export function Giveaways({ title, intro, items, today, rulesHref = '/regulament
             </li>
           ))}
         </ul>
-        <p className="giveaways-foot">
-          <Link href={rulesHref} prefetch={false}>
-            Regulamento dos giveaways
-          </Link>
-        </p>
+        {rulesHref ? (
+          <p className="giveaways-foot">
+            <Link href={rulesHref} prefetch={false}>
+              Regulamento dos giveaways
+            </Link>
+          </p>
+        ) : null}
       </div>
     </section>
   );

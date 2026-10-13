@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Maintenance } from '@/components/Maintenance';
 import { RulesView } from '@/components/views/RulesView';
 import { site as defaults } from '@/content/site.config';
@@ -19,5 +20,7 @@ export const revalidate = 3600;
 export default async function RulesPage() {
   const site = await getSite();
   if (site.maintenance.active) return <Maintenance site={site} />;
+  // Tirado do site na configuração (pages.rules): é como se não existisse.
+  if (!site.pages.rules) notFound();
   return <RulesView site={site} />;
 }

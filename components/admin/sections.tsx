@@ -225,7 +225,10 @@ function GiveawayFields({ path, day }: { path: string; day: string }) {
   );
 }
 
-export function GiveawaysSection({ open }: { open?: number }) {
+// A página do regulamento pode estar fora do site (pages.rules, na configuração): o que se escreve aqui fica guardado para quando voltar.
+const RULES_OFF = ' Por agora a página do regulamento está fora do site: o que escreveres aqui fica guardado e só aparece quando ela voltar.';
+
+export function GiveawaysSection({ open, rulesPage }: { open?: number; rulesPage: boolean }) {
   const { draft } = useForm();
   const day = today();
   const { active, items } = draft.giveaways;
@@ -280,7 +283,7 @@ export function GiveawaysSection({ open }: { open?: number }) {
 
       <Card
         title="Regulamento"
-        hint="As regras que valem para todos os giveaways. Ficam na página /regulamento, com um link por baixo dos cartões. Lê-as e acerta-as ao teu caso: a idade, o país, os prazos."
+        hint={`As regras que valem para todos os giveaways. Ficam na página /regulamento, com um link por baixo dos cartões. Lê-as e acerta-as ao teu caso: a idade, o país, os prazos.${rulesPage ? '' : RULES_OFF}`}
       >
         <Repeater<Rule> path="giveaways.rules" max={MAX.rules} addLabel="Adicionar regra" make={emptyRule}>
           {(path) => (
@@ -294,7 +297,7 @@ export function GiveawaysSection({ open }: { open?: number }) {
 
       <Card
         title="Vencedores"
-        hint="Quem já ganhou, do mais recente para o mais antigo. Aparecem na página /regulamento. Só o nome de utilizador, e só se a pessoa concordar em aparecer."
+        hint={`Quem já ganhou, do mais recente para o mais antigo. Aparecem na página /regulamento. Só o nome de utilizador, e só se a pessoa concordar em aparecer.${rulesPage ? '' : RULES_OFF}`}
       >
         <Repeater<Winner> path="giveaways.winners" max={MAX.winners} addLabel="Adicionar vencedor" make={emptyWinner}>
           {(path) => (

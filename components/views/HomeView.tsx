@@ -94,7 +94,13 @@ export async function HomeView({ site, base = '', preview = false }: ViewProps) 
           mailSubject={site.partners.mailSubject}
         />
         {giveaways.length ? (
-          <Giveaways title={site.giveaways.title} intro={site.giveaways.intro} items={giveaways} today={day} rulesHref={`${base}/regulamento`} />
+          <Giveaways
+            title={site.giveaways.title}
+            intro={site.giveaways.intro}
+            items={giveaways}
+            today={day}
+            rulesHref={site.pages.rules ? `${base}/regulamento` : undefined}
+          />
         ) : null}
         <Socials
           title={site.socialsSection.title}
@@ -106,8 +112,8 @@ export async function HomeView({ site, base = '', preview = false }: ViewProps) 
       <Footer
         name={site.name}
         links={[
-          { href: `${base}/links`, label: 'Links' },
-          ...(site.giveaways.active ? [{ href: `${base}/regulamento`, label: 'Regulamento dos giveaways' }] : []),
+          ...(site.pages.links ? [{ href: `${base}/links`, label: 'Links' }] : []),
+          ...(site.pages.rules && site.giveaways.active ? [{ href: `${base}/regulamento`, label: 'Regulamento dos giveaways' }] : []),
           { href: `${base}/privacidade`, label: 'Privacidade' },
         ]}
       />
