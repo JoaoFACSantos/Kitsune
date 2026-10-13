@@ -2,6 +2,7 @@
 
 import Lenis from 'lenis';
 import { useEffect } from 'react';
+import { OPEN_PARAM } from '@/components/Countdown';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { LENIS_LERP, MEDIA } from '@/lib/motion';
 import { PREVIEW_PATH } from '@/lib/preview';
@@ -88,6 +89,14 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       scrollToTarget(id === 'topo' ? 'top' : el);
     };
     document.addEventListener('click', onClick);
+
+    // A página de abertura manda para o site com "?aberto=…" no endereço, para não receber uma
+    // cópia em cache (components/Countdown.tsx). Chegado cá, o endereço fica limpo.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has(OPEN_PARAM)) {
+      url.searchParams.delete(OPEN_PARAM);
+      history.replaceState(null, '', url.pathname + url.search + url.hash);
+    }
 
     // As fontes mudam a altura do texto: recalcula as posições quando estiverem prontas.
     document.fonts.ready.then(() => ScrollTrigger.refresh());

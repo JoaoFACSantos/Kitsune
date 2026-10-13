@@ -15,17 +15,30 @@ const none = () => null;
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
-/** Recarrega a página para mostrar o site. Se ainda vier a página de abertura (uma cópia em cache), espera cada vez mais. */
-function reload() {
+/** O que a página de abertura junta ao endereço para entrar no site (ver `enter`). */
+export const OPEN_PARAM = 'aberto';
+
+/**
+ * Passa para o que o servidor tem agora: o site, se já abriu. Recarregar não chega: a página
+ * pode vir de uma cópia em cache ainda com a contagem (a Cloudflare guarda uma em cada centro de
+ * dados, durante um minuto ou mais). Por isso pede-se com "?aberto=…" no endereço, que é outra
+ * entrada na cache, gerada na hora. O primeiro pedido leva a hora da abertura, igual para toda a
+ * gente: gera-se uma vez e serve a todos. Se ainda assim vier a contagem, os seguintes levam
+ * também um número ao acaso. Ao chegar, o endereço fica limpo (providers/SmoothScroll.tsx).
+ */
+function enter(opened: number) {
   let tries = 0;
   try {
     tries = Number(sessionStorage.getItem(TRIES_KEY)) || 0;
     sessionStorage.setItem(TRIES_KEY, String(tries + 1));
   } catch {
-    // Sem armazenamento: recarrega sempre com a mesma espera.
+    // Sem armazenamento: vai sempre com um número ao acaso.
     tries = 1;
   }
-  window.setTimeout(() => window.location.reload(), Math.min(tries * 2000, 10_000));
+  const stamp = Math.floor(opened / 1000);
+  const url = new URL(window.location.href);
+  url.searchParams.set(OPEN_PARAM, tries ? `${stamp}-${Math.random().toString(36).slice(2, 8)}` : String(stamp));
+  window.setTimeout(() => window.location.replace(url.href), Math.min(tries * 1500, 8000));
 }
 
 /**
@@ -62,9 +75,9 @@ export function Countdown({ opensAt }: { opensAt: string }) {
         const response = await fetch('/api/abrir', { method: 'POST' });
         if (!response.ok) throw new Error(String(response.status));
         const state = (await response.json()) as { open: boolean; opensAt: string | null; now: number };
-        if (state.open) return reload();
-        // Fechado sem hora marcada (tiraram-na no painel): a página certa é o aviso de manutenção.
-        if (!state.opensAt) return window.location.reload();
+        // Aberto: entra-se no site. Fechado sem hora marcada (tiraram-na no painel): a página
+        // certa é o aviso de manutenção. Num caso e no outro, vai-se buscar a página de agora.
+        if (state.open || !state.opensAt) return enter(target);
         // Ainda não: o relógio daqui estava adiantado, ou a hora mudou no painel. Acerta-se e continua-se.
         try {
           sessionStorage.removeItem(TRIES_KEY);
@@ -86,7 +99,7 @@ export function Countdown({ opensAt }: { opensAt: string }) {
       window.clearTimeout(timer);
       asking.current = false;
     };
-  }, [opening]);
+  }, [opening, target]);
 
   const units =
     left === null
