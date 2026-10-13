@@ -36,7 +36,7 @@ export async function LinksView({ site, base = '', preview = false }: ViewProps)
           <h1 className="links-name">{site.name}</h1>
           <p className="links-role">{site.role}</p>
           {main ? (
-            <a href={main.url} target="_blank" rel="noopener noreferrer" className="links-live" title={`Abrir o canal na ${SOCIAL_LABELS[site.platform]}`}>
+            <a href={main.url} target="_blank" rel="noopener noreferrer" className="live-link" title={`Abrir o canal na ${SOCIAL_LABELS[site.platform]}`}>
               <LivePill />
               <span className="sr-only">: abrir o canal na {SOCIAL_LABELS[site.platform]}</span>
             </a>

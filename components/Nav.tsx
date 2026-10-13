@@ -3,7 +3,6 @@
 import { useRef } from 'react';
 import { LivePill } from '@/components/LivePill';
 import { Magnetic } from '@/components/Magnetic';
-import { useLive } from '@/components/providers/Live';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
 
@@ -18,7 +17,6 @@ type NavProps = {
 /** Nav em pílula: esconde ao descer, volta ao subir; o destaque desliza entre links. */
 export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
   const ref = useRef<HTMLElement>(null);
-  const status = useLive();
 
   useGSAP(
     () => {
@@ -79,21 +77,12 @@ export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
         </div>
 
         <div className="nav-actions">
-          <LivePill compact className="hidden sm:inline-flex" />
           <ThemeToggle lightColor={themeColors.light} darkColor={themeColors.dark} />
+          {/* O estado do direto é o link para o canal: clica-se na própria etiqueta. */}
           <Magnetic>
-            <a href={watchUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
-              {status.live ? (
-                <>
-                  <span className="sm:hidden">Direto</span>
-                  <span className="hidden sm:inline">Ver em direto</span>
-                </>
-              ) : (
-                'Twitch'
-              )}
-              <span aria-hidden className="arrow">
-                ↗
-              </span>
+            <a href={watchUrl} target="_blank" rel="noopener noreferrer" className="live-link" title="Abrir o canal">
+              <LivePill compact />
+              <span className="sr-only">: abrir o canal</span>
             </a>
           </Magnetic>
         </div>

@@ -2846,20 +2846,19 @@
     font-weight: 600;
   }
 
-  /* O estado do direto é o link para o canal: clica-se na própria etiqueta. */
-  .links-live {
+  /* O estado do direto é o link para o canal: clica-se na própria etiqueta (aqui e no menu do site). */
+  .live-link {
     display: inline-flex;
-    margin-top: 2px;
     border-radius: 999px;
     transition: transform var(--dur-hover) var(--spring);
   }
 
-  .links-live:active {
+  .live-link:active {
     transform: scale(0.96);
   }
 
   @media (hover: hover) {
-    .links-live:hover {
+    .live-link:hover {
       transform: translateY(-2px) scale(1.04);
     }
   }
@@ -2958,7 +2957,7 @@
     }
 
     /* A etiqueta do direto e o botão do site, um pouco maiores do que no telemóvel. */
-    .links-live .live-pill {
+    .links .live-link .live-pill {
       gap: 10px;
       height: 44px;
       padding: 0 20px;
