@@ -154,6 +154,7 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/<link-curto>` | O link curto de uma parceria: conta o clique e leva à marca |
 | `/api/click` | Conta um clique no botão de uma parceria, no site |
 | `/regulamento`, `/privacidade` | O regulamento dos giveaways (com os vencedores) e a página de privacidade |
+| qualquer outro endereço | A página de "não encontrado" ([`app/not-found.tsx`](app/not-found.tsx)), com um joguinho: a raposa salta por cima do que lhe aparece ([`components/FoxRun.tsx`](components/FoxRun.tsx)) |
 | `/uploads/…` | As imagens enviadas no painel |
 | `/hero-video` | O vídeo do hero (`hero.photoVideo`), com resposta a pedidos parciais, que o Safari exige. A página pede-o com um `?v=` que muda quando o ficheiro muda, para o browser não mostrar o que tem guardado |
 | `/opengraph-image` | Imagem de partilha, com "EM DIRETO" quando está live |

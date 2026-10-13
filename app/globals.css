@@ -2966,6 +2966,147 @@
     text-decoration: underline;
   }
 
+  /* ---------- Página não encontrada (404) ---------- */
+
+  .lost {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    min-height: 100svh;
+    padding: clamp(36px, 7vw, 80px) var(--margin) 48px;
+    text-align: center;
+  }
+
+  /* O "404" com o mesmo relevo do nome do hero. */
+  .lost-code {
+    color: var(--pink);
+    font-family: var(--font-display);
+    font-size: clamp(96px, 26vw, 210px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-shadow:
+      0 1px 0 color-mix(in oklab, var(--pink) 94%, var(--dark)),
+      0 2px 0 color-mix(in oklab, var(--pink) 90%, var(--dark)),
+      0 3px 0 color-mix(in oklab, var(--pink) 86%, var(--dark)),
+      0 4px 0 color-mix(in oklab, var(--pink) 82%, var(--dark)),
+      0 5px 0 color-mix(in oklab, var(--pink) 78%, var(--dark)),
+      0 6px 0 color-mix(in oklab, var(--pink) 74%, var(--dark)),
+      0 7px 0 color-mix(in oklab, var(--pink) 70%, var(--dark)),
+      0 20px 30px color-mix(in oklab, var(--pink-deep) 35%, transparent);
+  }
+
+  .lost .lead {
+    max-width: 560px;
+  }
+
+  .lost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  /* O joguinho (components/FoxRun.tsx): um palco onde a raposa corre e salta. O palco inteiro é
+     um botão: um toque em qualquer sítio faz saltar. */
+  .foxrun {
+    width: min(100%, 760px);
+    margin-top: 18px;
+    padding: 10px;
+    border-radius: 34px;
+  }
+
+  .foxrun-stage {
+    --ground: 34px;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 230px;
+    overflow: hidden;
+    border-radius: 26px;
+    background: linear-gradient(180deg, transparent 40%, color-mix(in oklab, var(--pink) 14%, transparent));
+    /* Sem zoom ao tocar duas vezes seguidas nem seleção de texto: são toques de jogo. */
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .foxrun-ground {
+    position: absolute;
+    right: 0;
+    bottom: var(--ground);
+    left: 0;
+    border-top: 3px dashed var(--line);
+  }
+
+  /* A raposa e o que lhe aparece à frente assentam no chão; o jogo move-os com transform.
+     O tamanho e a posição da raposa são os de FOX e FOX_X, em FoxRun.tsx. */
+  .foxrun-fox,
+  .foxrun-thing {
+    position: absolute;
+    bottom: var(--ground);
+    left: 0;
+    will-change: transform;
+  }
+
+  .foxrun-fox {
+    left: 28px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .foxrun-thing {
+    visibility: hidden;
+  }
+
+  :is(.foxrun-fox, .foxrun-thing) svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Parada, abana devagar; a correr, dá passinhos. */
+  .foxrun-stage[data-phase="idle"] .foxrun-fox svg {
+    animation: wobble 2.6s ease-in-out infinite;
+  }
+
+  .foxrun-stage[data-phase="playing"] .foxrun-fox svg {
+    animation: wobble 0.42s ease-in-out infinite;
+  }
+
+  .foxrun-score {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .foxrun-note {
+    position: absolute;
+    top: 26%;
+    right: 12px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--ink-soft);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .foxrun-note strong {
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: clamp(18px, 4.6vw, 24px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
   /* O regulamento, por baixo dos cartões dos giveaways. */
   .giveaways-foot {
     margin-top: 22px;
