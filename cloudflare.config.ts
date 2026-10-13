@@ -18,6 +18,10 @@ export default defineConfig({
     compatibilityDate: "2026-10-01",
     compatibilityFlags: ["nodejs_compat"],
     assets: { notFoundHandling: "none" },
+    // O endereço do site. A zona kitsunetv.pt está na mesma conta da Cloudflare: os registos de
+    // DNS e o certificado criam-se sozinhos no deploy. (O "www" só existe para mandar para o
+    // endereço sem ele: ver proxy.ts.)
+    domains: ["kitsunetv.pt", "www.kitsunetv.pt"],
     env: {
       ...cache.env,
       ...(mode === "development" ? localSecrets : {}),
