@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { site } from '@/content/site.config';
 import type { EditableContent } from '@/content/types';
 import { adminStatus, checkPassword, clearFailures, clientIp, createSession, destroySession, endAllSessions, isAdmin, recordFailure, tooManyFailures } from '@/lib/admin/auth';
-import { defaultContent } from '@/lib/content/site';
+import { defaultContent, getContent } from '@/lib/content/site';
 import { clearStored, pruneUploads, writeDraft, writeStored } from '@/lib/content/store';
 import { type Issue, uploadsIn, validateContent } from '@/lib/content/validate';
 
@@ -47,11 +47,34 @@ function publish() {
   revalidatePath('/', 'layout');
 }
 
-export async function saveContent(input: unknown): Promise<SaveResult> {
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * Junta o que chega do painel com o que está guardado. Um painel pode estar aberto há horas, ou
+ * em dois aparelhos: o que lá está já pode não ser o que está guardado, e gravá-lo por inteiro
+ * desfazia o que mudou entretanto (foi assim que uma hora de abertura já marcada se perdeu).
+ * Por isso, de cada parte do conteúdo (redes, setup, parcerias, giveaways, manutenção…) só vale a
+ * do painel se foi mexida lá desde que ele a leu (`base`); as outras ficam como estão guardadas.
+ * Um painel aberto antes de isto existir não manda `base`: desse aceita-se tudo menos a
+ * manutenção, que pode ter mudado sozinha (o site abre à hora marcada).
+ */
+function merge(content: EditableContent, base: EditableContent | null, stored: EditableContent): EditableContent {
+  const merged = { ...content };
+  for (const key of Object.keys(content) as (keyof EditableContent)[]) {
+    const touched = base ? !same(content[key], base[key]) : key !== 'maintenance';
+    if (!touched) Object.assign(merged, { [key]: stored[key] });
+  }
+  return merged;
+}
+
+/** `base` é o conteúdo que o painel tinha como guardado quando o leu (ver `merge`). */
+export async function saveContent(input: unknown, base?: unknown): Promise<SaveResult> {
   if (!(await isAdmin())) return { ok: false, reason: 'auth' };
-  const { content, issues } = validateContent(input, defaultContent(), site.platform);
+  const { content: sent, issues } = validateContent(input, defaultContent(), site.platform);
   if (issues.length) return { ok: false, reason: 'invalid', issues };
   try {
+    const read = base === undefined ? null : validateContent(base, defaultContent(), site.platform).content;
+    const content = merge(sent, read, (await getContent()).content);
     const savedAt = await writeStored(content);
     await pruneUploads(uploadsIn(content));
     publish();

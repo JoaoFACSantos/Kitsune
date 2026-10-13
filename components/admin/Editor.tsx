@@ -208,7 +208,8 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
     setTask('save');
     startTransition(async () => {
       try {
-        const result = await saveContent(tidy(draft));
+        // Vai também o que este painel tinha como guardado: o servidor só troca o que mudou aqui.
+        const result = await saveContent(tidy(draft), saved);
         if (!result.ok) return fail(result.reason, result.issues);
         replace(result.content, result.savedAt);
         setStatus({ kind: 'saved' });
