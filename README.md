@@ -96,6 +96,8 @@ O que fica no painel e o que fica no código:
 - **No painel**: `socials`, `discord`, `setup.gear`, `setup.pc`, `partners.brands`, `giveaways.active` e `giveaways.items` (o tipo `EditableContent`, em [`content/types.ts`](content/types.ts)).
 - **Só no código**: nome, handle, plataforma, cores, a imagem do hero e todos os textos e títulos (o topo, os clips, o cartão de convite das parcerias e os seus números, as estatísticas a brincar).
 
+Um painel pode estar aberto há horas, ou em dois aparelhos ao mesmo tempo. Ao guardar, o servidor só troca as partes do conteúdo que foram mexidas nesse painel desde que ele as leu (as redes, o setup, as parcerias, os giveaways, a manutenção); as outras ficam como estão guardadas, e o painel fica a par delas (`merge`, em [`app/admin/actions.ts`](app/admin/actions.ts)). Sem isto, um painel desatualizado desfazia o que tinha mudado entretanto: uma hora de abertura já marcada, por exemplo. Duas pessoas a mexer na mesma parte ao mesmo tempo continuam a pisar-se: vale a última a guardar.
+
 O painel guarda tudo numa base de dados D1 da Cloudflare (o binding `DB`, em [`cloudflare.config.ts`](cloudflare.config.ts)). As tabelas criam-se sozinhas na primeira gravação ([`lib/db.ts`](lib/db.ts)):
 
 | Tabela | O que é |
