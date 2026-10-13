@@ -22,9 +22,9 @@ export default defineConfig({
     // DNS e o certificado criam-se sozinhos no deploy. (O "www" só existe para mandar para o
     // endereço sem ele: ver proxy.ts.)
     domains: ["kitsunetv.pt", "www.kitsunetv.pt"],
-    // Com um domínio próprio, o endereço workers.dev desliga-se sozinho. Fica ligado enquanto o
-    // certificado de kitsunetv.pt não estiver emitido, para o site e o painel terem por onde entrar.
-    workersDev: true,
+    // O endereço kitsune.<conta>.workers.dev fica desligado: o site tem um endereço só, e as regras
+    // da zona (o limite de pedidos por IP, o HTTPS obrigatório) não se contornam por outro lado.
+    workersDev: false,
     env: {
       ...cache.env,
       ...(mode === "development" ? localSecrets : {}),
