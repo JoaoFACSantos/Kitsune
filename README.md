@@ -83,7 +83,7 @@ O site conta os cliques em cada parceria, por dia e por origem: pelo link curto,
 
 ## Privacidade (/privacidade)
 
-Diz, em linguagem de gente, o que o site guarda sobre quem o visita: a contagem de visitas e de cliques, os links de afiliada, os players, o alojamento. O texto está em [`app/privacidade/page.tsx`](app/privacidade/page.tsx) e tem de acompanhar o código: quem mexer na contagem, nos players ou no alojamento tem de o acertar. Não substitui o conselho de quem perceba de proteção de dados.
+Diz, em linguagem de gente, o que o site guarda sobre quem o visita: a contagem de visitas e de cliques, os links de afiliada, os players, o alojamento. O texto está em [`components/views/PrivacyView.tsx`](components/views/PrivacyView.tsx) e tem de acompanhar o código: quem mexer na contagem, nos players ou no alojamento tem de o acertar. Não substitui o conselho de quem perceba de proteção de dados.
 
 ## Painel (/admin)
 
@@ -103,7 +103,7 @@ O painel guarda tudo numa base de dados D1 da Cloudflare (o binding `DB`, em [`c
 | `content` | O conteúdo em vigor. Sem ele, o site usa o de `site.config.ts` |
 | `backups` | Cópia do conteúdo antes de cada gravação (ficam as últimas 30) |
 | `uploads` | As imagens enviadas, já convertidas em WebP e sem metadados |
-| `settings`, `login_failures` | A chave das sessões do painel e as tentativas de entrada falhadas |
+| `settings`, `login_failures` | A chave das sessões do painel, o rascunho da pré-visualização e as tentativas de entrada falhadas |
 | `visits`, `visitors` | As visitas e as pessoas de cada dia (ver [Visitas](#visitas)) |
 | `clicks` | Os cliques nas parcerias, por dia, marca e origem (ver [Links curtos e cliques](#links-curtos-e-cliques)) |
 
@@ -117,9 +117,15 @@ npx cf d1 query <id-da-base-de-dados> --sql "INSERT OR REPLACE INTO content (id,
 
 Um Worker não tem disco: para pôr o site num alojamento sem D1, é preciso trocar [`lib/content/store.ts`](lib/content/store.ts) e [`lib/db.ts`](lib/db.ts) (o resto do site só usa as funções que esses ficheiros exportam).
 
+### Pré-visualização
+
+O botão «Pré-visualizar» abre o site num separador novo com o que está no painel nesse momento, guardado ou não, sem publicar nada. É a forma de experimentar uma alteração antes de a pôr no site, e de ver o site inteiro enquanto está em manutenção. Uma etiqueta ao fundo diz se o que se vê tem alterações por guardar e se o site está em manutenção.
+
+Como funciona: o painel valida o conteúdo como ao guardar e deixa-o como rascunho na tabela `settings` (uma linha só; guardar ou repor apaga-a). As páginas da pré-visualização vivem em `/admin/ver` ([`app/admin/ver`](app/admin/ver/[[...path]]/page.tsx)): `/admin/ver` é a página inicial, `/admin/ver/links` a de links, e o mesmo para o regulamento e a privacidade. Ficam dentro de `/admin` para levarem o cookie da sessão; sem sessão, mandam para a entrada. São as mesmas páginas do site, desenhadas pelos componentes de [`components/views`](components/views), com os links internos a apontar para dentro da pré-visualização. Lá não se contam visitas nem cliques, e os motores de busca não a veem.
+
 ### Manutenção
 
-Em Definições há um interruptor "Pôr o site em manutenção". Ligado (e guardado), a página inicial mostra só «em manutenção» ([`components/Maintenance.tsx`](components/Maintenance.tsx)); o painel continua a funcionar em `/admin`, para se poder desligar. O que o aviso diz está em `maintenance.title`, em [`content/site.config.ts`](content/site.config.ts). Enquanto dura, a página pede aos motores de busca que não a guardem e as visitas não se contam.
+Em Definições há um interruptor "Pôr o site em manutenção". Ligado (e guardado), a página inicial mostra só «em manutenção» ([`components/Maintenance.tsx`](components/Maintenance.tsx)); o painel continua a funcionar em `/admin`, para se poder desligar, e a [pré-visualização](#pré-visualização) continua a mostrar o site inteiro a quem tem sessão. O que o aviso diz está em `maintenance.title`, em [`content/site.config.ts`](content/site.config.ts). Enquanto dura, a página pede aos motores de busca que não a guardem e as visitas não se contam.
 
 ### Visitas
 
@@ -149,6 +155,7 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/` | A página (ISR, regenera no máximo a cada 60 s) |
 | `/api/live` | Estado do direto (cache de 60 s) |
 | `/admin` | O painel da streamer (com password) |
+| `/admin/ver`, `/admin/ver/links`, … | A pré-visualização: o site com o que está no painel, só para quem tem sessão |
 | `/api/visit` | Conta uma visita (a página pede-o ao abrir) |
 | `/links` | A página de links, para a bio das redes |
 | `/<link-curto>` | O link curto de uma parceria: conta o clique e leva à marca |

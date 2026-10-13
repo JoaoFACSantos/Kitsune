@@ -11,6 +11,8 @@ type GiveawaysProps = {
   items: Giveaway[];
   /** O dia de hoje em Lisboa, para a contagem ("faltam 5 dias"). */
   today: string;
+  /** Onde está o regulamento (na pré-visualização do painel fica noutro endereço). */
+  rulesHref?: string;
 };
 
 const GIFT =
@@ -25,7 +27,7 @@ function Gift({ strokeWidth = 2.2 }: { strokeWidth?: number }) {
 }
 
 /** Giveaways a decorrer: um cartão por prémio, com os passos para participar e o prazo. */
-export function Giveaways({ title, intro, items, today }: GiveawaysProps) {
+export function Giveaways({ title, intro, items, today, rulesHref = '/regulamento' }: GiveawaysProps) {
   return (
     <section id="giveaways" tabIndex={-1} aria-labelledby="giveaways-title" className="section">
       <div className="section-inner">
@@ -87,7 +89,7 @@ export function Giveaways({ title, intro, items, today }: GiveawaysProps) {
           ))}
         </ul>
         <p className="giveaways-foot">
-          <Link href="/regulamento" prefetch={false}>
+          <Link href={rulesHref} prefetch={false}>
             Regulamento dos giveaways
           </Link>
         </p>

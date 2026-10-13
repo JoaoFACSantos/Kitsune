@@ -10,7 +10,7 @@ import type { ClickStats } from '@/lib/clicks';
 import type { VisitStats } from '@/lib/visits';
 import { Clicks } from './Clicks';
 import { useForm } from './form';
-import { ArrowIcon, CheckIcon, InfoIcon, PlusIcon, WarnIcon } from './icons';
+import { ArrowIcon, CheckIcon, EyeIcon, InfoIcon, PlusIcon, WarnIcon } from './icons';
 import { Visits } from './Visits';
 
 /** O que o servidor foi buscar para o resumo: números das APIs e os clips mais vistos. */
@@ -36,6 +36,8 @@ type DashboardProps = {
   savedAt: string | null;
   /** Vai para uma secção; `open` abre lá um item (pelo índice) ou cria um novo. */
   go: (section: Section, open?: number | 'new') => void;
+  /** Abre a pré-visualização do site com o que está no painel. */
+  preview: () => void;
 };
 
 const and = new Intl.ListFormat('pt', { style: 'long', type: 'conjunction' });
@@ -66,7 +68,7 @@ function Tile({ label, value, sub, hero }: { label: string; value: React.ReactNo
 }
 
 /** Início do painel: o estado do site num relance e atalhos para o que se mexe mais. */
-export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps) {
+export function Dashboard({ name, overview, dirty, savedAt, go, preview }: DashboardProps) {
   const { draft } = useForm();
   const live = useLive();
   const brands = draft.partners.brands;
@@ -92,7 +94,11 @@ export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps
 
   const reviews: Review[] = [];
   if (draft.maintenance.active) {
-    reviews.push({ level: 'warn', text: 'O site está em manutenção: quem o abre vê só o aviso. Desliga-se em Definições.' });
+    reviews.push({
+      level: 'warn',
+      text: 'O site está em manutenção: quem o abre vê só o aviso. Tu vês o site inteiro na pré-visualização. Desliga-se em Definições.',
+      action: { label: 'Pré-visualizar', run: preview },
+    });
   }
   const bare = brands.map((brand, index) => ({ brand, index })).filter(({ brand }) => brand.perks.length === 0);
   if (bare.length) {
@@ -159,6 +165,10 @@ export function Dashboard({ name, overview, dirty, savedAt, go }: DashboardProps
             </button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('redes')}>
               Atualizar seguidores
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={preview}>
+              <EyeIcon />
+              Pré-visualizar o site
             </button>
           </div>
         </div>

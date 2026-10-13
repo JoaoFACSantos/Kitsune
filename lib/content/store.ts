@@ -8,6 +8,7 @@ import { UPLOAD_NAME } from './editable';
 //   content   o conteúdo em vigor, no mesmo formato do antigo content.json
 //   backups   cópias do conteúdo antes de cada gravação (ficam as últimas 30)
 //   uploads   as imagens carregadas no painel
+//   settings  o rascunho da pré-visualização (e a chave das sessões, em lib/admin/auth.ts)
 //
 // Um Worker não tem disco: por isso é uma base de dados e não uma pasta. O resto do site só usa
 // as funções exportadas aqui.
@@ -36,6 +37,12 @@ export async function readStored(): Promise<{ content: unknown; savedAt: string 
 /** Guarda a cópia de segurança do conteúdo atual, se existir. */
 const backup = (savedAt: string) => db().prepare('INSERT INTO backups (saved_at, data) SELECT ?, data FROM content WHERE id = 1').bind(savedAt);
 
+// O rascunho da pré-visualização: o que estava no ecrã do painel quando se carregou em
+// «Pré-visualizar», ainda por publicar. É uma linha só da tabela settings: cada pré-visualização
+// passa por cima da anterior, e guardar ou repor o conteúdo apaga-a.
+const DRAFT = 'preview_draft';
+const dropDraft = () => db().prepare('DELETE FROM settings WHERE key = ?').bind(DRAFT);
+
 /** Grava o conteúdo (já validado). Devolve a data da gravação. */
 export async function writeStored(content: EditableContent): Promise<string> {
   await ensureSchema();
@@ -47,6 +54,7 @@ export async function writeStored(content: EditableContent): Promise<string> {
       .prepare('INSERT INTO content (id, data) VALUES (1, ?1) ON CONFLICT (id) DO UPDATE SET data = ?1')
       .bind(JSON.stringify({ version: 1, savedAt, content })),
     db().prepare('DELETE FROM backups WHERE id NOT IN (SELECT id FROM backups ORDER BY id DESC LIMIT ?)').bind(KEEP_BACKUPS),
+    dropDraft(),
   ]);
   return savedAt;
 }
@@ -54,7 +62,25 @@ export async function writeStored(content: EditableContent): Promise<string> {
 /** Apaga o conteúdo guardado: o site volta ao de origem. Fica uma cópia de segurança. */
 export async function clearStored() {
   await ensureSchema();
-  await db().batch([backup(new Date().toISOString()), db().prepare('DELETE FROM content')]);
+  await db().batch([backup(new Date().toISOString()), db().prepare('DELETE FROM content'), dropDraft()]);
+}
+
+/** O rascunho da pré-visualização tal como está na base de dados (ainda por validar), ou null se não houver. */
+export async function readDraft(): Promise<unknown> {
+  try {
+    const row = await db().prepare('SELECT value FROM settings WHERE key = ?').bind(DRAFT).first<{ value: string }>();
+    return row ? (JSON.parse(row.value) as unknown) : null;
+  } catch (error) {
+    // Rascunho estragado ou base de dados em baixo: a pré-visualização mostra o que está guardado.
+    if (!isMissingTable(error)) console.error('[conteúdo] não consegui ler o rascunho', error);
+    return null;
+  }
+}
+
+/** Guarda o rascunho (já validado) para a pré-visualização. Não mexe no que está publicado. */
+export async function writeDraft(content: EditableContent) {
+  await ensureSchema();
+  await db().prepare('INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = ?2').bind(DRAFT, JSON.stringify(content)).run();
 }
 
 export async function saveUpload(name: string, data: Uint8Array) {

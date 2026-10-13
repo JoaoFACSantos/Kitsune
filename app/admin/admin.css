@@ -330,8 +330,19 @@ html .admin button.image-pick * {
   background: var(--warn);
 }
 
-.admin-save[data-state="saved"] .admin-save-dot {
+.admin-save[data-state="saved"] .admin-save-dot,
+.admin-save[data-state="ready"] .admin-save-dot {
   background: var(--good);
+}
+
+.admin-save[data-state="ready"] p {
+  color: var(--ink);
+}
+
+.admin-save p a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .admin-save[data-state="saving"] .admin-save-dot {
@@ -489,6 +500,21 @@ html .admin button.image-pick * {
 
   .admin-save-actions {
     margin-left: auto;
+  }
+
+  /* O botão de pré-visualizar fica só com o olho: com o texto, os três botões não cabiam. */
+  .admin-preview {
+    width: 44px;
+    padding: 0;
+  }
+
+  .admin-preview span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

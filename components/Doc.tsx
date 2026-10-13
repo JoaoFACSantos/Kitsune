@@ -10,15 +10,17 @@ type DocProps = {
   updated?: string;
   /** As outras páginas de texto, para o fundo desta. */
   also: { href: string; label: string }[];
+  /** Onde está a página inicial (na pré-visualização do painel fica noutro endereço). */
+  home?: string;
   children: React.ReactNode;
 };
 
 /** Uma página de texto (o regulamento, a privacidade): o título, o texto e o caminho de volta. */
-export function Doc({ title, lead, updated, also, children }: DocProps) {
+export function Doc({ title, lead, updated, also, home = '/', children }: DocProps) {
   return (
     <main id="conteudo" tabIndex={-1} className="doc">
       <p className="doc-back">
-        <Link href="/" prefetch={false}>
+        <Link href={home} prefetch={false}>
           ← Voltar ao site
         </Link>
       </p>
@@ -28,7 +30,7 @@ export function Doc({ title, lead, updated, also, children }: DocProps) {
       <footer className="doc-foot">
         {updated ? <p>Revisto em {updated}.</p> : null}
         <p>
-          <Link href="/" prefetch={false}>
+          <Link href={home} prefetch={false}>
             Site
           </Link>
           {also.map((page) => (

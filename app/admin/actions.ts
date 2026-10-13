@@ -6,7 +6,7 @@ import { site } from '@/content/site.config';
 import type { EditableContent } from '@/content/types';
 import { adminStatus, checkPassword, clearFailures, clientIp, createSession, destroySession, endAllSessions, isAdmin, recordFailure, tooManyFailures } from '@/lib/admin/auth';
 import { defaultContent } from '@/lib/content/site';
-import { clearStored, pruneUploads, writeStored } from '@/lib/content/store';
+import { clearStored, pruneUploads, writeDraft, writeStored } from '@/lib/content/store';
 import { type Issue, uploadsIn, validateContent } from '@/lib/content/validate';
 
 // As ações do painel. Qualquer pessoa consegue enviar um POST para aqui sem passar pela
@@ -58,6 +58,26 @@ export async function saveContent(input: unknown): Promise<SaveResult> {
     return { ok: true, content, savedAt };
   } catch (error) {
     console.error('[painel] não consegui gravar', error);
+    return { ok: false, reason: 'storage' };
+  }
+}
+
+export type PreviewResult = { ok: true } | { ok: false; reason: 'auth' | 'invalid' | 'storage'; issues?: Issue[] };
+
+/**
+ * Deixa o que está no ecrã do painel pronto para a pré-visualização (/admin/ver), sem publicar
+ * nada: o site continua como estava. Passa pela mesma validação de guardar, por isso o que se vê
+ * é o que ficaria no site.
+ */
+export async function savePreview(input: unknown): Promise<PreviewResult> {
+  if (!(await isAdmin())) return { ok: false, reason: 'auth' };
+  const { content, issues } = validateContent(input, defaultContent(), site.platform);
+  if (issues.length) return { ok: false, reason: 'invalid', issues };
+  try {
+    await writeDraft(content);
+    return { ok: true };
+  } catch (error) {
+    console.error('[painel] não consegui guardar o rascunho', error);
     return { ok: false, reason: 'storage' };
   }
 }

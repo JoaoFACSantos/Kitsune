@@ -1,16 +1,18 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
-import { logout, resetContent, saveContent } from '@/app/admin/actions';
+import { logout, resetContent, saveContent, savePreview } from '@/app/admin/actions';
 import type { EditableContent, SocialId } from '@/content/types';
 import { StickerArt } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { VISIT_SKIP_KEY } from '@/components/VisitBeacon';
 import type { Issue } from '@/lib/content/validate';
+import { PREVIEW_PATH } from '@/lib/preview';
 import { Dashboard, type Overview, type Section } from './Dashboard';
 import { Card, type FormApi, FormProvider, getAt, setAt, Toggle } from './form';
-import { ArrowIcon, LogoutIcon, NavGlyph, type NavIcon } from './icons';
+import { ArrowIcon, EyeIcon, LogoutIcon, NavGlyph, type NavIcon } from './icons';
 import { emptyBrand, GiveawaysSection, PartnersSection, SetupSection, SocialsSection } from './sections';
 
 type EditorProps = {
@@ -37,7 +39,8 @@ const TABS: readonly { id: string; label: string; icon: NavIcon; hint: string; p
   { id: 'definicoes', label: 'Definições', icon: 'settings', hint: 'Pôr o site em manutenção, como o painel funciona e como voltar ao site de origem.', paths: ['maintenance'] },
 ];
 
-type Status = { kind: 'idle' } | { kind: 'saved' } | { kind: 'error'; text: string };
+/** 'ready': a pré-visualização está pronta mas o browser não abriu o separador; fica o link para a abrir à mão. */
+type Status = { kind: 'idle' } | { kind: 'saved' } | { kind: 'ready' } | { kind: 'error'; text: string };
 
 const under = (path: string, roots: readonly string[]) => roots.some((root) => path === root || path.startsWith(`${root}.`));
 
@@ -124,6 +127,8 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
   // Muda quando o rascunho é trocado de uma vez (descartar, repor): os campos voltam a montar, fechados.
   const [version, setVersion] = useState(0);
   const [busy, startTransition] = useTransition();
+  // O que o servidor está a fazer enquanto `busy`: a guardar ou a preparar a pré-visualização.
+  const [task, setTask] = useState<'save' | 'preview'>('save');
 
   const tab = TABS.find((t) => t.id === view.tab) ?? TABS[0];
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(saved), [draft, saved]);
@@ -198,7 +203,8 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
     }
   };
 
-  const save = () =>
+  const save = () => {
+    setTask('save');
     startTransition(async () => {
       try {
         const result = await saveContent(tidy(draft));
@@ -209,6 +215,32 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
         setStatus({ kind: 'error', text: 'Sem ligação ao servidor. O que escreveste continua aqui: tenta guardar outra vez.' });
       }
     });
+  };
+
+  /** Abre o site num separador novo com o que está aqui no ecrã, guardado ou não. Não publica nada. */
+  const preview = () => {
+    // O separador abre já, ainda dentro do clique: aberto só quando o servidor responde, o
+    // browser tomava-o por uma janela de publicidade e bloqueava-o.
+    const page = window.open('', '_blank');
+    if (page) page.document.title = 'A preparar a pré-visualização…';
+    setTask('preview');
+    startTransition(async () => {
+      try {
+        const result = await savePreview(tidy(draft));
+        if (!result.ok) {
+          page?.close();
+          return fail(result.reason, result.issues);
+        }
+        // Há browsers (os de dentro das apps, sobretudo) que não abrem separadores a pedido da
+        // página: aí fica um link, que esses abrem sempre.
+        if (page) page.location.replace(PREVIEW_PATH);
+        else setStatus({ kind: 'ready' });
+      } catch {
+        page?.close();
+        setStatus({ kind: 'error', text: 'Sem ligação ao servidor. O que escreveste continua aqui: tenta outra vez.' });
+      }
+    });
+  };
 
   const discard = () => {
     if (!window.confirm('Descartar o que mudaste desde a última gravação?')) return;
@@ -234,7 +266,17 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
   };
 
   // O estado da gravação, numa palavra (a etiqueta) e numa frase (para leitores de ecrã e telemóvel).
-  const state = busy ? 'saving' : status.kind === 'error' ? 'error' : dirty ? 'dirty' : status.kind === 'saved' ? 'saved' : 'clean';
+  const state = busy
+    ? 'saving'
+    : status.kind === 'error'
+      ? 'error'
+      : status.kind === 'ready'
+        ? 'ready'
+        : dirty
+          ? 'dirty'
+          : status.kind === 'saved'
+            ? 'saved'
+            : 'clean';
 
   return (
     <FormProvider value={form}>
@@ -297,9 +339,20 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                 <span aria-hidden className="admin-save-dot" />
                 <span>
                   {busy ? (
-                    'A guardar…'
+                    task === 'preview' ? (
+                      'A preparar a pré-visualização…'
+                    ) : (
+                      'A guardar…'
+                    )
                   ) : status.kind === 'error' ? (
                     status.text
+                  ) : status.kind === 'ready' ? (
+                    <>
+                      A pré-visualização está pronta.{' '}
+                      <Link href={PREVIEW_PATH} target="_blank" prefetch={false}>
+                        Abrir
+                      </Link>
+                    </>
                   ) : status.kind === 'saved' && !dirty ? (
                     'Guardado ♡ O site já tem as alterações.'
                   ) : dirty ? (
@@ -322,6 +375,10 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                     Descartar
                   </button>
                 ) : null}
+                <button type="button" className="btn btn-ghost btn-sm admin-preview" disabled={busy} onClick={preview}>
+                  <EyeIcon />
+                  <span>Pré-visualizar</span>
+                </button>
                 <button type="button" className="btn btn-primary btn-sm" disabled={busy || !dirty} onClick={save}>
                   Guardar e publicar
                 </button>
@@ -355,7 +412,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
 
           {/* A chave junta a secção e o item a abrir: quem chega do Início encontra-o já aberto. */}
           <div key={`${version}:${view.tab}:${view.open ?? ''}`} className="admin-sections">
-            {tab.id === 'inicio' ? <Dashboard name={name} overview={overview} dirty={dirty} savedAt={savedAt} go={go} /> : null}
+            {tab.id === 'inicio' ? <Dashboard name={name} overview={overview} dirty={dirty} savedAt={savedAt} go={go} preview={preview} /> : null}
             {tab.id === 'parcerias' ? <PartnersSection open={view.open} /> : null}
             {tab.id === 'giveaways' ? <GiveawaysSection open={view.open} /> : null}
             {tab.id === 'redes' ? <SocialsSection auto={auto} open={view.open} /> : null}
@@ -366,7 +423,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                   <Toggle
                     path="maintenance.active"
                     label="Pôr o site em manutenção"
-                    hint="Só muda quando guardares. O painel continua a funcionar: é aqui que voltas a desligar."
+                    hint="Só muda quando guardares. O painel continua a funcionar: é aqui que voltas a desligar. Em manutenção, tu continuas a ver o site inteiro em «Pré-visualizar»."
                   />
                   <p className="field-hint">
                     {draft.maintenance.active
@@ -379,6 +436,10 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                     <li>Muda o que quiseres nas secções e carrega em «Guardar e publicar». O site fica atualizado nesse momento.</li>
                     <li>Para mudar a ordem das parcerias, dos giveaways ou das redes, arrasta o cartão pela pega do lado esquerdo.</li>
                     <li>Enquanto não guardares, nada muda no site. «Descartar» volta ao que estava guardado.</li>
+                    <li>
+                      «Pré-visualizar» abre o site num separador novo com o que tens aqui, guardado ou não. Só tu o vês: serve para experimentar antes
+                      de publicar, e para ver o site enquanto está em manutenção.
+                    </li>
                     <li>O estado do direto, os clips e os seguidores da Twitch vêm sozinhos da Twitch: não se mexem aqui.</li>
                     <li>O nome, as cores, a imagem do topo, os textos e os títulos não estão no painel: para esses, fala com quem trata do site.</li>
                   </ul>

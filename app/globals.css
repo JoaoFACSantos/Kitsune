@@ -2665,6 +2665,61 @@
     text-align: center;
   }
 
+  /* ---------- Pré-visualização do painel (/admin/ver) ---------- */
+
+  /* A etiqueta que diz que isto é a pré-visualização: em baixo à esquerda, por cima da página. */
+  .preview-bar {
+    --edge: clamp(14px, 2vw, 26px);
+    position: fixed;
+    left: var(--edge);
+    bottom: calc(var(--edge) + env(safe-area-inset-bottom, 0px));
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    /* Em ecrãs estreitos sobra espaço à direita para a seta de voltar ao topo. */
+    max-width: min(470px, calc(100% - 2 * var(--edge) - 64px));
+    padding: 10px 10px 10px 18px;
+    border: 1.5px solid var(--link);
+    border-radius: 26px;
+    background: var(--nav-bg);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(1.4);
+  }
+
+  .preview-bar p {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .preview-bar strong {
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .preview-bar .btn {
+    flex: none;
+  }
+
+  /* O fim da página não fica tapado pela etiqueta. */
+  body:has(.preview-bar) {
+    padding-bottom: 96px;
+  }
+
+  /* Em ecrãs estreitos o texto parte em mais linhas: a etiqueta fica mais alta. */
+  @media (max-width: 640px) {
+    body:has(.preview-bar) {
+      padding-bottom: 136px;
+    }
+  }
+
   /* ---------- Página de links (/links) ---------- */
 
   /* Uma coluna estreita, pensada para o telemóvel: é a página que vai na bio das redes. */

@@ -4,6 +4,7 @@ import Lenis from 'lenis';
 import { useEffect } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { LENIS_LERP, MEDIA } from '@/lib/motion';
+import { PREVIEW_PATH } from '@/lib/preview';
 
 let lenis: Lenis | null = null;
 
@@ -63,7 +64,9 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     };
 
     // No painel (/admin) o scroll fica o do browser: há campos e listas com scroll próprio.
-    const wanted = () => !reduce.matches && !window.location.pathname.startsWith('/admin');
+    // A pré-visualização (/admin/ver) é o site: leva o scroll suave como ele.
+    const panel = () => window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith(PREVIEW_PATH);
+    const wanted = () => !reduce.matches && !panel();
     gsap.ticker.lagSmoothing(0);
     if (wanted()) start();
     const onChange = () => {
