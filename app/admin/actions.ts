@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { site } from '@/content/site.config';
 import type { EditableContent } from '@/content/types';
-import { adminStatus, checkPassword, clearFailures, clientIp, createSession, destroySession, isAdmin, recordFailure, tooManyFailures } from '@/lib/admin/auth';
+import { adminStatus, checkPassword, clearFailures, clientIp, createSession, destroySession, endAllSessions, isAdmin, recordFailure, tooManyFailures } from '@/lib/admin/auth';
 import { defaultContent } from '@/lib/content/site';
 import { clearStored, pruneUploads, writeStored } from '@/lib/content/store';
 import { type Issue, uploadsIn, validateContent } from '@/lib/content/validate';
@@ -31,6 +31,8 @@ export async function login(_state: LoginState, formData: FormData): Promise<Log
 }
 
 export async function logout() {
+  // Só quem está dentro fecha as sessões: de outro modo qualquer pessoa punha a streamer na rua.
+  if (await isAdmin()) await endAllSessions();
   await destroySession();
   redirect('/admin');
 }

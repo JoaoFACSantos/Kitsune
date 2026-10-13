@@ -71,7 +71,7 @@ Os giveaways escrevem-se no painel. Em [`content/site.config.ts`](content/site.c
 
 Em `/admin` a streamer muda o conteúdo do site sozinha: as marcas das parcerias (com envio de imagens), os giveaways, as redes e os seguidores, os periféricos e o PC. A ordem das marcas, dos giveaways e das redes muda-se a arrastar os cartões (com o teclado: foco na pega e setas para cima e para baixo). Ao guardar, o site fica atualizado nesse momento.
 
-Para o ligar, define o segredo `ADMIN_PASSWORD` no Worker (ver [Deploy](#deploy)), com 12 caracteres ou mais. Sem password o painel fica fechado. A sessão dura duas semanas; mudar a password fecha todas as sessões.
+Para o ligar, define o segredo `ADMIN_PASSWORD` no Worker (ver [Deploy](#deploy)), com 12 caracteres ou mais. Sem password o painel fica fechado. A sessão dura duas semanas. "Sair" fecha todas as sessões, em todos os aparelhos, e mudar a password também.
 
 O que fica no painel e o que fica no código:
 

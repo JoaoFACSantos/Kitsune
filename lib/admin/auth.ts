@@ -5,7 +5,8 @@ import { db, ensureSchema, isMissingTable } from '@/lib/db';
 
 // Entrada no painel (/admin): uma password só, definida em ADMIN_PASSWORD nos segredos do
 // Worker. Quem acerta fica com um cookie assinado que dura duas semanas. Não há tabela de
-// sessões: mudar a password invalida todos os cookies antigos.
+// sessões: mudar a password invalida todos os cookies antigos, e "Sair" também (troca o segredo
+// com que são assinados), em todos os aparelhos de uma vez.
 
 const COOKIE = 'painel';
 const MAX_AGE_S = 14 * 24 * 60 * 60;
@@ -53,15 +54,17 @@ async function sessionSecret(create: boolean): Promise<string | null> {
 // A chave das assinaturas sai do segredo das sessões e da password (sem mais segredos para
 // configurar). Quem apanhasse um cookie não conseguia testar passwords contra ele: falta-lhe o
 // segredo. E não se usa uma função lenta, que não cabia no tempo de processador de um Worker.
-// Calcula-se uma vez por password e fica guardada.
-let signingKey: { password: string; key: Buffer } | null = null;
+// A chave fica guardada enquanto a password e o segredo forem os mesmos. O segredo lê-se da base
+// de dados a cada pedido do painel: "Sair" troca-o, e as outras instâncias do Worker têm de dar
+// por isso logo, não quando calhar reiniciarem.
+let signingKey: { password: string; secret: string; key: Buffer } | null = null;
 
 /** A assinatura, ou null se ainda não houver segredo (ninguém entrou até agora). */
 async function sign(payload: string, password: string, create = false) {
-  if (signingKey?.password !== password) {
-    const secret = await sessionSecret(create);
-    if (!secret) return null;
-    signingKey = { password, key: createHmac('sha256', secret).update(password).digest() };
+  const secret = await sessionSecret(create);
+  if (!secret) return null;
+  if (signingKey?.password !== password || signingKey.secret !== secret) {
+    signingKey = { password, secret, key: createHmac('sha256', secret).update(password).digest() };
   }
   return createHmac('sha256', signingKey.key).update(payload).digest('base64url');
 }
@@ -102,6 +105,18 @@ export async function createSession() {
 
 export async function destroySession() {
   (await cookies()).set(COOKIE, '', { httpOnly: true, sameSite: 'lax', secure: await isHttps(), path: '/admin', maxAge: 0 });
+}
+
+/**
+ * Troca o segredo das sessões: todos os cookies passados deixam de valer, em todos os aparelhos.
+ * Apagar o cookie só o tira deste browser; uma cópia dele (roubada, por exemplo) continuava boa.
+ */
+export async function endAllSessions() {
+  try {
+    await db().prepare("UPDATE settings SET value = ? WHERE key = 'session_secret'").bind(randomBytes(32).toString('base64url')).run();
+  } catch (error) {
+    if (!isMissingTable(error)) throw error;
+  }
 }
 
 /** Tem um cookie válido? Tudo o que mexe no conteúdo começa por perguntar isto. */
