@@ -273,7 +273,7 @@ export function Hero({
       aria-labelledby="hero-name"
       className="hero"
       data-scroll="out"
-      data-scroll-on=".hero-greeting, .letter, .stage, .sticker"
+      data-scroll-on=".hero-greeting, .letter, .stage, .sticker-fly"
       data-scroll-direct=""
       style={{ '--chars': letters.length } as React.CSSProperties}
     >
@@ -406,7 +406,9 @@ export function Hero({
                 } as React.CSSProperties
               }
             >
-              <span className="block h-full w-full intro-pop" style={{ '--delay': `${0.9 + i * 0.08}s` } as React.CSSProperties}>
+              {/* Quem voa ao sair do hero é este, e não o sticker: o GSAP, ao arrastar, toma conta do
+                  translate e do rotate do elemento que arrasta e anulava o voo. */}
+              <span className="sticker-fly intro-pop" style={{ '--delay': `${0.9 + i * 0.08}s` } as React.CSSProperties}>
                 <span className="sticker-pop">
                   <span className="sticker-wobble" style={{ '--d': `${i * -0.7}s` } as React.CSSProperties}>
                     <StickerArt kind={s.kind} className="h-full w-full" />

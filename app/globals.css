@@ -1675,7 +1675,6 @@
     top: var(--y);
     width: var(--s, 28%);
     aspect-ratio: 1;
-    pointer-events: auto;
     touch-action: none;
   }
 
@@ -1683,6 +1682,15 @@
     .sticker {
       left: var(--x);
     }
+  }
+
+  /* O desenho, que voa para fora quando o hero sai do ecrã (ver "Hero a sair"). É por ele que se
+     agarra o sticker: a caixa de fora fica no sítio e, sem isto, apanhava cliques no vazio. */
+  .sticker-fly {
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
   }
 
   .sticker-pop {
@@ -2982,7 +2990,7 @@
   .collab.fx-in .stat-pill,
   .socials.fx-in > li,
   .giveaways.fx-in > li,
-  .hero.fx-out :is(.sticker, .hero-greeting) {
+  .hero.fx-out :is(.sticker-fly, .hero-greeting) {
     will-change: transform, opacity;
   }
 
@@ -3026,11 +3034,16 @@
     translate: 0 calc(var(--out, 0) * 8vh);
   }
 
-  .hero .sticker {
+  /* Desaparecem a meio do caminho, para não passarem por cima do texto. */
+  .hero .sticker-fly {
+    opacity: calc(1 - var(--out, 0) * 2.4);
+  }
+
+  /* Com o direto a passar só desaparecem, sem voar: um sticker a passar por cima da televisão
+     (mesmo já transparente) contava como tapá-la, e a Twitch pausava o player. */
+  .hero .stage:not([data-playing="true"]) .sticker-fly {
     translate: calc(var(--out, 0) * var(--fly-x, 1) * 16vw) calc(var(--out, 0) * var(--fly-y, -10vh));
     rotate: calc(var(--out, 0) * var(--fly-x, 1) * 50deg);
-    /* Desaparecem a meio do caminho, para não passarem por cima do texto. */
-    opacity: calc(1 - var(--out, 0) * 2.4);
   }
 
   .hero .hero-greeting {
