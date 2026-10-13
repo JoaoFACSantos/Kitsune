@@ -398,10 +398,9 @@ const emptySpec = (): Spec => ({ label: '', value: '' });
 export function SetupSection() {
   return (
     <>
-      <Card title="Periféricos" hint="O que usas para fazer diretos. Clica num para lhe mudar a marca e o modelo.">
+      <Card title="Periféricos" hint="O que usas para fazer diretos. A ordem aqui é a ordem no site: arrasta um cartão para o mudar de sítio. Clica num para lhe mudar a marca e o modelo.">
         <Repeater<Gear>
           path="setup.gear"
-          sortable={false}
           min={1}
           max={MAX.gear}
           addLabel="Adicionar periférico"
@@ -431,7 +430,7 @@ export function SetupSection() {
         </Repeater>
       </Card>
 
-      <Card title="O PC" hint="As peças da máquina, linha a linha.">
+      <Card title="O PC" hint="As peças da máquina, linha a linha. Arrasta uma linha pela pega para a mudar de sítio.">
         <Repeater<Spec> path="setup.pc" max={MAX.pc} addLabel="Adicionar peça" make={emptySpec}>
           {(path) => (
             <>

@@ -447,7 +447,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                 <Card title="Como funciona">
                   <ul className="admin-help">
                     <li>Muda o que quiseres nas secções e carrega em «Guardar e publicar». O site fica atualizado nesse momento.</li>
-                    <li>Para mudar a ordem das parcerias, dos giveaways ou das redes, arrasta o cartão pela pega do lado esquerdo.</li>
+                    <li>Para mudar a ordem de qualquer lista (parcerias, giveaways, redes, periféricos, peças do PC, regras), arrasta pela pega do lado esquerdo.</li>
                     <li>Enquanto não guardares, nada muda no site. «Descartar» volta ao que estava guardado.</li>
                     <li>
                       «Pré-visualizar» abre o site num separador novo com o que tens aqui, guardado ou não. Só tu o vês: serve para experimentar antes

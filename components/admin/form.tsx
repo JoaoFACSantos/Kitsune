@@ -290,16 +290,6 @@ function Tool({ label, onClick, disabled, danger, children }: { label: string; o
 }
 
 const ICON = { viewBox: '0 0 24 24', 'aria-hidden': true, fill: 'none', stroke: 'currentColor', strokeWidth: 2.6, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
-const Up = () => (
-  <svg {...ICON}>
-    <path d="M12 19V5M6 11l6-6 6 6" />
-  </svg>
-);
-const Down = () => (
-  <svg {...ICON}>
-    <path d="M12 5v14M6 13l6 6 6-6" />
-  </svg>
-);
 const Cross = () => (
   <svg {...ICON}>
     <path d="M6 6l12 12M18 6 6 18" />
@@ -385,8 +375,6 @@ type RepeaterProps<T> = {
   confirmRemove?: (item: T) => string;
   /** O item que já aparece aberto (quem chega do Início vem para editar um em concreto). */
   initialOpen?: number;
-  /** Com `false`, a ordem não se mexe no painel: a lista fica sem a pega de arrastar e sem as setas. */
-  sortable?: boolean;
   children: (itemPath: string, item: T, index: number) => ReactNode;
 };
 
@@ -404,10 +392,11 @@ const shift = <V,>(list: V[], from: number, to: number) => {
 };
 
 /**
- * Lista de coisas com vários campos (marcas, redes, periféricos): acrescentar, tirar e trocar a ordem.
- * Os cartões (listas com resumo) trocam de ordem a arrastar; as linhas simples, com as setas.
+ * Lista de coisas com vários campos (marcas, redes, periféricos, peças do PC): acrescentar, tirar e
+ * trocar a ordem. A ordem troca-se a arrastar pela pega do lado esquerdo, tanto nos cartões
+ * (listas com resumo) como nas linhas simples; com o teclado, foco na pega e setas para cima e para baixo.
  */
-export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confirmRemove, initialOpen, sortable = true, children }: RepeaterProps<T>) {
+export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confirmRemove, initialOpen, children }: RepeaterProps<T>) {
   const { draft, set, errors } = useForm();
   const items = (getAt(draft, path) as T[] | undefined) ?? [];
   // Uma chave por item, que o acompanha quando muda de posição: é ela que diz qual está aberto.
@@ -460,12 +449,14 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
   });
 
   /* Arrastar um cartão: com o rato pega-se em qualquer ponto do cabeçalho; com o dedo só na pega,
-     para o resto do cartão continuar a fazer scroll. Enquanto se arrasta mexe-se só no estilo dos
+     para o resto do cartão continuar a fazer scroll. Uma linha simples tem os campos à vista, por
+     isso só se pega nela pela pega (`gripOnly`). Enquanto se arrasta mexe-se só no estilo dos
      cartões; a lista muda uma vez, ao largar. */
-  const dragStart = (event: React.PointerEvent<HTMLDivElement>, i: number) => {
+  const dragStart = (event: React.PointerEvent<HTMLDivElement>, i: number, gripOnly = false) => {
     const target = event.target as Element;
-    if (event.pointerType === 'mouse' ? event.button !== 0 || target.closest('.tools') : !target.closest('.rep-grip')) return;
-    const cards = Array.from(listRef.current?.querySelectorAll<HTMLElement>(':scope > .rep-item') ?? []);
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (event.pointerType === 'mouse' && !gripOnly ? target.closest('.tools') : !target.closest('.rep-grip')) return;
+    const cards = Array.from(listRef.current?.querySelectorAll<HTMLElement>(':scope > .rep-item, :scope > .rep-row') ?? []);
     if (cards.length < 2) return;
     const boxes = cards.map((card) => card.getBoundingClientRect());
     dragRef.current = {
@@ -532,22 +523,31 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
     if (drop) moveTo(drag.from, drag.to);
   };
 
-  const tools = (i: number, arrows: boolean) => (
+  const tools = (i: number) => (
     <div className="tools">
-      {arrows ? (
-        <>
-          <Tool label="Subir" disabled={i === 0} onClick={() => moveTo(i, i - 1)}>
-            <Up />
-          </Tool>
-          <Tool label="Descer" disabled={i === items.length - 1} onClick={() => moveTo(i, i + 1)}>
-            <Down />
-          </Tool>
-        </>
-      ) : null}
       <Tool label="Apagar" danger disabled={items.length <= min} onClick={() => remove(i)}>
         <Cross />
       </Tool>
     </div>
+  );
+
+  /** A pega: arrasta-se com o rato ou o dedo; com o teclado, as setas mudam o item de sítio. */
+  const grip = (i: number, key: number, name: string) => (
+    <button
+      type="button"
+      className="rep-grip"
+      title="Arrastar para mudar a ordem"
+      aria-label={`Mudar a ordem de ${name}: arrasta, ou usa as setas para cima e para baixo`}
+      onKeyDown={(event) => {
+        const to = event.key === 'ArrowUp' ? i - 1 : event.key === 'ArrowDown' ? i + 1 : null;
+        if (to === null) return;
+        event.preventDefault();
+        refocus.current = key;
+        moveTo(i, to);
+      }}
+    >
+      <Grip />
+    </button>
   );
 
   return (
@@ -557,9 +557,18 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
         const itemPath = `${path}.${i}`;
         if (!summary) {
           return (
-            <div key={key} className="rep-row">
+            <div
+              key={key}
+              className="rep-row"
+              data-key={key}
+              onPointerDown={(event) => dragStart(event, i, true)}
+              onPointerMove={dragMove}
+              onPointerUp={(event) => dragEnd(event, true)}
+              onPointerCancel={(event) => dragEnd(event, false)}
+            >
+              {grip(i, key, `linha ${i + 1}`)}
               <div className="rep-fields">{children(itemPath, item, i)}</div>
-              {tools(i, sortable)}
+              {tools(i)}
             </div>
           );
         }
@@ -571,10 +580,10 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
           <div key={key} className="rep-item" data-key={key} data-open={expanded} data-invalid={bad ? true : undefined}>
             <div
               className="rep-head"
-              onPointerDown={sortable ? (event) => dragStart(event, i) : undefined}
-              onPointerMove={sortable ? dragMove : undefined}
-              onPointerUp={sortable ? (event) => dragEnd(event, true) : undefined}
-              onPointerCancel={sortable ? (event) => dragEnd(event, false) : undefined}
+              onPointerDown={(event) => dragStart(event, i)}
+              onPointerMove={dragMove}
+              onPointerUp={(event) => dragEnd(event, true)}
+              onPointerCancel={(event) => dragEnd(event, false)}
               onClickCapture={(event) => {
                 if (!skipClick.current) return;
                 skipClick.current = false;
@@ -582,23 +591,7 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
                 event.stopPropagation();
               }}
             >
-              {sortable ? (
-                <button
-                  type="button"
-                  className="rep-grip"
-                  title="Arrastar para mudar a ordem"
-                  aria-label={`Mudar a ordem de ${info.title}: arrasta, ou usa as setas para cima e para baixo`}
-                  onKeyDown={(event) => {
-                    const to = event.key === 'ArrowUp' ? i - 1 : event.key === 'ArrowDown' ? i + 1 : null;
-                    if (to === null) return;
-                    event.preventDefault();
-                    refocus.current = key;
-                    moveTo(i, to);
-                  }}
-                >
-                  <Grip />
-                </button>
-              ) : null}
+              {grip(i, key, info.title)}
               <button type="button" className="rep-toggle" aria-expanded={expanded} onClick={() => setOpen(open === key ? null : key)}>
                 {info.media ? <span className="rep-media">{info.media}</span> : null}
                 <span className="rep-title">
@@ -608,7 +601,7 @@ export function Repeater<T>({ path, max, min = 0, addLabel, make, summary, confi
                 {bad ? <span className="rep-flag">por corrigir</span> : null}
                 <Chevron />
               </button>
-              {tools(i, false)}
+              {tools(i)}
             </div>
             {expanded ? <div className="rep-body">{children(itemPath, item, i)}</div> : null}
           </div>

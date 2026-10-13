@@ -1734,7 +1734,7 @@ select.input option {
 }
 
 /* A arrastar: os outros cartões abrem espaço a deslizar; o que vai na mão fica por cima, sem atraso. */
-.repeater[data-sorting] > .rep-item {
+.repeater[data-sorting] > :is(.rep-item, .rep-row) {
   transition: translate 0.22s var(--ease-out);
 }
 
@@ -1744,6 +1744,19 @@ select.input option {
   border-color: var(--link);
   background: var(--bg);
   box-shadow: var(--shadow);
+  transition: none;
+}
+
+/* Uma linha simples não tem caixa: ganha uma enquanto vai na mão, para se ver o que se está a mexer. */
+.repeater[data-sorting] > .rep-row[data-dragging] {
+  position: relative;
+  z-index: 2;
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 8px var(--bg),
+    0 0 0 9.5px var(--link),
+    var(--shadow);
   transition: none;
 }
 
@@ -1771,6 +1784,11 @@ select.input option {
   padding-bottom: 5px;
 }
 
+/* A pega de uma linha fica à altura dos campos (que têm o nome por cima). */
+.rep-row > .rep-grip {
+  margin-bottom: 4px;
+}
+
 @media (max-width: 599px) {
   /* Ecrãs estreitos: os botões de ordem e de apagar passam para baixo do título, que assim cabe inteiro. */
   .rep-head {
@@ -1787,11 +1805,22 @@ select.input option {
     flex-basis: calc(100% - 46px);
   }
 
+  /* A pega fica à esquerda, os campos uns por baixo dos outros e o botão de apagar no fim. */
   .rep-row {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 8px 6px;
     padding-bottom: 12px;
     border-bottom: 1.5px dashed var(--line);
+  }
+
+  .rep-row > .rep-grip {
+    margin: 26px 0 0;
+  }
+
+  .rep-row .tools {
+    grid-column: 2;
   }
 
   .rep-fields {
