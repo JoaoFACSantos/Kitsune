@@ -3,18 +3,16 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { FunStat, Gear, Spec } from '@/content/types';
 import { GearGlyph } from '@/components/icons';
+import { useMessages } from '@/components/providers/Lang';
 import { Title } from '@/components/Title';
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
 import { isBelowFold, MEDIA } from '@/lib/motion';
 
 type SetupProps = { title: string; intro: string; gear: Gear[]; pc: Spec[]; funStats: FunStat[] };
 
-const TABS = [
-  { id: 'gear', label: 'Periféricos' },
-  { id: 'pc', label: 'O PC' },
-] as const;
+const TABS = ['gear', 'pc'] as const;
 
-type TabId = (typeof TABS)[number]['id'];
+type TabId = (typeof TABS)[number];
 
 const STAT_COLORS = ['var(--butter)', 'var(--mint)', 'var(--lilac)', 'color-mix(in oklab, var(--pink) 45%, white)'];
 const STAT_TILT = [-3, 2.5, -2, 3];
@@ -26,6 +24,7 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
   const [tab, setTab] = useState<TabId>('gear');
   const [selected, setSelected] = useState(0);
   const item = gear[selected];
+  const m = useMessages().setup;
 
   // Pílula escura que desliza para o separador ativo.
   useLayoutEffect(() => {
@@ -91,21 +90,21 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
             <Title id="setup-title" text={title} />
             <p className="lead mt-5">{intro}</p>
           </div>
-          <div ref={tabsRef} role="tablist" aria-label="Setup" className="tabs" onKeyDown={onTabKey}>
+          <div ref={tabsRef} role="tablist" aria-label={m.tabs} className="tabs" onKeyDown={onTabKey}>
             <span aria-hidden className="tab-glider" />
-            {TABS.map((t) => (
+            {TABS.map((id) => (
               <button
-                key={t.id}
-                id={`tab-${t.id}`}
+                key={id}
+                id={`tab-${id}`}
                 type="button"
                 role="tab"
-                aria-selected={tab === t.id}
-                aria-controls={`panel-${t.id}`}
-                tabIndex={tab === t.id ? 0 : -1}
+                aria-selected={tab === id}
+                aria-controls={`panel-${id}`}
+                tabIndex={tab === id ? 0 : -1}
                 className="tab"
-                onClick={() => setTab(t.id)}
+                onClick={() => setTab(id)}
               >
-                {t.label}
+                {m[id]}
               </button>
             ))}
           </div>
@@ -113,7 +112,7 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
 
         <div id="panel-gear" role="tabpanel" aria-labelledby="tab-gear" hidden={tab !== 'gear'} className="mt-12 md:mt-16">
           <div className="grid gap-5 lg:grid-cols-12">
-            <ul className="gear-grid lg:col-span-7" aria-label="Periféricos" data-scroll="through" data-scroll-on=".gear > svg" data-scroll-direct="24">
+            <ul className="gear-grid lg:col-span-7" aria-label={m.gear} data-scroll="through" data-scroll-on=".gear > svg" data-scroll-direct="24">
               {gear.map((g, i) => (
                 <li key={g.name} className="gear-cell" style={{ '--i': i } as React.CSSProperties}>
                   <button
@@ -140,7 +139,7 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
                 <p className="detail-name">{item.name}</p>
                 <p className="lead">{item.note}</p>
                 {item.tags?.length ? (
-                  <ul className="flex flex-wrap gap-2" aria-label="Características">
+                  <ul className="flex flex-wrap gap-2" aria-label={m.features}>
                     {item.tags.map((tag) => (
                       <li key={tag} className="chip">
                         {tag}
@@ -156,7 +155,7 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
         <div id="panel-pc" role="tabpanel" aria-labelledby="tab-pc" hidden={tab !== 'pc'} className="mt-12 md:mt-16">
           <div className="grid gap-5 lg:grid-cols-12">
             <div className="glass rounded-[34px] p-6 md:p-10 lg:col-span-7">
-              <p className="kicker">A máquina</p>
+              <p className="kicker">{m.machine}</p>
               <dl className="mt-4">
                 {pc.map((spec) => (
                   <div key={spec.label} className="spec-row">
@@ -167,7 +166,7 @@ export function Setup({ title, intro, gear, pc, funStats }: SetupProps) {
               </dl>
             </div>
             <div className="lg:col-span-5">
-              <p className="kicker mb-4">Estatísticas muito científicas</p>
+              <p className="kicker mb-4">{m.funStats}</p>
               <ul className="grid grid-cols-2 gap-4">
                 {funStats.map((stat, i) => (
                   <li key={stat.label} className="fun-cell">

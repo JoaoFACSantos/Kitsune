@@ -9,6 +9,7 @@ import { LivePill } from '@/components/LivePill';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { VISIT_SKIP_KEY } from '@/components/VisitBeacon';
 import type { Issue } from '@/lib/content/validate';
+import type { Lang } from '@/lib/i18n';
 import { PREVIEW_PATH } from '@/lib/preview';
 import { Dashboard, type Overview, type Section } from './Dashboard';
 import { Card, DateTimeField, type FormApi, FormProvider, getAt, setAt, Toggle } from './form';
@@ -42,6 +43,9 @@ const TABS: readonly { id: string; label: string; icon: NavIcon; hint: string; p
 ];
 
 /** 'ready': a pré-visualização está pronta mas o browser não abriu o separador; fica o link para a abrir à mão. */
+/** As secções com textos que têm versão inglesa. */
+const TRANSLATED_TABS = new Set(['parcerias', 'giveaways', 'setup']);
+
 type Status = { kind: 'idle' } | { kind: 'saved' } | { kind: 'ready' } | { kind: 'error'; text: string };
 
 const under = (path: string, roots: readonly string[]) => roots.some((root) => path === root || path.startsWith(`${root}.`));
@@ -86,6 +90,7 @@ const FIELD_NAMES: Record<string, string> = {
   items: 'Giveaways',
   steps: 'Como participar',
   endsAt: 'Último dia',
+  en: 'Inglês',
   opensAt: 'Abrir sozinho a',
 };
 
@@ -132,6 +137,8 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
   const [busy, startTransition] = useTransition();
   // O que o servidor está a fazer enquanto `busy`: a guardar ou a preparar a pré-visualização.
   const [task, setTask] = useState<'save' | 'preview'>('save');
+  // A língua em que se escrevem os textos: o português, ou a versão inglesa do site (/en).
+  const [editLang, setEditLang] = useState<Lang>('pt');
 
   const tab = TABS.find((t) => t.id === view.tab) ?? TABS[0];
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(saved), [draft, saved]);
@@ -144,7 +151,9 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
     setStatus({ kind: 'idle' });
   }, []);
 
-  const form = useMemo<FormApi>(() => ({ draft, set, errors }), [draft, set, errors]);
+  const form = useMemo<FormApi>(() => ({ draft, set, errors, editLang }), [draft, set, errors, editLang]);
+  // A pré-visualização abre na língua em que se está a escrever.
+  const previewPath = editLang === 'en' ? `${PREVIEW_PATH}/en` : PREVIEW_PATH;
 
   // Quem trata do site não conta como visita: este browser deixa de avisar o contador.
   useEffect(() => {
@@ -237,7 +246,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
         }
         // Há browsers (os de dentro das apps, sobretudo) que não abrem separadores a pedido da
         // página: aí fica um link, que esses abrem sempre.
-        if (page) page.location.replace(PREVIEW_PATH);
+        if (page) page.location.replace(previewPath);
         else setStatus({ kind: 'ready' });
       } catch {
         page?.close();
@@ -353,7 +362,7 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                   ) : status.kind === 'ready' ? (
                     <>
                       A pré-visualização está pronta.{' '}
-                      <Link href={PREVIEW_PATH} target="_blank" prefetch={false}>
+                      <Link href={previewPath} target="_blank" prefetch={false}>
                         Abrir
                       </Link>
                     </>
@@ -411,6 +420,25 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
                 ))}
                 {issues.length > 8 ? <li>e mais {issues.length - 8}.</li> : null}
               </ul>
+            </div>
+          ) : null}
+
+          {/* As secções com textos que têm versão inglesa: escolhe-se em que língua se escreve. */}
+          {TRANSLATED_TABS.has(tab.id) ? (
+            <div className="edit-lang">
+              <div role="group" aria-label="Língua dos textos" className="edit-lang-switch">
+                <button type="button" aria-pressed={editLang === 'pt'} onClick={() => setEditLang('pt')}>
+                  Português
+                </button>
+                <button type="button" aria-pressed={editLang === 'en'} onClick={() => setEditLang('en')}>
+                  English
+                </button>
+              </div>
+              <p>
+                {editLang === 'en'
+                  ? 'Estás a escrever a versão inglesa do site (kitsunetv.pt/en). Mudam só os campos marcados com EN; em branco, aparece o texto em português. Links, códigos e imagens são os mesmos nas duas.'
+                  : 'O site também existe em inglês (kitsunetv.pt/en). Para escrever os textos em inglês, escolhe English.'}
+              </p>
             </div>
           ) : null}
 

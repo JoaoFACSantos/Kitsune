@@ -1,4 +1,5 @@
 import type { SocialId } from '@/content/types';
+import type { Messages } from '@/lib/i18n';
 
 // Como cada rede aparece nos cartões (a secção das redes e a página de links).
 
@@ -13,5 +14,5 @@ export const SOCIAL_COLORS: Record<SocialId, string> = {
   kick: '#1B7A2B',
 };
 
-/** Como cada rede chama a quem a segue (por omissão, "seguidores"). */
-export const COUNT_LABEL: Partial<Record<SocialId, string>> = { discord: 'membros', youtube: 'subscritores' };
+/** Como cada rede chama a quem a segue: membros no Discord, subscritores no YouTube, seguidores no resto. */
+export const countLabel = (id: SocialId, m: Messages) => (id === 'discord' ? m.counts.members : id === 'youtube' ? m.counts.subscribers : m.counts.followers);

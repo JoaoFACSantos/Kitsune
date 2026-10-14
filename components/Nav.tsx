@@ -1,9 +1,12 @@
 'use client';
 
 import { useRef } from 'react';
+import { LangSwitch } from '@/components/LangSwitch';
 import { LivePill } from '@/components/LivePill';
 import { Magnetic } from '@/components/Magnetic';
+import { useLang } from '@/components/providers/Lang';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { type Lang, messages } from '@/lib/i18n';
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
 
 type NavProps = {
@@ -12,11 +15,17 @@ type NavProps = {
   links: { id: string; label: string }[];
   /** Cor da barra do browser em cada tema. */
   themeColors: { light: string; dark: string };
+  /** O nome da plataforma do direto ("Twitch"). */
+  platform: string;
+  /** Esta página em cada língua, para o interruptor PT | EN. */
+  langHrefs: Record<Lang, string>;
 };
 
 /** Nav em pílula: esconde ao descer, volta ao subir; o destaque desliza entre links. */
-export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
+export function Nav({ name, watchUrl, links, themeColors, platform, langHrefs }: NavProps) {
   const ref = useRef<HTMLElement>(null);
+  const lang = useLang();
+  const m = messages(lang).nav;
 
   useGSAP(
     () => {
@@ -58,8 +67,8 @@ export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
 
   return (
     <header ref={ref} className="nav" data-links={links.length}>
-      <nav aria-label="Principal" className="nav-pill">
-        <a href="#topo" className="nav-brand" aria-label={`${name}, voltar ao início`}>
+      <nav aria-label={m.main} className="nav-pill">
+        <a href="#topo" className="nav-brand" aria-label={m.home(name)}>
           <span className="nav-name truncate">{name}</span>
         </a>
 
@@ -77,12 +86,13 @@ export function Nav({ name, watchUrl, links, themeColors }: NavProps) {
         </div>
 
         <div className="nav-actions">
+          <LangSwitch lang={lang} hrefs={langHrefs} />
           <ThemeToggle lightColor={themeColors.light} darkColor={themeColors.dark} />
           {/* O estado do direto é o link para o canal: clica-se na própria etiqueta. */}
           <Magnetic>
-            <a href={watchUrl} target="_blank" rel="noopener noreferrer" className="live-link" title="Abrir o canal">
+            <a href={watchUrl} target="_blank" rel="noopener noreferrer" className="live-link" title={m.openChannel(platform)}>
               <LivePill compact />
-              <span className="sr-only">: abrir o canal</span>
+              <span className="sr-only">: {m.openChannel(platform)}</span>
             </a>
           </Magnetic>
         </div>

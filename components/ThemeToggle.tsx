@@ -2,6 +2,7 @@
 
 import { useRef, useSyncExternalStore } from 'react';
 import { MoonIcon, SunIcon } from '@/components/icons';
+import { useMessages } from '@/components/providers/Lang';
 import { MEDIA, THEME_KEY } from '@/lib/motion';
 
 const subscribe = (onChange: () => void) => {
@@ -16,6 +17,7 @@ const isDark = () => document.documentElement.dataset.theme === 'dark';
  * e fica guardado no browser. A troca faz uma revelação circular rápida a partir do botão.
  */
 export function ThemeToggle({ lightColor, darkColor }: { lightColor: string; darkColor: string }) {
+  const m = useMessages();
   // No servidor conta como escuro: é o tema de origem.
   const dark = useSyncExternalStore(subscribe, isDark, () => true);
   // Com rato, a troca arranca logo ao carregar (pointerdown), sem esperar que o botão seja largado.
@@ -63,7 +65,7 @@ export function ThemeToggle({ lightColor, darkColor }: { lightColor: string; dar
       type="button"
       role="switch"
       aria-checked={dark}
-      aria-label="Modo escuro"
+      aria-label={m.darkMode}
       className="theme-switch"
       onPointerDown={(event) => {
         pressed.current = event.pointerType === 'mouse' && event.button === 0;

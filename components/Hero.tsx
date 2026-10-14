@@ -8,10 +8,13 @@ import { HeartShape, PlayIcon, StickerArt, type StickerKind } from '@/components
 import { LivePill } from '@/components/LivePill';
 import { LiveTv } from '@/components/LiveTv';
 import { Magnetic } from '@/components/Magnetic';
+import { useLang } from '@/components/providers/Lang';
 import { useLive } from '@/components/providers/Live';
+import { SOCIAL_LABELS } from '@/lib/content/editable';
 import { liveEmbedUrl } from '@/lib/embed';
 import { cn } from '@/lib/format';
 import { gsap, useGSAP } from '@/lib/gsap';
+import { messages } from '@/lib/i18n';
 import { FOLLOW, MEDIA } from '@/lib/motion';
 
 type HeroProps = {
@@ -97,12 +100,13 @@ export function Hero({
   const [likes, setLikes] = useState(0);
   const status = useLive();
   const live = status.live;
+  const m = messages(useLang()).hero;
   // Domínio do site, guardado ao clicar no play: a Twitch exige-o para deixar embutir.
   const [host, setHost] = useState<string | null>(null);
   const canEmbed = liveEmbedUrl(platform, handle, 'x') !== null;
   const embed = live && host ? liveEmbedUrl(platform, handle, host) : null;
   const playing = embed !== null;
-  const playLabel = status.live ? `Ver o direto: ${status.title}` : '';
+  const playLabel = status.live ? m.watchTitle(status.title) : '';
   // Com a televisão ligada, a ilustração troca para a versão em que se viram para ela.
   const photoSrc = playing && photoWatching ? photoWatching : photo;
   const letters = Array.from(name.toUpperCase());
@@ -344,10 +348,10 @@ export function Hero({
                 <span className="likes" aria-live="polite">
                   <HeartShape />
                   <span className="tabular-nums">{likes}</span>
-                  <span className="sr-only">corações</span>
+                  <span className="sr-only">{m.hearts}</span>
                 </span>
               </div>
-              <button type="button" className="window-hit" aria-label={`Mandar um coração à ${name}`} onClick={love} />
+              <button type="button" className="window-hit" aria-label={m.sendHeart(name)} onClick={love} />
               {live && !playing ? (
                 <>
                   {/* Ecrãs pequenos (ou plataforma sem player): o play abre a plataforma. */}
@@ -421,9 +425,9 @@ export function Hero({
 
         <p aria-hidden className="hero-hint hero-hint-love hand intro-rise hidden lg:flex" style={{ '--delay': '1.7s' } as React.CSSProperties}>
           <span>
-            clica na foto
+            {m.clickPhoto[0]}
             <br />
-            para mandar ♡
+            {m.clickPhoto[1]}
           </span>
           <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
             <path d="M4 30c16 4 38 0 48-18M52 12l2 12M52 12l-11 3" />
@@ -435,15 +439,15 @@ export function Hero({
             <path d="M56 30C40 34 18 30 8 12M8 12l-2 12M8 12l11 3" />
           </svg>
           <span>
-            arrasta os
+            {m.dragStickers[0]}
             <br />
-            stickers!
+            {m.dragStickers[1]}
           </span>
         </p>
       </div>
 
       <p aria-hidden className="hero-tap hand intro-rise lg:hidden" style={{ '--delay': '1.3s' } as React.CSSProperties}>
-        {live ? 'toca no play para ver o direto' : 'toca na foto para mandar corações'}
+        {live ? m.tapPlay : m.tapPhoto}
       </p>
 
       <div className="hero-foot intro-rise" style={{ '--delay': '0.7s' } as React.CSSProperties}>
@@ -454,7 +458,7 @@ export function Hero({
         <div className="flex flex-wrap gap-3">
           <Magnetic>
             <a href={watchUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-              {live ? 'Ver em direto' : 'Ver na Twitch'}
+              {live ? m.watchLive : m.watchOn(SOCIAL_LABELS[platform])}
               <span aria-hidden className="arrow">
                 ↗
               </span>
@@ -462,7 +466,7 @@ export function Hero({
           </Magnetic>
           <Magnetic>
             <a href="#parcerias" className="btn btn-ghost">
-              Parcerias
+              {m.partners}
             </a>
           </Magnetic>
         </div>

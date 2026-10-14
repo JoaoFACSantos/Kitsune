@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { type Lang, messages } from '@/lib/i18n';
 import { BackToTop } from './BackToTop';
 
 // Quem fez o site.
@@ -8,10 +9,11 @@ type FooterProps = {
   name: string;
   /** As outras páginas do site (a de links, a privacidade, o regulamento). */
   links?: { href: string; label: string }[];
+  lang?: Lang;
 };
 
 /** Rodapé: nome enorme em contorno que se enche de cor no hover. */
-export function Footer({ name, links = [] }: FooterProps) {
+export function Footer({ name, links = [], lang = 'pt' }: FooterProps) {
   // O ano lê-se aqui dentro e não no topo do ficheiro: num Worker, fora de um pedido, o relógio
   // está parado em 1970.
   const year = new Date().getFullYear();
@@ -33,7 +35,7 @@ export function Footer({ name, links = [] }: FooterProps) {
           </a>
         </p>
         {links.length ? (
-          <nav aria-label="Mais páginas" className="footer-links">
+          <nav aria-label={messages(lang).footer.more} className="footer-links">
             {links.map((link) => (
               <Link key={link.href} href={link.href} prefetch={false}>
                 {link.label}

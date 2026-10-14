@@ -2,6 +2,7 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useId, useRef, useState } from 'react';
 import type { EditableContent } from '@/content/types';
+import type { Lang } from '@/lib/i18n';
 
 // As peças do formulário do painel. Cada campo liga-se ao conteúdo por um caminho
 // ("partners.brands.2.name"): lê o valor de lá, escreve lá e mostra o erro que o servidor
@@ -13,6 +14,8 @@ export type FormApi = {
   set: (path: string, value: unknown) => void;
   /** Erros da última tentativa de guardar, por caminho. */
   errors: Record<string, string>;
+  /** A língua dos textos que se estão a escrever: o português, ou a versão inglesa do site (/en). */
+  editLang?: Lang;
 };
 
 const FormContext = createContext<FormApi | null>(null);
@@ -53,6 +56,27 @@ export function setAt<T>(root: T, path: string, value: unknown): T {
   return copy as T;
 }
 
+/** Onde fica a versão inglesa de um campo de um item: "partners.brands.2.about" → "partners.brands.2.en.about". */
+export const enPath = (path: string) => {
+  const cut = path.lastIndexOf('.');
+  return `${path.slice(0, cut)}.en.${path.slice(cut + 1)}`;
+};
+
+/**
+ * Para onde escreve um campo: o próprio caminho ou, com o painel em inglês e o campo traduzível,
+ * a versão inglesa. `original` é o texto em português, que fica a cinzento por baixo.
+ */
+function useTarget(path: string, translate?: boolean) {
+  const { draft, editLang } = useForm();
+  const english = Boolean(translate) && editLang === 'en';
+  return { target: english ? enPath(path) : path, english, original: english ? getAt(draft, path) : undefined };
+}
+
+const EN_HINT = 'Versão inglesa (kitsunetv.pt/en). Em branco, aparece o texto em português, o que está a cinzento.';
+
+/** A marca dos campos que, com o painel em inglês, escrevem a versão inglesa. */
+const EnBadge = () => <span className="field-en">EN</span>;
+
 function useField<T>(path: string) {
   const { draft, set, errors } = useForm();
   return { value: getAt(draft, path) as T | undefined, set: (value: T | undefined) => set(path, value), error: errors[path] };
@@ -92,46 +116,77 @@ function Count({ used, max }: { used: number; max?: number }) {
   );
 }
 
-type TextProps = FieldProps & { path: string; max?: number; placeholder?: string; optional?: boolean };
+type TextProps = FieldProps & {
+  path: string;
+  max?: number;
+  placeholder?: string;
+  optional?: boolean;
+  /** Tem versão inglesa: com o painel em "English", escreve-se nela (ver useTarget). */
+  translate?: boolean;
+};
 
-export function TextField({ path, label, hint, max, placeholder, optional, type = 'text' }: TextProps & { type?: 'text' | 'url' | 'email' }) {
+export function TextField({ path, label, hint, max, placeholder, optional, translate, type = 'text' }: TextProps & { type?: 'text' | 'url' | 'email' }) {
   const id = useId();
-  const { value, set, error } = useField<string>(path);
+  const { target, english, original } = useTarget(path, translate);
+  const { value, set, error } = useField<string>(target);
   const text = value ?? '';
   return (
-    <Field id={id} label={label} hint={hint} error={error} extra={<Count used={text.length} max={max} />}>
+    <Field
+      id={id}
+      label={label}
+      hint={english ? EN_HINT : hint}
+      error={error}
+      extra={
+        <>
+          {english ? <EnBadge /> : null}
+          <Count used={text.length} max={max} />
+        </>
+      }
+    >
       <input
         id={id}
         type={type}
         className="input"
         value={text}
         maxLength={max}
-        placeholder={placeholder}
+        placeholder={english && typeof original === 'string' && original ? original : placeholder}
         aria-invalid={error ? true : undefined}
         // Sem corretor nem maiúsculas automáticas: são nomes, códigos e links.
         spellCheck={type === 'text'}
         autoCapitalize={type === 'text' ? undefined : 'none'}
-        onChange={(event) => set(optional && !event.target.value ? undefined : event.target.value)}
+        onChange={(event) => set((optional || english) && !event.target.value ? undefined : event.target.value)}
       />
     </Field>
   );
 }
 
-export function TextArea({ path, label, hint, max, placeholder, optional, rows = 3 }: TextProps & { rows?: number }) {
+export function TextArea({ path, label, hint, max, placeholder, optional, translate, rows = 3 }: TextProps & { rows?: number }) {
   const id = useId();
-  const { value, set, error } = useField<string>(path);
+  const { target, english, original } = useTarget(path, translate);
+  const { value, set, error } = useField<string>(target);
   const text = value ?? '';
   return (
-    <Field id={id} label={label} hint={hint} error={error} extra={<Count used={text.length} max={max} />}>
+    <Field
+      id={id}
+      label={label}
+      hint={english ? EN_HINT : hint}
+      error={error}
+      extra={
+        <>
+          {english ? <EnBadge /> : null}
+          <Count used={text.length} max={max} />
+        </>
+      }
+    >
       <textarea
         id={id}
         className="input"
         rows={rows}
         value={text}
         maxLength={max}
-        placeholder={placeholder}
+        placeholder={english && typeof original === 'string' && original ? original : placeholder}
         aria-invalid={error ? true : undefined}
-        onChange={(event) => set(optional && !event.target.value ? undefined : event.target.value)}
+        onChange={(event) => set((optional || english) && !event.target.value ? undefined : event.target.value)}
       />
     </Field>
   );
@@ -311,16 +366,41 @@ const Chevron = () => (
   </svg>
 );
 
-/** Lista de textos curtos (vantagens, palavras, etiquetas): uma caixa por linha. */
-export function StringList({ path, label, hint, max, itemMax, addLabel, placeholder }: FieldProps & { path: string; max: number; itemMax: number; addLabel: string; placeholder?: string }) {
+/**
+ * Lista de textos curtos (vantagens, palavras, etiquetas): uma caixa por linha. Na versão inglesa
+ * há uma linha por cada uma das portuguesas, com ela a cinzento por baixo.
+ */
+export function StringList({
+  path,
+  label,
+  hint,
+  max,
+  itemMax,
+  addLabel,
+  placeholder,
+  translate,
+}: FieldProps & { path: string; max: number; itemMax: number; addLabel: string; placeholder?: string; translate?: boolean }) {
   const { draft, set, errors } = useForm();
-  const items = (getAt(draft, path) as string[] | undefined) ?? [];
-  const error = errors[path];
+  const { target, english, original } = useTarget(path, translate);
+  const items = (getAt(draft, target) as string[] | undefined) ?? [];
+  const originals = english && Array.isArray(original) ? (original as string[]) : [];
+  const rows = Array.from({ length: Math.max(items.length, originals.length) }, (_, i) => items[i] ?? '');
+  const error = errors[target];
+  /** Escreve uma linha; na versão inglesa, as de antes que ainda não existam ficam em branco. */
+  const write = (i: number, text: string) => {
+    const next = [...items];
+    while (next.length <= i) next.push('');
+    next[i] = text;
+    set(target, next);
+  };
   return (
     <div className="field" role="group" aria-label={label} data-invalid={error ? true : undefined}>
-      <span className="field-label">{label}</span>
-      {items.map((item, i) => {
-        const itemError = errors[`${path}.${i}`];
+      <span className="field-label">
+        {label}
+        {english ? <EnBadge /> : null}
+      </span>
+      {rows.map((item, i) => {
+        const itemError = errors[`${target}.${i}`];
         return (
           // A posição serve de chave: as linhas não têm identidade própria e só mudam de sítio ao tirar uma.
           <div key={i} className="line" data-invalid={itemError ? true : undefined}>
@@ -329,12 +409,12 @@ export function StringList({ path, label, hint, max, itemMax, addLabel, placehol
                 className="input"
                 value={item}
                 maxLength={itemMax}
-                placeholder={placeholder}
+                placeholder={originals[i] || placeholder}
                 aria-label={`${label}, linha ${i + 1}`}
                 aria-invalid={itemError ? true : undefined}
-                onChange={(event) => set(`${path}.${i}`, event.target.value)}
+                onChange={(event) => write(i, event.target.value)}
               />
-              <Tool label="Tirar esta linha" danger onClick={() => set(path, items.filter((_, j) => j !== i))}>
+              <Tool label="Tirar esta linha" danger onClick={() => set(target, items.filter((_, j) => j !== i))}>
                 <Cross />
               </Tool>
             </div>
@@ -346,13 +426,15 @@ export function StringList({ path, label, hint, max, itemMax, addLabel, placehol
           </div>
         );
       })}
-      <button type="button" className="add" disabled={items.length >= max} onClick={() => set(path, [...items, ''])}>
+      <button type="button" className="add" disabled={rows.length >= max} onClick={() => write(rows.length, '')}>
         + {addLabel}
       </button>
       {error ? (
         <p className="field-error" role="alert">
           {error}
         </p>
+      ) : english ? (
+        <p className="field-hint">{EN_HINT}</p>
       ) : hint ? (
         <p className="field-hint">{hint}</p>
       ) : null}

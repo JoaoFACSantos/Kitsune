@@ -107,9 +107,31 @@ function position(value: unknown): string | undefined {
   return `${Number(match[1])}% ${Number(match[2])}%`;
 }
 
+/**
+ * A versão inglesa dos textos de um item (`en`, para as páginas em /en): os mesmos limites, tudo
+ * opcional. As linhas em branco das listas saem; sem nada escrito, o item fica sem `en`.
+ */
+function english<T>(bag: Bag, value: unknown, path: string, fields: Record<string, number>, lists: Record<string, [number, number]> = {}): { en?: T } {
+  const v = record(value);
+  const out: Rec = {};
+  for (const [key, max] of Object.entries(fields)) {
+    const clean = text(bag, v[key], `${path}.en.${key}`, max, false);
+    if (clean) out[key] = clean;
+  }
+  for (const [key, [most, max]] of Object.entries(lists)) {
+    const items = list(bag, v[key], `${path}.en.${key}`, most, (entry, p) => text(bag, entry, p, max, false)).filter(Boolean);
+    if (items.length) out[key] = [...new Set(items)];
+  }
+  return Object.keys(out).length ? { en: out as T } : {};
+}
+
 function spec(bag: Bag, value: unknown, path: string): Spec {
   const v = record(value);
-  return { label: text(bag, v.label, `${path}.label`, 30), value: text(bag, v.value, `${path}.value`, 60) };
+  return {
+    label: text(bag, v.label, `${path}.label`, 30),
+    value: text(bag, v.value, `${path}.value`, 60),
+    ...english<Spec['en']>(bag, v.en, path, { label: 30 }),
+  };
 }
 
 function social(bag: Bag, value: unknown, path: string): Social {
@@ -141,6 +163,7 @@ function gear(bag: Bag, value: unknown, path: string): Gear {
     note: text(bag, v.note, `${path}.note`, 120, false),
     ...(tags.length ? { tags } : {}),
     ...(url ? { url } : {}),
+    ...english<Gear['en']>(bag, v.en, path, { label: 24, note: 120 }, { tags: [MAX.gearTags, 20] }),
   };
 }
 
@@ -172,12 +195,17 @@ function brand(bag: Bag, value: unknown, path: string): Brand {
     color: color(v.color),
     ...(note ? { note } : {}),
     ...(slug ? { slug } : {}),
+    ...english<Brand['en']>(bag, v.en, path, { category: 40, perk: 32, about: 400, cta: 40, note: 300 }, { perks: [MAX.brandPerks, 140] }),
   };
 }
 
 function rule(bag: Bag, value: unknown, path: string): Rule {
   const v = record(value);
-  return { title: text(bag, v.title, `${path}.title`, 60), text: text(bag, v.text, `${path}.text`, 500) };
+  return {
+    title: text(bag, v.title, `${path}.title`, 60),
+    text: text(bag, v.text, `${path}.text`, 500),
+    ...english<Rule['en']>(bag, v.en, path, { title: 60, text: 500 }),
+  };
 }
 
 /** Um dia do calendário ("2026-10-31"), ou nada. */
@@ -206,6 +234,7 @@ function giveaway(bag: Bag, value: unknown, path: string): Giveaway {
     cta: text(bag, v.cta, `${path}.cta`, 40, false) || 'Participar',
     ...(picture ? { image: picture, imageSize: { width: dimension(size.width), height: dimension(size.height) } } : {}),
     ...(endsAt ? { endsAt } : {}),
+    ...english<Giveaway['en']>(bag, v.en, path, { title: 60, about: 300, cta: 40 }, { steps: [MAX.giveawaySteps, 140] }),
   };
 }
 
@@ -213,7 +242,12 @@ function winner(bag: Bag, value: unknown, path: string): Winner {
   const v = record(value);
   const date = day(v.date);
   if (!date && typeof v.date === 'string' && v.date.trim()) bag.push({ path: `${path}.date`, message: 'Data inválida: escolhe-a outra vez.' });
-  return { name: text(bag, v.name, `${path}.name`, 40), prize: text(bag, v.prize, `${path}.prize`, 60), ...(date ? { date } : {}) };
+  return {
+    name: text(bag, v.name, `${path}.name`, 40),
+    prize: text(bag, v.prize, `${path}.prize`, 60),
+    ...(date ? { date } : {}),
+    ...english<Winner['en']>(bag, v.en, path, { prize: 60 }),
+  };
 }
 
 /** O código de um link de convite do Discord ("https://discord.gg/abc" → "abc"). */

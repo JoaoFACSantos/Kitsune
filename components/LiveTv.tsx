@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { StickerArt } from '@/components/icons';
 import { LivePill } from '@/components/LivePill';
+import { useMessages } from '@/components/providers/Lang';
 
 // Depois de a página parar, o browser atualiza o hover com um movimento de rato "falso":
 // só passado este tempo é que um movimento conta como sendo da pessoa.
@@ -14,6 +15,7 @@ const SETTLE_MS = 250;
  * por cima. Por isso a entrada da televisão e a estática são retiradas assim que acabam.
  */
 export function LiveTv({ name, src, onClose }: { name: string; src: string; onClose: () => void }) {
+  const m = useMessages().tv;
   const [entered, setEntered] = useState(false);
   const [staticDone, setStaticDone] = useState(false);
   const screen = useRef<HTMLDivElement>(null);
@@ -68,14 +70,14 @@ export function LiveTv({ name, src, onClose }: { name: string; src: string; onCl
             <i />
             <i />
           </span>
-          <button type="button" className="tv-close" aria-label="Fechar o direto" onClick={onClose}>
+          <button type="button" className="tv-close" aria-label={m.close} onClick={onClose}>
             <span aria-hidden>✕</span>
           </button>
         </div>
         <div className="tv-main">
           <div className="tv-tube">
             <div ref={screen} className="tv-screen" data-interactive="false">
-              <iframe src={src} title={`Direto de ${name}`} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+              <iframe src={src} title={m.title(name)} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
               {/* Chuva de estática enquanto a televisão "liga". */}
               {staticDone ? null : <span aria-hidden className="tv-static" />}
             </div>

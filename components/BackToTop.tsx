@@ -1,8 +1,10 @@
 'use client';
 
+import { useMessages } from '@/components/providers/Lang';
 import { scrollToTarget } from '@/components/providers/SmoothScroll';
 
 export function BackToTop() {
+  const m = useMessages();
   return (
     <button
       type="button"
@@ -14,7 +16,7 @@ export function BackToTop() {
         document.getElementById('topo')?.focus({ preventScroll: true });
       }}
     >
-      Voltar ao topo
+      {m.footer.backToTop}
       <span aria-hidden className="arrow">
         ↑
       </span>

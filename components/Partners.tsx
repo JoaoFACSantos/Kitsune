@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import type { Brand, FunStat } from '@/content/types';
 import { Magnetic } from '@/components/Magnetic';
 import { BrandTile, PartnerDetails } from '@/components/PartnerCard';
+import { useMessages } from '@/components/providers/Lang';
 import { setScrollLocked } from '@/components/providers/SmoothScroll';
 import { Title } from '@/components/Title';
 import { brandSlug } from '@/lib/content/editable';
@@ -40,6 +41,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
   const [active, setActive] = useState<Brand | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
   const mailto = `mailto:${email}?subject=${encodeURIComponent(mailSubject)}`;
+  const m = useMessages().partners;
 
   // Brilho que segue o cursor dentro do cartão.
   useGSAP(
@@ -297,12 +299,12 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
   return (
     <section id="parcerias" tabIndex={-1} aria-labelledby="parcerias-title" className="section">
       <div className="section-inner">
-        <p className="kicker">Parcerias</p>
-        <p className="lead mt-3">Marcas com quem trabalho. Clica numa para ver as vantagens e o código.</p>
+        <p className="kicker">{m.kicker}</p>
+        <p className="lead mt-3">{m.lead}</p>
 
         <div ref={marqueeRef} className="brands-marquee" data-paused={active !== null}>
           {[0, 1].map((copyIndex) => (
-            <ul key={copyIndex} className="brands-track" aria-hidden={copyIndex > 0} aria-label={copyIndex ? undefined : 'Marcas'}>
+            <ul key={copyIndex} className="brands-track" aria-hidden={copyIndex > 0} aria-label={copyIndex ? undefined : m.brands}>
               {brands.map((brand) => (
                 <li key={brand.name}>
                   <button
@@ -331,7 +333,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
               <div className="mt-8 flex flex-wrap gap-3">
                 <Magnetic>
                   <a href={mailto} className="btn btn-white">
-                    Enviar email
+                    {m.sendEmail}
                     <span aria-hidden className="arrow">
                       ↗
                     </span>
@@ -339,7 +341,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
                 </Magnetic>
                 <Magnetic>
                   <button type="button" className="btn btn-outline-white" onClick={copy}>
-                    {copied ? 'Copiado ♡' : 'Copiar email'}
+                    {copied ? m.copied : m.copyEmail}
                   </button>
                 </Magnetic>
               </div>
@@ -379,7 +381,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
             // A coluna da imagem ajusta-se ao formato do banner (largura a dividir pela altura).
             style={{ '--art-ratio': active.imageSize.width / active.imageSize.height } as React.CSSProperties}
           >
-            <button type="button" className="partner-close" aria-label="Fechar" onClick={closeBrand}>
+            <button type="button" className="partner-close" aria-label={m.close} onClick={closeBrand}>
               <svg viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
@@ -400,7 +402,7 @@ export function Partners({ title, intro, stats, brands, email, mailSubject }: Pa
       </dialog>
 
       <p role="status" className="toast" data-show={copied}>
-        {copied ? `${email} copiado ♡` : ''}
+        {copied ? m.emailCopied(email) : ''}
       </p>
     </section>
   );

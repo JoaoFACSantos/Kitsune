@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useMessages } from '@/components/providers/Lang';
 
 // Quantas vezes este separador já recarregou à espera do site aberto (ver `reload`).
 const TRIES_KEY = 'abertura:tentativas';
@@ -46,6 +47,7 @@ function enter(opened: number) {
  * site já abriu (POST /api/abrir, que o abre se a hora já passou) e recarrega a página.
  */
 export function Countdown({ opensAt }: { opensAt: string }) {
+  const m = useMessages().opening;
   const [target, setTarget] = useState(() => Date.parse(opensAt));
   // Quanto o relógio deste aparelho está atrasado em relação ao do servidor (ms). Só se fica a
   // saber quando se pergunta ao servidor; até lá, confia-se no do aparelho.
@@ -105,17 +107,17 @@ export function Countdown({ opensAt }: { opensAt: string }) {
     left === null
       ? null
       : [
-          { label: 'dias', value: Math.floor(left / 86_400) },
-          { label: 'horas', value: Math.floor(left / 3600) % 24 },
-          { label: 'min', value: Math.floor(left / 60) % 60 },
-          { label: 'seg', value: left % 60 },
+          { label: m.units.days, value: Math.floor(left / 86_400) },
+          { label: m.units.hours, value: Math.floor(left / 3600) % 24 },
+          { label: m.units.min, value: Math.floor(left / 60) % 60 },
+          { label: m.units.sec, value: left % 60 },
         ].filter((unit, i) => i > 0 || unit.value > 0);
 
   return (
     <>
       {/* Os leitores de ecrã não leem a contagem a cada segundo: a hora de abrir está na frase por cima. */}
-      <div className="countdown" role="timer" aria-live="off" aria-label="Tempo que falta para o site abrir" data-opening={opening || undefined}>
-        {(units ?? [{ label: 'horas' }, { label: 'min' }, { label: 'seg' }]).map((unit) => (
+      <div className="countdown" role="timer" aria-live="off" aria-label={m.timer} data-opening={opening || undefined}>
+        {(units ?? [{ label: m.units.hours }, { label: m.units.min }, { label: m.units.sec }]).map((unit) => (
           <span key={unit.label} className="countdown-unit glass">
             {'value' in unit ? (
               // A chave muda com o número: é o que faz o algarismo dar o salto ao mudar.
@@ -128,7 +130,7 @@ export function Countdown({ opensAt }: { opensAt: string }) {
         ))}
       </div>
       <p className="countdown-status" role="status">
-        {opening ? 'A abrir…' : ''}
+        {opening ? m.busy : ''}
       </p>
     </>
   );

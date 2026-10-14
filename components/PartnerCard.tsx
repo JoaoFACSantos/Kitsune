@@ -1,5 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import type { Brand } from '@/content/types';
+import { useMessages } from '@/components/providers/Lang';
 
 // As duas caras de uma parceria: o cartão pequeno da fila e o cartão aberto. O site
 // (components/Partners.tsx) e o painel (components/admin/Live.tsx, que os mostra ao lado dos
@@ -36,6 +39,7 @@ type PartnerDetailsProps = {
 
 /** O cartão aberto de uma marca: a imagem, o texto, o código e o botão. Vai dentro de um `.partner-box`. */
 export function PartnerDetails({ brand, nameId, codeCopied = false, onCopyCode, onVisit }: PartnerDetailsProps) {
+  const m = useMessages().partners;
   return (
     <>
       <div className="partner-art" style={{ background: brand.color }}>
@@ -47,7 +51,7 @@ export function PartnerDetails({ brand, nameId, codeCopied = false, onCopyCode, 
             <span aria-hidden className="partner-art-fill" style={{ backgroundImage: `url("${brand.image}")` }} />
             <Image
               src={brand.image}
-              alt={`Imagem da parceria com a ${brand.name}`}
+              alt={m.imageAlt(brand.name)}
               fill
               sizes="(min-width: 760px) 470px, 100vw"
               style={{ objectFit: 'contain' }}
@@ -62,7 +66,7 @@ export function PartnerDetails({ brand, nameId, codeCopied = false, onCopyCode, 
         </h3>
         <p className="partner-about">{brand.about}</p>
         {brand.perks.length ? (
-          <ul className="partner-perks" aria-label="Vantagens">
+          <ul className="partner-perks" aria-label={m.perks}>
             {brand.perks.map((perk) => (
               <li key={perk}>{perk}</li>
             ))}
@@ -71,11 +75,11 @@ export function PartnerDetails({ brand, nameId, codeCopied = false, onCopyCode, 
         {brand.code ? (
           <div className="partner-code">
             <span className="flex min-w-0 flex-col">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink-soft">Código</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-soft">{m.code}</span>
               <strong className="truncate">{brand.code}</strong>
             </span>
             <button type="button" className="btn btn-ghost btn-sm ml-auto" onClick={onCopyCode}>
-              {codeCopied ? 'Copiado ♡' : 'Copiar'}
+              {codeCopied ? m.copied : m.copy}
             </button>
           </div>
         ) : null}
@@ -88,7 +92,7 @@ export function PartnerDetails({ brand, nameId, codeCopied = false, onCopyCode, 
           </a>
           {brand.code ? (
             <p className="text-sm font-semibold text-ink-soft">
-              {brand.codeInLink ? 'O link já leva o código.' : 'O código fica copiado: cola-o no checkout.'}
+              {brand.codeInLink ? m.codeInLink : m.codeCopied}
             </p>
           ) : null}
         </div>

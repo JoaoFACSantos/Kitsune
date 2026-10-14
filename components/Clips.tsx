@@ -4,11 +4,13 @@ import Image from 'next/image';
 import { useRef, useState } from 'react';
 import type { Clip } from '@/content/types';
 import { PlayIcon, StickerArt, type StickerKind } from '@/components/icons';
+import { useLang } from '@/components/providers/Lang';
 import { setScrollLocked } from '@/components/providers/SmoothScroll';
 import { Title } from '@/components/Title';
 import { clipEmbedUrl } from '@/lib/embed';
 import { formatCompact, formatDate, formatDuration } from '@/lib/format';
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
+import { messages } from '@/lib/i18n';
 import { isBelowFold, MEDIA } from '@/lib/motion';
 
 type ClipsProps = { title: string; intro: string; moreUrl: string; clips: Clip[] };
@@ -27,6 +29,8 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
   const root = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const [playing, setPlaying] = useState<{ clip: Clip; src: string } | null>(null);
+  const lang = useLang();
+  const m = messages(lang).clips;
 
   // Entrada em "pop" dos cartões quando a secção aparece.
   useGSAP(
@@ -66,14 +70,14 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
             <p className="lead mt-5">{intro}</p>
           </div>
           <a href={moreUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-            Ver todos os clips
+            {m.all}
             <span aria-hidden className="arrow">
               ↗
             </span>
           </a>
         </div>
 
-        <ul className="clips mt-10 md:mt-14" aria-label="Clips" data-scroll="through" data-scroll-on=".clip-drift" data-scroll-direct="">
+        <ul className="clips mt-10 md:mt-14" aria-label={m.list} data-scroll="through" data-scroll-on=".clip-drift" data-scroll-direct="">
           {clips.map((clip, i) => {
             const cover = COVERS[i % COVERS.length];
             const style = { '--r': `${TILT[i % TILT.length]}deg` } as React.CSSProperties;
@@ -89,13 +93,13 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
                     <PlayIcon />
                   </span>
                   <span className="clip-time">
-                    <span className="sr-only">Duração: </span>
+                    <span className="sr-only">{m.duration}</span>
                     {formatDuration(clip.duration)}
                   </span>
                 </span>
                 <span className="clip-title">{clip.title}</span>
                 <span className="clip-meta">
-                  {formatCompact(clip.views)} visualizações · {formatDate(clip.createdAt)}
+                  {formatCompact(clip.views, lang)} {m.views} · {formatDate(clip.createdAt, lang)}
                 </span>
               </>
             );
@@ -137,13 +141,13 @@ export function Clips({ title, intro, moreUrl, clips }: ClipsProps) {
             <div className="clip-dialog-bar">
               <p className="clip-dialog-title">{playing.clip.title}</p>
               <a href={playing.clip.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-                Abrir clip
+                {m.open}
                 <span aria-hidden className="arrow">
                   ↗
                 </span>
               </a>
               <button type="button" className="btn btn-primary btn-sm" onClick={() => dialog.current?.close()}>
-                Fechar
+                {m.close}
               </button>
             </div>
           </div>

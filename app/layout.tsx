@@ -7,6 +7,7 @@ import { Analytics } from '@/components/Analytics';
 import { Cursor } from '@/components/Cursor';
 import { InlineScript } from '@/components/InlineScript';
 import { SmoothScroll } from '@/components/providers/SmoothScroll';
+import { SkipLink } from '@/components/SkipLink';
 import { getSite } from '@/lib/content/site';
 import { cursorVars } from '@/lib/cursor';
 import { THEME_KEY } from '@/lib/motion';
@@ -73,11 +74,16 @@ const theme = {
 // Antes do primeiro paint: passa para o claro se foi a última escolha no switch (sem piscar).
 const themeScript = `try{if(localStorage.getItem('${THEME_KEY}')==='light')delete document.documentElement.dataset.theme}catch(e){}`;
 
+// O <html> é o mesmo em todas as páginas e diz pt-PT: nas páginas em inglês (/en…) passa a "en"
+// antes do primeiro paint (é o que os leitores de ecrã usam para escolher a voz).
+const langScript = `var p=location.pathname.split('/');if(p[1]==='en'||(p[1]==='admin'&&p[2]==='ver'&&p[3]==='en'))document.documentElement.lang='en'`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-PT" data-theme="dark" className={`${display.variable} ${sans.variable} ${hand.variable}`} style={theme} suppressHydrationWarning>
       <head>
         <InlineScript html={themeScript} />
+        <InlineScript html={langScript} />
       </head>
       <body>
         <div aria-hidden className="backdrop">
@@ -87,9 +93,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <span className="dots" data-scroll="page" data-scroll-direct="" />
           <span className="grain" />
         </div>
-        <a href="#conteudo" className="skip-link">
-          Saltar para o conteúdo
-        </a>
+        <SkipLink />
         <SmoothScroll>{children}</SmoothScroll>
         <Cursor />
         <Analytics />

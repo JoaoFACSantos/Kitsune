@@ -525,7 +525,23 @@
     }
 
     .nav-actions {
+      gap: 4px;
+    }
+
+    .nav .lang-switch {
+      height: 34px;
+      padding: 2px;
+    }
+
+    .nav .lang-option {
+      min-width: 26px;
+      padding: 0 5px;
+      font-size: 11px;
+    }
+
+    .nav .live-pill {
       gap: 6px;
+      padding: 0 10px;
     }
   }
 
@@ -2733,6 +2749,72 @@
       scale: 1.12;
       opacity: 0.6;
     }
+  }
+
+  /* ---------- Interruptor de língua (PT | EN) ---------- */
+
+  /* Duas opções numa pílula; a da página fica cheia. Está no menu do site, na página de links,
+     nas páginas de texto e no aviso de manutenção (components/LangSwitch.tsx). */
+  .lang-switch {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 2px;
+    height: 36px;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--surface-strong);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+  }
+
+  .lang-option {
+    display: grid;
+    min-width: 32px;
+    height: 100%;
+    place-items: center;
+    padding: 0 8px;
+    border-radius: 999px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    transition:
+      background-color var(--dur-fade),
+      color var(--dur-fade);
+  }
+
+  .lang-option[aria-current="true"] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  @media (hover: hover) {
+    .lang-option:not([aria-current="true"]):hover {
+      color: var(--ink);
+    }
+  }
+
+  /* Na página de links e no aviso de manutenção fica ao canto, em cima. */
+  .links,
+  .maintenance {
+    position: relative;
+  }
+
+  .links-lang,
+  .maintenance-lang {
+    position: absolute;
+    top: clamp(10px, 2svh, 22px);
+    right: var(--margin);
+    z-index: 2;
+  }
+
+  /* Nas páginas de texto, à direita do «Voltar ao site». */
+  .doc-back {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
   }
 
   /* ---------- Pré-visualização do painel (/admin/ver) ---------- */

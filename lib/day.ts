@@ -4,6 +4,7 @@
 
 const LISBON = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' });
 const LONG = new Intl.DateTimeFormat('pt-PT', { timeZone: 'UTC', day: 'numeric', month: 'long' });
+const LONG_EN = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'long' });
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const WEEKDAY = new Intl.DateTimeFormat('pt-PT', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -27,8 +28,8 @@ export const shiftDay = (day: string, by: number) => new Date(at(day).getTime() 
 /** Dias de `from` até `to` (negativo se `to` já passou). */
 export const daysBetween = (from: string, to: string) => Math.round((at(to).getTime() - at(from).getTime()) / DAY_MS);
 
-/** "31 de outubro". */
-export const formatDay = (day: string) => LONG.format(at(day));
+/** "31 de outubro" (em inglês, "31 October"). */
+export const formatDay = (day: string, lang: 'pt' | 'en' = 'pt') => (lang === 'en' ? LONG_EN : LONG).format(at(day));
 
 /** "31 out". */
 export const formatDayShort = (day: string) => `${at(day).getUTCDate()} ${MONTHS[at(day).getUTCMonth()]}`;

@@ -30,9 +30,16 @@ export type Gear = {
   note: string;
   tags?: string[];
   url?: string;
+  /** A versão inglesa (em /en). O que ficar em branco aparece em português. */
+  en?: Partial<Pick<Gear, 'label' | 'note' | 'tags'>>;
 };
 
-export type Spec = { label: string; value: string };
+export type Spec = {
+  label: string;
+  value: string;
+  /** A versão inglesa (em /en). Em branco, aparece em português. */
+  en?: Partial<Pick<Spec, 'label'>>;
+};
 
 export type FunStat = { value: string; label: string };
 
@@ -72,6 +79,8 @@ export type Brand = {
    * Sem isto, sai do nome ("GTZ Esports" dá "gtz-esports").
    */
   slug?: string;
+  /** A versão inglesa dos textos (em /en). O que ficar em branco aparece em português. */
+  en?: Partial<Pick<Brand, 'category' | 'perk' | 'about' | 'perks' | 'cta' | 'note'>>;
 };
 
 /** Um giveaway: um cartão na secção dos giveaways, com o prémio e como participar. */
@@ -95,10 +104,17 @@ export type Giveaway = {
    * sai do site sozinho. Sem data, fica até ser tirado.
    */
   endsAt?: string;
+  /** A versão inglesa dos textos (em /en). O que ficar em branco aparece em português. */
+  en?: Partial<Pick<Giveaway, 'title' | 'about' | 'steps' | 'cta'>>;
 };
 
 /** Uma regra do regulamento dos giveaways (/regulamento): um título curto e o que ela diz. */
-export type Rule = { title: string; text: string };
+export type Rule = {
+  title: string;
+  text: string;
+  /** A versão inglesa (em /en/rules). Em branco, aparece em português. */
+  en?: Partial<Pick<Rule, 'title' | 'text'>>;
+};
 
 /** Quem ganhou um giveaway que já acabou. Só o nome de utilizador, e só com o acordo da pessoa. */
 export type Winner = {
@@ -107,6 +123,8 @@ export type Winner = {
   prize: string;
   /** O dia em que saiu (AAAA-MM-DD). */
   date?: string;
+  /** A versão inglesa (em /en/rules). Em branco, aparece em português. */
+  en?: Partial<Pick<Winner, 'prize'>>;
 };
 
 /** Um clip (melhor momento). Com as chaves da Twitch vêm da API; sem elas, de `clips.items`. */
@@ -270,6 +288,23 @@ export type SiteConfig = {
     /** O que a página de abertura diz enquanto conta. */
     opening: { title: Title; text: string };
   };
+};
+
+/**
+ * Os textos do site em inglês, para /en: os mesmos campos de `SiteConfig` que são texto (ver
+ * content/site.en.ts). O que se escreve no painel tem a versão inglesa em cada item (`en`).
+ */
+export type SiteText = {
+  role: string;
+  tagline: string;
+  description: string;
+  hero: Pick<SiteConfig['hero'], 'greeting' | 'photoAlt' | 'note' | 'ribbon'>;
+  clips: Pick<SiteConfig['clips'], 'title' | 'intro'>;
+  setup: Pick<SiteConfig['setup'], 'title' | 'intro' | 'funStats'>;
+  partners: Pick<SiteConfig['partners'], 'title' | 'intro' | 'stats' | 'mailSubject'>;
+  giveaways: Pick<SiteConfig['giveaways'], 'title' | 'intro'>;
+  maintenance: Pick<SiteConfig['maintenance'], 'title' | 'opening'>;
+  socialsSection: SiteConfig['socialsSection'];
 };
 
 /**

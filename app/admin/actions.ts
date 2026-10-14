@@ -67,6 +67,28 @@ function merge(content: EditableContent, base: EditableContent | null, stored: E
   return merged;
 }
 
+/**
+ * Um painel aberto antes de haver versão inglesa não sabe dela: manda os itens sem `en`. As
+ * traduções guardadas ficam, item a item, reconhecido pelo nome (a marca, o periférico, o prémio…).
+ */
+function keepEnglish(sent: EditableContent, stored: EditableContent): EditableContent {
+  const carry = <T extends { en?: unknown }>(items: T[], old: T[], name: (item: T) => string) => {
+    const english = new Map(old.map((item) => [name(item), item.en]));
+    return items.map((item) => (item.en || !english.get(name(item)) ? item : { ...item, en: english.get(name(item)) }));
+  };
+  return {
+    ...sent,
+    setup: { gear: carry(sent.setup.gear, stored.setup.gear, (g) => g.name), pc: carry(sent.setup.pc, stored.setup.pc, (s) => s.value) },
+    partners: { brands: carry(sent.partners.brands, stored.partners.brands, (b) => b.name) },
+    giveaways: {
+      ...sent.giveaways,
+      items: carry(sent.giveaways.items, stored.giveaways.items, (g) => g.title),
+      rules: carry(sent.giveaways.rules, stored.giveaways.rules, (r) => r.title),
+      winners: carry(sent.giveaways.winners, stored.giveaways.winners, (w) => `${w.name}·${w.prize}`),
+    },
+  };
+}
+
 /** `base` é o conteúdo que o painel tinha como guardado quando o leu (ver `merge`). */
 export async function saveContent(input: unknown, base?: unknown): Promise<SaveResult> {
   if (!(await isAdmin())) return { ok: false, reason: 'auth' };
@@ -74,7 +96,8 @@ export async function saveContent(input: unknown, base?: unknown): Promise<SaveR
   if (issues.length) return { ok: false, reason: 'invalid', issues };
   try {
     const read = base === undefined ? null : validateContent(base, defaultContent(), site.platform).content;
-    const content = merge(sent, read, (await getContent()).content);
+    const stored = (await getContent()).content;
+    const content = merge(read ? sent : keepEnglish(sent, stored), read, stored);
     const savedAt = await writeStored(content);
     await pruneUploads(uploadsIn(content));
     publish();

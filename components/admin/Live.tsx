@@ -4,7 +4,10 @@ import type { ReactNode } from 'react';
 import type { Brand, Giveaway } from '@/content/types';
 import { GiveawayCard } from '@/components/Giveaways';
 import { BrandTile, PartnerDetails } from '@/components/PartnerCard';
+import { LangProvider } from '@/components/providers/Lang';
 import { isOpen } from '@/lib/content/giveaways';
+import { inEnglish } from '@/lib/content/localize';
+import { useForm } from './form';
 
 // O cartão ao vivo: ao lado dos campos de uma parceria ou de um giveaway (por baixo, em ecrãs
 // estreitos), o cartão tal como fica no site, a mudar enquanto se escreve. É desenhado pelos
@@ -31,7 +34,10 @@ export function WithLive({ card, children }: { card: ReactNode; children: ReactN
 const lines = (list: string[]) => list.map((line) => line.trim()).filter(Boolean);
 
 /** Uma parceria como aparece no site: o cartão pequeno da fila e o cartão aberto. */
-export function BrandLive({ brand }: { brand: Brand }) {
+export function BrandLive({ brand: original }: { brand: Brand }) {
+  // Com o painel em inglês, o cartão mostra a versão inglesa (o que lá faltar fica em português).
+  const { editLang = 'pt' } = useForm();
+  const brand = editLang === 'en' ? inEnglish(original) : original;
   // Os campos obrigatórios ainda por escrever levam o nome do campo, para o cartão não ficar oco.
   const shown: Brand = {
     ...brand,
@@ -43,7 +49,7 @@ export function BrandLive({ brand }: { brand: Brand }) {
     perks: lines(brand.perks),
   };
   return (
-    <>
+    <LangProvider lang={editLang}>
       <p className="live-label">Na fila das parcerias</p>
       <div className="brand glass" inert>
         <BrandTile brand={shown} />
@@ -58,7 +64,7 @@ export function BrandLive({ brand }: { brand: Brand }) {
         <PartnerDetails brand={shown} />
       </div>
       <p className="live-hint">No computador, a imagem fica ao lado do texto.</p>
-    </>
+    </LangProvider>
   );
 }
 
@@ -71,7 +77,9 @@ type GiveawayLiveProps = {
 };
 
 /** Um giveaway como aparece no site. */
-export function GiveawayLive({ item, day, active }: GiveawayLiveProps) {
+export function GiveawayLive({ item: original, day, active }: GiveawayLiveProps) {
+  const { editLang = 'pt' } = useForm();
+  const item = editLang === 'en' ? inEnglish(original) : original;
   const shown: Giveaway = { ...item, title: item.title || 'O prémio', cta: item.cta || 'Participar', steps: lines(item.steps) };
   const off = !active
     ? 'A secção de giveaways está desligada: este cartão não aparece no site.'
@@ -82,7 +90,7 @@ export function GiveawayLive({ item, day, active }: GiveawayLiveProps) {
     <>
       {off ? <p className="live-note">{off}</p> : null}
       <div inert>
-        <GiveawayCard item={shown} today={day} />
+        <GiveawayCard item={shown} today={day} lang={editLang} />
       </div>
       <p className="live-hint">No computador, com um só giveaway a decorrer, o cartão deita-se: a imagem fica ao lado do texto.</p>
     </>

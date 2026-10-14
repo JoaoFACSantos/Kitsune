@@ -1,20 +1,27 @@
 import { Doc } from '@/components/Doc';
+import { localize } from '@/lib/content/localize';
 import { formatDay } from '@/lib/day';
+import { messages, routesFor } from '@/lib/i18n';
 import type { ViewProps } from '@/lib/preview';
 
 /**
  * O regulamento dos giveaways e a lista de quem já ganhou. As regras e os vencedores escrevem-se
- * no painel (/admin > Giveaways); as de origem estão em content/site.config.ts.
+ * no painel (/admin > Giveaways), com a versão inglesa; as de origem estão em content/site.config.ts.
  */
-export function RulesView({ site, base = '' }: ViewProps) {
+export function RulesView({ site: config, lang = 'pt', base = '' }: ViewProps) {
+  const site = localize(config, lang);
+  const m = messages(lang);
+  const routes = routesFor(lang, base);
   const { rules, winners } = site.giveaways;
 
   return (
     <Doc
-      title="regulamento dos *giveaways*"
-      lead={`As regras que valem para todos os giveaways da ${site.name}. O prémio, os passos para participar e o prazo estão no cartão de cada um.`}
-      also={[{ href: `${base}/privacidade`, label: 'Privacidade' }]}
-      home={base || '/'}
+      title={m.rules.title}
+      lead={m.rules.lead(site.name)}
+      also={[{ href: routes.privacy, label: m.footer.privacy }]}
+      home={routes.home}
+      lang={lang}
+      langHrefs={{ pt: routesFor('pt', base).rules, en: routesFor('en', base).rules }}
     >
       {rules.length ? (
         <ol className="doc-rules">
@@ -26,20 +33,20 @@ export function RulesView({ site, base = '' }: ViewProps) {
           ))}
         </ol>
       ) : (
-        <p>O regulamento ainda não foi escrito.</p>
+        <p>{m.rules.empty}</p>
       )}
 
       {winners.length ? (
         <section aria-labelledby="vencedores">
           <h2 id="vencedores" className="doc-heading">
-            Quem já ganhou
+            {m.rules.winners}
           </h2>
           <ul className="doc-winners">
             {winners.map((winner, i) => (
               <li key={`${winner.name}-${i}`}>
                 <strong>{winner.name}</strong>
                 <span>{winner.prize}</span>
-                {winner.date ? <time dateTime={winner.date}>{formatDay(winner.date)}</time> : null}
+                {winner.date ? <time dateTime={winner.date}>{formatDay(winner.date, lang)}</time> : null}
               </li>
             ))}
           </ul>

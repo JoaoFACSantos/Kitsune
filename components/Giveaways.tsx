@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Giveaway } from '@/content/types';
 import { Title } from '@/components/Title';
 import { countdown, formatDay } from '@/lib/content/giveaways';
+import { type Lang, messages } from '@/lib/i18n';
 
 type GiveawaysProps = {
   title: string;
@@ -13,6 +14,7 @@ type GiveawaysProps = {
   today: string;
   /** Onde está o regulamento (na pré-visualização do painel fica noutro endereço). Sem ele, a página está fora do site e o link não aparece. */
   rulesHref?: string;
+  lang?: Lang;
 };
 
 const GIFT =
@@ -30,7 +32,8 @@ function Gift({ strokeWidth = 2.2 }: { strokeWidth?: number }) {
  * O cartão de um giveaway: o prémio, os passos para participar e o prazo. O painel também o usa
  * (components/admin/Live.tsx), para o mostrar ao lado dos campos enquanto se escreve.
  */
-export function GiveawayCard({ item, today }: { item: Giveaway; today: string }) {
+export function GiveawayCard({ item, today, lang = 'pt' }: { item: Giveaway; today: string; lang?: Lang }) {
+  const m = messages(lang).giveaways;
   return (
     <article className="giveaway glass">
       {/* Sem imagem do prémio, fica um presente desenhado: os cartões têm todos a mesma forma. */}
@@ -48,17 +51,17 @@ export function GiveawayCard({ item, today }: { item: Giveaway; today: string })
           <Gift />
           {item.endsAt ? (
             <>
-              <strong>{countdown(item.endsAt, today)}</strong>
-              <span>até {formatDay(item.endsAt)}</span>
+              <strong>{countdown(item.endsAt, today, lang)}</strong>
+              <span>{m.until(formatDay(item.endsAt, lang))}</span>
             </>
           ) : (
-            <strong>a decorrer</strong>
+            <strong>{m.ongoing}</strong>
           )}
         </p>
         <h3 className="giveaway-title">{item.title}</h3>
         {item.about ? <p className="giveaway-about">{item.about}</p> : null}
         {item.steps.length ? (
-          <ol className="giveaway-steps" aria-label="Como participar">
+          <ol className="giveaway-steps" aria-label={m.howTo}>
             {item.steps.map((step) => (
               <li key={step}>{step}</li>
             ))}
@@ -78,7 +81,7 @@ export function GiveawayCard({ item, today }: { item: Giveaway; today: string })
 }
 
 /** Giveaways a decorrer: um cartão por prémio, com os passos para participar e o prazo. */
-export function Giveaways({ title, intro, items, today, rulesHref }: GiveawaysProps) {
+export function Giveaways({ title, intro, items, today, rulesHref, lang = 'pt' }: GiveawaysProps) {
   return (
     <section id="giveaways" tabIndex={-1} aria-labelledby="giveaways-title" className="section">
       <div className="section-inner">
@@ -88,14 +91,14 @@ export function Giveaways({ title, intro, items, today, rulesHref }: GiveawaysPr
         <ul className="giveaways mt-10 md:mt-14" data-count={Math.min(items.length, 3)} data-scroll="in" data-scroll-on=":scope > li" data-scroll-direct="24">
           {items.map((item, i) => (
             <li key={item.title} style={{ '--i': i } as React.CSSProperties}>
-              <GiveawayCard item={item} today={today} />
+              <GiveawayCard item={item} today={today} lang={lang} />
             </li>
           ))}
         </ul>
         {rulesHref ? (
           <p className="giveaways-foot">
             <Link href={rulesHref} prefetch={false}>
-              Regulamento dos giveaways
+              {messages(lang).giveaways.rules}
             </Link>
           </p>
         ) : null}

@@ -2,8 +2,10 @@
 
 import type { Social } from '@/content/types';
 import { SocialIcon } from '@/components/icons';
+import { useLang } from '@/components/providers/Lang';
 import { formatCompact } from '@/lib/format';
-import { COUNT_LABEL, SOCIAL_COLORS } from '@/lib/social-style';
+import { messages } from '@/lib/i18n';
+import { countLabel, SOCIAL_COLORS } from '@/lib/social-style';
 
 type SocialCardProps = {
   social: Social;
@@ -16,6 +18,7 @@ type SocialCardProps = {
  * É o da secção "Redes" do site (components/Socials.tsx) e o da página de links.
  */
 export function SocialCard({ social, count }: SocialCardProps) {
+  const lang = useLang();
   const setOrigin = (event: React.PointerEvent<HTMLAnchorElement>) => {
     const r = event.currentTarget.getBoundingClientRect();
     event.currentTarget.style.setProperty('--x', `${event.clientX - r.left}px`);
@@ -43,9 +46,9 @@ export function SocialCard({ social, count }: SocialCardProps) {
         <span className="social-stat ml-auto text-right">
           {/* data-count: no site, o número conta até lá quando entra no ecrã (Socials.tsx). */}
           <span className="social-count block tabular-nums" data-count={count}>
-            {formatCompact(count)}
+            {formatCompact(count, lang)}
           </span>
-          <span className="social-meta block text-xs font-bold uppercase tracking-wider">{COUNT_LABEL[social.id] ?? 'seguidores'}</span>
+          <span className="social-meta block text-xs font-bold uppercase tracking-wider">{countLabel(social.id, messages(lang))}</span>
         </span>
       ) : null}
       <span aria-hidden className="social-arrow">

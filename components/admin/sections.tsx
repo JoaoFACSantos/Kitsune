@@ -74,17 +74,19 @@ function BrandFields({ path, brand }: { path: string; brand: Brand }) {
       />
       <Row>
         <TextField path={`${path}.name`} label="Nome da marca" max={40} />
-        <TextField path={`${path}.category`} label="O que é" max={40} placeholder="Nutrição desportiva" hint="Em duas ou três palavras." />
+        <TextField translate path={`${path}.category`} label="O que é" max={40} placeholder="Nutrição desportiva" hint="Em duas ou três palavras." />
       </Row>
       <TextField
+        translate
         path={`${path}.perk`}
         label="Vantagem principal"
         max={32}
         placeholder="10% de desconto"
         hint="É o que aparece no cartão pequeno, na fila que passa."
       />
-      <TextArea path={`${path}.about`} label="Sobre a marca" max={400} hint="Uma ou duas frases. Aparece quando abrem o cartão." />
+      <TextArea translate path={`${path}.about`} label="Sobre a marca" max={400} hint="Uma ou duas frases. Aparece quando abrem o cartão." />
       <StringList
+        translate
         path={`${path}.perks`}
         label="Vantagens"
         max={MAX.brandPerks}
@@ -95,7 +97,7 @@ function BrandFields({ path, brand }: { path: string; brand: Brand }) {
       />
       <Row>
         <TextField path={`${path}.code`} label="O teu código (se houver)" max={24} placeholder="KITSUNE10" optional />
-        <TextField path={`${path}.cta`} label="Texto do botão" max={40} placeholder="Ir para a loja" />
+        <TextField translate path={`${path}.cta`} label="Texto do botão" max={40} placeholder="Ir para a loja" />
       </Row>
       <TextField
         path={`${path}.url`}
@@ -121,6 +123,7 @@ function BrandFields({ path, brand }: { path: string; brand: Brand }) {
       />
       <ShortLink slug={brandSlug(brand)} />
       <TextArea
+        translate
         path={`${path}.note`}
         label="Aviso em letra pequena (opcional)"
         max={300}
@@ -193,9 +196,10 @@ function GiveawayFields({ path, day }: { path: string; day: string }) {
         hint="Aparece inteira, sem cortes. JPG, PNG ou WebP, até 8 MB."
         optional
       />
-      <TextField path={`${path}.title`} label="O prémio" max={60} placeholder="Teclado Keychron Q1 Pro" hint="É o título do cartão." />
-      <TextArea path={`${path}.about`} label="Sobre o giveaway (opcional)" max={300} hint="Uma ou duas frases: para quem é, quando sai o vencedor." />
+      <TextField translate path={`${path}.title`} label="O prémio" max={60} placeholder="Teclado Keychron Q1 Pro" hint="É o título do cartão." />
+      <TextArea translate path={`${path}.about`} label="Sobre o giveaway (opcional)" max={300} hint="Uma ou duas frases: para quem é, quando sai o vencedor." />
       <StringList
+        translate
         path={`${path}.steps`}
         label="Como participar"
         max={MAX.giveawaySteps}
@@ -213,7 +217,7 @@ function GiveawayFields({ path, day }: { path: string; day: string }) {
           optional
           hint="O formulário, o tweet ou o Discord. Sem link, o cartão fica sem botão."
         />
-        <TextField path={`${path}.cta`} label="Texto do botão" max={40} placeholder="Participar" />
+        <TextField translate path={`${path}.cta`} label="Texto do botão" max={40} placeholder="Participar" />
       </Row>
       <DateField
         path={`${path}.endsAt`}
@@ -288,8 +292,8 @@ export function GiveawaysSection({ open, rulesPage }: { open?: number; rulesPage
         <Repeater<Rule> path="giveaways.rules" max={MAX.rules} addLabel="Adicionar regra" make={emptyRule}>
           {(path) => (
             <>
-              <TextField path={`${path}.title`} label="Regra" max={60} placeholder="Quem pode participar" />
-              <TextArea path={`${path}.text`} label="O que diz" max={500} rows={2} />
+              <TextField translate path={`${path}.title`} label="Regra" max={60} placeholder="Quem pode participar" />
+              <TextArea translate path={`${path}.text`} label="O que diz" max={500} rows={2} />
             </>
           )}
         </Repeater>
@@ -303,7 +307,7 @@ export function GiveawaysSection({ open, rulesPage }: { open?: number; rulesPage
           {(path) => (
             <>
               <TextField path={`${path}.name`} label="Nome de utilizador" max={40} placeholder="@fulana" />
-              <TextField path={`${path}.prize`} label="O que ganhou" max={60} placeholder="Teclado Keychron Q1 Pro" />
+              <TextField translate path={`${path}.prize`} label="O que ganhou" max={60} placeholder="Teclado Keychron Q1 Pro" />
               <DateField path={`${path}.date`} label="Dia (opcional)" />
             </>
           )}
@@ -420,11 +424,11 @@ export function SetupSection() {
             <>
               <Row>
                 <SelectField path={`${path}.icon`} label="Desenho" options={GEAR_ICONS.map((icon) => ({ value: icon, label: GEAR_LABELS[icon] }))} />
-                <TextField path={`${path}.label`} label="Tipo" max={24} placeholder="Headset" />
+                <TextField translate path={`${path}.label`} label="Tipo" max={24} placeholder="Headset" />
               </Row>
               <TextField path={`${path}.name`} label="Marca e modelo" max={60} placeholder="Razer Kraken Kitty V2 Pro" />
-              <TextField path={`${path}.note`} label="Uma frase tua sobre ele (opcional)" max={120} />
-              <StringList path={`${path}.tags`} label="Etiquetas" max={MAX.gearTags} itemMax={20} addLabel="Adicionar etiqueta" placeholder="Sem fios" />
+              <TextField translate path={`${path}.note`} label="Uma frase tua sobre ele (opcional)" max={120} />
+              <StringList translate path={`${path}.tags`} label="Etiquetas" max={MAX.gearTags} itemMax={20} addLabel="Adicionar etiqueta" placeholder="Sem fios" />
             </>
           )}
         </Repeater>
@@ -434,7 +438,7 @@ export function SetupSection() {
         <Repeater<Spec> path="setup.pc" max={MAX.pc} addLabel="Adicionar peça" make={emptySpec}>
           {(path) => (
             <>
-              <TextField path={`${path}.label`} label="Peça" max={30} placeholder="Placa gráfica" />
+              <TextField translate path={`${path}.label`} label="Peça" max={30} placeholder="Placa gráfica" />
               <TextField path={`${path}.value`} label="Modelo" max={60} placeholder="NVIDIA RTX 4070 Ti Super" />
             </>
           )}

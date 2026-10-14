@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import type { Social } from '@/content/types';
+import { useLang } from '@/components/providers/Lang';
 import { SocialCard } from '@/components/SocialCard';
 import { Title } from '@/components/Title';
 import { formatCompact } from '@/lib/format';
@@ -13,6 +14,7 @@ type SocialsProps = { title: string; note: string; socials: Social[]; discordMem
 /** Redes: um cartão por rede (components/SocialCard.tsx), com os números a contar quando entram no ecrã. */
 export function Socials({ title, note, socials, discordMembers }: SocialsProps) {
   const root = useRef<HTMLElement>(null);
+  const lang = useLang();
 
   // Os números contam quando entram no ecrã.
   useGSAP(
@@ -23,14 +25,14 @@ export function Socials({ title, note, socials, discordMembers }: SocialsProps) 
         if (!isBelowFold(el)) return;
         const target = Number(el.dataset.count);
         const value = { n: 0 };
-        el.textContent = formatCompact(0);
+        el.textContent = formatCompact(0, lang);
         gsap.to(value, {
           n: target,
           duration: 3.2,
           ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 92%', once: true },
           onUpdate: () => {
-            el.textContent = formatCompact(value.n);
+            el.textContent = formatCompact(value.n, lang);
           },
         });
       });

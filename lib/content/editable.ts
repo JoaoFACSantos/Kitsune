@@ -88,6 +88,7 @@ export const SLUG = /^[a-z0-9](?:[a-z0-9-]{0,22}[a-z0-9])$/;
 export const RESERVED_SLUGS = new Set([
   'admin',
   'api',
+  'en',
   'links',
   'regulamento',
   'privacidade',

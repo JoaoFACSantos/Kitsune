@@ -61,6 +61,17 @@ Para acrescentar ou mudar uma marca:
 3. Preenche `perk` (a vantagem principal, no cartão da fila), `about`, `perks` e `note` (idade mínima, riscos, países onde não funciona). Escreve só vantagens que a marca confirma.
 4. Em `url` põe o link de afiliada. Se ele já leva o código, marca `codeInLink: true`; senão, o código fica copiado quando a pessoa abre o site.
 
+## Línguas (PT | EN)
+
+O site existe em português, na raiz (`/`, `/links`, `/privacidade`, `/regulamento`), e em inglês, em `/en` (`/en/links`, `/en/privacy`, `/en/rules`). O interruptor «PT | EN» está no menu, na página de links, nas páginas de texto e no aviso de manutenção, e leva à mesma página na outra língua. As duas versões são as mesmas páginas ([`components/views`](components/views)), que recebem a língua:
+
+- **Textos fixos dos componentes** (botões, etiquetas, datas, números): [`lib/i18n.ts`](lib/i18n.ts), um dicionário por língua. Os números e as datas também mudam de forma ("76 mil" e "76K", "14 ago 2026" e "14 Aug 2026"), em [`lib/format.ts`](lib/format.ts) e [`lib/day.ts`](lib/day.ts).
+- **Textos da configuração** (o papel, a frase do topo, os títulos e as frases das secções): os portugueses em [`content/site.config.ts`](content/site.config.ts), os ingleses em [`content/site.en.ts`](content/site.en.ts). Quem mudar um tem de mudar o outro.
+- **O que se escreve no painel** (parcerias, giveaways, periféricos, peças do PC, regras, vencedores): cada item tem a versão inglesa (`en`). No painel, as secções Parcerias, Giveaways e Setup têm um interruptor «Português | English»: em English, os campos marcados com EN escrevem a versão inglesa, com o texto português a cinzento. O que ficar em branco aparece em português. A pré-visualização e o cartão ao vivo seguem a língua escolhida.
+- **A página de privacidade** tem os dois textos em [`components/views/PrivacyView.tsx`](components/views/PrivacyView.tsx).
+
+A junção está em [`lib/content/localize.ts`](lib/content/localize.ts). Cada página diz aos motores de busca onde está a outra versão (hreflang, em [`lib/metadata.ts`](lib/metadata.ts) e no sitemap), e a imagem de partilha tem as duas línguas ([`lib/share-image.tsx`](lib/share-image.tsx)). O `<html lang>` passa a `en` nas páginas em inglês antes do primeiro paint (um script em [`app/layout.tsx`](app/layout.tsx)). Os clips vêm da Twitch com o título que lá têm, e a página de "não encontrado" é só em português.
+
 ## Giveaways
 
 A secção dos giveaways fica a seguir às parcerias e só existe quando faz falta: aparece (com o link no menu) se estiver ligada no painel e houver pelo menos um giveaway por terminar. Cada giveaway tem o prémio, uma imagem (opcional), os passos para participar, um link (opcional) e o último dia para participar (opcional). O dia conta pelo relógio de Lisboa: no dia seguinte, o cartão sai do site sozinho; sem data, fica até ser apagado.
@@ -177,6 +188,7 @@ Tudo o que chega do painel é validado no servidor ([`lib/content/validate.ts`](
 | `/api/visit` | Conta uma visita (a página pede-o ao abrir) |
 | `/api/abrir` | A página de abertura pergunta aqui se o site já abriu; passada a hora marcada, abre-o |
 | `/links` | A página de links, para a bio das redes |
+| `/en`, `/en/links`, `/en/privacy`, `/en/rules` | As mesmas páginas em inglês (ver [Línguas](#línguas-pt--en)) |
 | `/<link-curto>` | O link curto de uma parceria: conta o clique e leva à marca |
 | `/api/click` | Conta um clique no botão de uma parceria, no site |
 | `/regulamento`, `/privacidade` | O regulamento dos giveaways (com os vencedores) e a página de privacidade |
