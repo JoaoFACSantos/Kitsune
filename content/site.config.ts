@@ -324,20 +324,52 @@ export const site: SiteConfig = {
     // O regulamento e os vencedores também se mudam no painel. Estas regras são um ponto de partida:
     // quem faz os giveaways tem de as ler e acertar (idade, país, prazos) antes de abrir o site.
     rules: [
-      { title: 'Quem pode participar', text: 'Pessoas com 18 anos ou mais, a viver em Portugal. Uma participação por pessoa.' },
-      { title: 'Como participar', text: 'Cada giveaway diz os passos no seu cartão. Só contam as participações feitas até ao fim do último dia indicado.' },
-      { title: 'Como se escolhe quem ganha', text: 'Por sorteio entre todas as participações válidas, feito em direto ou com uma ferramenta de sorteio.' },
+      {
+        title: 'Quem pode participar',
+        text: 'Pessoas com 18 anos ou mais, a viver em Portugal. Uma participação por pessoa.',
+        en: { title: 'Who can enter', text: 'People aged 18 or over who live in Portugal. One entry per person.' },
+      },
+      {
+        title: 'Como participar',
+        text: 'Cada giveaway diz os passos no seu cartão. Só contam as participações feitas até ao fim do último dia indicado.',
+        en: { title: 'How to enter', text: 'Each giveaway lists the steps on its card. Only entries made by the end of the last day shown count.' },
+      },
+      {
+        title: 'Como se escolhe quem ganha',
+        text: 'Por sorteio entre todas as participações válidas, feito em direto ou com uma ferramenta de sorteio.',
+        en: { title: 'How the winner is picked', text: 'By a random draw among all valid entries, done live or with a drawing tool.' },
+      },
       {
         title: 'Como se sabe quem ganhou',
         text: 'O nome sai em direto e fica nesta página. Quem ganha é contactado pela rede onde participou e tem 7 dias para responder. Sem resposta, sorteia-se outra pessoa.',
+        en: {
+          title: 'How winners are announced',
+          text: 'The name is announced live and listed on this page. The winner is contacted on the network they entered through and has 7 days to reply. Without a reply, someone else is drawn.',
+        },
       },
       {
         title: 'O prémio',
         text: 'É o que está descrito no cartão e não se troca por dinheiro. O envio é oferecido, só para moradas em Portugal, até 30 dias depois de a morada estar confirmada.',
+        en: {
+          title: 'The prize',
+          text: "It's what the card describes and can't be exchanged for money. Shipping is free, to addresses in Portugal only, within 30 days of the address being confirmed.",
+        },
       },
-      { title: 'Dados pessoais', text: 'O nome de utilizador de quem ganha é publicado. A morada serve só para enviar o prémio e é apagada a seguir.' },
-      { title: 'Participações que não contam', text: 'Contas falsas, várias contas da mesma pessoa e qualquer tentativa de fazer batota ficam de fora.' },
-      { title: 'As plataformas', text: 'Os giveaways não são patrocinados, apoiados nem geridos pela Twitch, pelo Instagram, pelo TikTok, pelo X nem pelo Discord.' },
+      {
+        title: 'Dados pessoais',
+        text: 'O nome de utilizador de quem ganha é publicado. A morada serve só para enviar o prémio e é apagada a seguir.',
+        en: { title: 'Personal data', text: "The winner's username is published. The address is only used to send the prize and is deleted afterwards." },
+      },
+      {
+        title: 'Participações que não contam',
+        text: 'Contas falsas, várias contas da mesma pessoa e qualquer tentativa de fazer batota ficam de fora.',
+        en: { title: "Entries that don't count", text: 'Fake accounts, several accounts from the same person and any attempt to cheat are excluded.' },
+      },
+      {
+        title: 'As plataformas',
+        text: 'Os giveaways não são patrocinados, apoiados nem geridos pela Twitch, pelo Instagram, pelo TikTok, pelo X nem pelo Discord.',
+        en: { title: 'The platforms', text: 'The giveaways are not sponsored, endorsed or run by Twitch, Instagram, TikTok, X or Discord.' },
+      },
     ],
     winners: [],
   },
