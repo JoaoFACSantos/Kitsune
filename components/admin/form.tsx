@@ -72,7 +72,7 @@ function useTarget(path: string, translate?: boolean) {
   return { target: english ? enPath(path) : path, english, original: english ? getAt(draft, path) : undefined };
 }
 
-const EN_HINT = 'Versão inglesa (kitsunetv.pt/en). Em branco, aparece o texto em português, o que está a cinzento.';
+const EN_HINT = 'Versão inglesa (kitsuniverse.com/en). Em branco, aparece o texto em português, o que está a cinzento.';
 
 /** A marca dos campos que, com o painel em inglês, escrevem a versão inglesa. */
 const EnBadge = () => <span className="field-en">EN</span>;

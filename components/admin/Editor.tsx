@@ -436,8 +436,8 @@ export function Editor({ name, initial, savedAt: initialSavedAt, auto, overview,
               </div>
               <p>
                 {editLang === 'en'
-                  ? 'Estás a escrever a versão inglesa do site (kitsunetv.pt/en). Mudam só os campos marcados com EN; em branco, aparece o texto em português. Links, códigos e imagens são os mesmos nas duas.'
-                  : 'O site também existe em inglês (kitsunetv.pt/en). Para escrever os textos em inglês, escolhe English.'}
+                  ? 'Estás a escrever a versão inglesa do site (kitsuniverse.com/en). Mudam só os campos marcados com EN; em branco, aparece o texto em português. Links, códigos e imagens são os mesmos nas duas.'
+                  : 'O site também existe em inglês (kitsuniverse.com/en). Para escrever os textos em inglês, escolhe English.'}
               </p>
             </div>
           ) : null}

@@ -18,10 +18,10 @@ export default defineConfig({
     compatibilityDate: "2026-10-01",
     compatibilityFlags: ["nodejs_compat"],
     assets: { notFoundHandling: "none" },
-    // O endereço do site. A zona kitsunetv.pt está na mesma conta da Cloudflare: os registos de
+    // O endereço do site. A zona kitsuniverse.com está na mesma conta da Cloudflare: os registos de
     // DNS e o certificado criam-se sozinhos no deploy. (O "www" só existe para mandar para o
     // endereço sem ele: ver proxy.ts.)
-    domains: ["kitsunetv.pt", "www.kitsunetv.pt"],
+    domains: ["kitsuniverse.com", "www.kitsuniverse.com"],
     // O endereço kitsune.<conta>.workers.dev fica desligado: o site tem um endereço só, e as regras
     // da zona (o limite de pedidos por IP, o HTTPS obrigatório) não se contornam por outro lado.
     workersDev: false,
