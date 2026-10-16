@@ -92,7 +92,7 @@ export function GiveawayLive({ item: original, day, active }: GiveawayLiveProps)
       <div inert>
         <GiveawayCard item={shown} today={day} lang={editLang} />
       </div>
-      <p className="live-hint">No computador, com um só giveaway a decorrer, o cartão deita-se: a imagem fica ao lado do texto.</p>
+      <p className="live-hint">No computador, com um só giveaway a decorrer, os passos e o botão passam para o lado do texto.</p>
     </>
   );
 }

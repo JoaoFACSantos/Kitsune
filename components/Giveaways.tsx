@@ -36,10 +36,13 @@ export function GiveawayCard({ item, today, lang = 'pt' }: { item: Giveaway; tod
   const m = messages(lang).giveaways;
   return (
     <article className="giveaway glass">
-      {/* Sem imagem do prémio, fica um presente desenhado: os cartões têm todos a mesma forma. */}
+      {/* A imagem fica por cima, no formato dela (até uma altura máxima). Inteira, sem cortes: o que
+          sobrar à volta leva a própria imagem, desfocada, como no cartão aberto das parcerias. Sem
+          imagem do prémio, fica um presente desenhado: os cartões têm todos a mesma forma. */}
       {item.image && item.imageSize ? (
-        <div className="giveaway-art">
-          <Image src={item.image} alt="" width={item.imageSize.width} height={item.imageSize.height} sizes="(min-width: 900px) 520px, 100vw" />
+        <div className="giveaway-art" style={{ '--ratio': `${item.imageSize.width} / ${item.imageSize.height}` } as React.CSSProperties}>
+          <span aria-hidden className="giveaway-art-fill" style={{ backgroundImage: `url("${item.image}")` }} />
+          <Image src={item.image} alt="" width={item.imageSize.width} height={item.imageSize.height} sizes="(min-width: 1240px) 1200px, 100vw" />
         </div>
       ) : (
         <div className="giveaway-art" data-empty>
@@ -47,34 +50,40 @@ export function GiveawayCard({ item, today, lang = 'pt' }: { item: Giveaway; tod
         </div>
       )}
       <div className="giveaway-body">
-        <p className="giveaway-when">
-          <Gift />
-          {item.endsAt ? (
-            <>
-              <strong>{countdown(item.endsAt, today, lang)}</strong>
-              <span>{m.until(formatDay(item.endsAt, lang))}</span>
-            </>
-          ) : (
-            <strong>{m.ongoing}</strong>
-          )}
-        </p>
-        <h3 className="giveaway-title">{item.title}</h3>
-        {item.about ? <p className="giveaway-about">{item.about}</p> : null}
-        {item.steps.length ? (
-          <ol className="giveaway-steps" aria-label={m.howTo}>
-            {item.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        ) : null}
-        {item.url ? (
-          <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary giveaway-cta">
-            {item.cta}
-            <span aria-hidden className="arrow">
-              ↗
-            </span>
-          </a>
-        ) : null}
+        {/* O que é (o prazo, o prémio, a frase) e como participar (os passos e o botão). Com um só
+            giveaway, no computador, ficam lado a lado. */}
+        <div className="giveaway-head">
+          <p className="giveaway-when">
+            <Gift />
+            {item.endsAt ? (
+              <>
+                <strong>{countdown(item.endsAt, today, lang)}</strong>
+                <span>{m.until(formatDay(item.endsAt, lang))}</span>
+              </>
+            ) : (
+              <strong>{m.ongoing}</strong>
+            )}
+          </p>
+          <h3 className="giveaway-title">{item.title}</h3>
+          {item.about ? <p className="giveaway-about">{item.about}</p> : null}
+        </div>
+        <div className="giveaway-act">
+          {item.steps.length ? (
+            <ol className="giveaway-steps" aria-label={m.howTo}>
+              {item.steps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          ) : null}
+          {item.url ? (
+            <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary giveaway-cta">
+              {item.cta}
+              <span aria-hidden className="arrow">
+                ↗
+              </span>
+            </a>
+          ) : null}
+        </div>
       </div>
     </article>
   );

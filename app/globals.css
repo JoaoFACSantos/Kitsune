@@ -3382,11 +3382,23 @@
     border-radius: 34px;
   }
 
-  /* A imagem do prémio aparece inteira, sobre a cor das etiquetas. */
+  /* A imagem do prémio, por cima do texto, no formato dela e inteira. Uma imagem alta não passa
+     de uma altura máxima: aí fica ao centro, com ela própria desfocada dos lados. */
   .giveaway-art {
     position: relative;
-    aspect-ratio: 16 / 10;
+    flex: none;
+    max-height: min(62vh, 540px);
+    overflow: hidden;
+    aspect-ratio: var(--ratio, 16 / 10);
     background: var(--chip-bg);
+  }
+
+  .giveaway-art-fill {
+    position: absolute;
+    inset: -40px;
+    background-position: center;
+    background-size: cover;
+    filter: blur(26px) saturate(1.15) brightness(0.8);
   }
 
   .giveaway-art img {
@@ -3415,9 +3427,21 @@
     display: flex;
     flex: 1;
     flex-direction: column;
+    gap: 18px;
+    padding: clamp(22px, 3vw, 34px);
+  }
+
+  .giveaway-head,
+  .giveaway-act {
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
     gap: 14px;
-    padding: clamp(22px, 3vw, 34px);
+  }
+
+  /* Os passos e o botão ocupam o que sobra: o botão fica no fundo do cartão. */
+  .giveaway-act {
+    flex: 1;
   }
 
   .giveaway-when {
@@ -3492,29 +3516,19 @@
     margin-top: auto;
   }
 
-  /* Um só giveaway: o cartão deita-se, com a imagem ao lado do texto. */
+  /* Um só giveaway, no computador: por baixo da imagem, o que é à esquerda e como participar à direita. */
   @media (min-width: 900px) {
-    .giveaways[data-count="1"] .giveaway {
-      flex-direction: row;
-    }
-
-    .giveaways[data-count="1"] .giveaway-art {
-      flex: none;
-      width: min(46%, 520px);
-      min-height: 340px;
-      aspect-ratio: auto;
-    }
-
     .giveaways[data-count="1"] .giveaway-body {
-      justify-content: center;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 24px clamp(32px, 5vw, 64px);
+      padding: clamp(28px, 4vw, 48px);
     }
 
-    .giveaways[data-count="1"] .giveaway-cta {
-      margin-top: 6px;
-    }
-
-    .giveaways[data-count="1"] .giveaway-body {
-      padding: clamp(28px, 4vw, 52px);
+    .giveaways[data-count="1"] .giveaway-act {
+      padding-left: clamp(32px, 5vw, 64px);
+      margin-left: calc(-1 * clamp(32px, 5vw, 64px) / 2);
+      border-left: 2px dashed var(--line);
     }
   }
 
